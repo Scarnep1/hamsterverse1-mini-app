@@ -4,23 +4,13 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-    // Navigation functionality
     setupNavigation();
-    
-    // Copy referral link functionality
     setupReferralLink();
-    
-    // Play button functionality
     setupPlayButtons();
-    
-    // Telegram WebApp integration
     setupTelegramIntegration();
-    
-    // HMSTR price data
     setupPriceData();
-    
-    // Daily bonus claim
     setupDailyBonus();
+    setupGuideButton();
 }
 
 function setupNavigation() {
@@ -31,11 +21,9 @@ function setupNavigation() {
         item.addEventListener('click', function() {
             const targetSection = this.getAttribute('data-section');
             
-            // Update active nav item
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
             
-            // Show target section
             sections.forEach(section => {
                 section.classList.remove('active');
                 if (section.id === targetSection) {
@@ -109,14 +97,11 @@ function setupReferralLink() {
 
 function setupTelegramIntegration() {
     if (window.Telegram && window.Telegram.WebApp) {
-        // Expand the app to full height
         window.Telegram.WebApp.expand();
         
-        // Get user data
         const user = window.Telegram.WebApp.initDataUnsafe?.user;
         
         if (user) {
-            // Update avatar
             const avatar = document.getElementById('tg-avatar');
             if (user.photo_url) {
                 avatar.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%;">`;
@@ -124,7 +109,6 @@ function setupTelegramIntegration() {
                 avatar.textContent = user.first_name?.[0] || 'U';
             }
             
-            // Update name and username
             const name = document.getElementById('tg-name');
             const username = document.getElementById('tg-username');
             
@@ -137,7 +121,6 @@ function setupTelegramIntegration() {
             }
         }
         
-        // Set theme parameters
         const themeParams = window.Telegram.WebApp.themeParams;
         if (themeParams) {
             document.documentElement.style.setProperty('--tg-theme-bg-color', themeParams.bg_color || '#ffffff');
@@ -149,13 +132,11 @@ function setupTelegramIntegration() {
 }
 
 function setupPriceData() {
-    // Simulate price data (in real app, fetch from API)
     const priceElement = document.getElementById('hmstr-price');
     const changeElement = document.getElementById('hmstr-change');
     
-    // Generate random price data
     const basePrice = 0.01;
-    const randomChange = (Math.random() - 0.5) * 0.02; // -1% to +1%
+    const randomChange = (Math.random() - 0.5) * 0.02;
     const currentPrice = basePrice * (1 + randomChange);
     const changePercent = (randomChange * 100).toFixed(2);
     
@@ -168,14 +149,12 @@ function setupPriceData() {
         changeElement.className = 'change negative';
     }
     
-    // Create price chart
     createPriceChart();
 }
 
 function createPriceChart() {
     const ctx = document.getElementById('priceChart').getContext('2d');
     
-    // Generate sample price data for 7 days
     const prices = [];
     let currentPrice = 0.01;
     
@@ -190,7 +169,6 @@ function createPriceChart() {
         data: {
             labels: ['6d', '5d', '4d', '3d', '2d', '1d', 'Now'],
             datasets: [{
-                label: 'HMSTR Price',
                 data: prices,
                 borderColor: '#667eea',
                 backgroundColor: 'rgba(102, 126, 234, 0.1)',
@@ -200,16 +178,14 @@ function createPriceChart() {
                 pointBackgroundColor: '#667eea',
                 pointBorderColor: '#ffffff',
                 pointBorderWidth: 2,
-                pointRadius: 3
+                pointRadius: 2
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: {
-                    display: false
-                },
+                legend: { display: false },
                 tooltip: {
                     mode: 'index',
                     intersect: false,
@@ -222,22 +198,13 @@ function createPriceChart() {
             },
             scales: {
                 x: {
-                    grid: {
-                        display: false
-                    },
+                    grid: { display: false },
                     ticks: {
                         color: '#666',
-                        font: {
-                            size: 10
-                        }
+                        font: { size: 9 }
                     }
                 },
-                y: {
-                    display: false,
-                    grid: {
-                        display: false
-                    }
-                }
+                y: { display: false }
             },
             interaction: {
                 intersect: false,
@@ -252,7 +219,6 @@ function setupDailyBonus() {
     
     if (claimButton) {
         claimButton.addEventListener('click', function() {
-            // Check if already claimed today
             const lastClaim = localStorage.getItem('lastDailyClaim');
             const today = new Date().toDateString();
             
@@ -261,20 +227,16 @@ function setupDailyBonus() {
                 return;
             }
             
-            // Claim bonus
             localStorage.setItem('lastDailyClaim', today);
             
-            // Update points
             const pointsElement = document.getElementById('total-points');
             const currentPoints = parseInt(pointsElement.textContent);
             pointsElement.textContent = currentPoints + 1;
             
-            // Update streak
             const streakElement = document.getElementById('daily-streak');
             const currentStreak = parseInt(streakElement.textContent);
             streakElement.textContent = currentStreak + 1;
             
-            // Update rank if needed
             updateUserRank(currentPoints + 1);
             
             alert('🎉 Вы получили 1 очко за ежедневный вход!');
@@ -283,7 +245,6 @@ function setupDailyBonus() {
         });
     }
     
-    // Initialize user rank
     updateUserRank(parseInt(document.getElementById('total-points').textContent));
 }
 
@@ -308,7 +269,6 @@ function updateUserRank(points) {
         progress = `${points}+ очков`;
     }
     
-    // Update rank badge
     rankBadge.className = `rank-badge ${rank}`;
     rankBadge.textContent = getRankName(rank);
     rankProgress.textContent = progress;
@@ -320,6 +280,23 @@ function getRankName(rank) {
         case 'player': return 'Игрок';
         case 'whale': return 'Кит';
         default: return 'Новичок';
+    }
+}
+
+function setupGuideButton() {
+    const guideButton = document.getElementById('show-guide');
+    const buyGuide = document.getElementById('buy-guide');
+    
+    if (guideButton && buyGuide) {
+        guideButton.addEventListener('click', function() {
+            if (buyGuide.classList.contains('hidden')) {
+                buyGuide.classList.remove('hidden');
+                guideButton.textContent = '📖 Скрыть гайд';
+            } else {
+                buyGuide.classList.add('hidden');
+                guideButton.textContent = '📖 Как купить HMSTR';
+            }
+        });
     }
 }
 
