@@ -10,9 +10,6 @@ function initializeApp() {
     // Copy referral link functionality
     setupReferralLink();
     
-    // Balance refresh
-    setupBalanceRefresh();
-    
     // Play button functionality
     setupPlayButtons();
 }
@@ -106,39 +103,6 @@ function setupReferralLink() {
                     console.error('Fallback copy failed: ', e);
                 }
             });
-        });
-    }
-}
-
-function setupBalanceRefresh() {
-    const refreshBtn = document.querySelector('.balance-refresh');
-    const balanceAmount = document.querySelector('.amount');
-    
-    if (refreshBtn && balanceAmount) {
-        refreshBtn.addEventListener('click', function() {
-            // Add rotation animation
-            this.style.transition = 'transform 0.3s ease';
-            this.style.transform = 'rotate(360deg)';
-            
-            // Simulate balance update (in real app, this would fetch from API)
-            setTimeout(() => {
-                // Reset rotation
-                this.style.transform = 'rotate(0deg)';
-                
-                // Simulate small balance change for demo
-                const currentBalance = parseInt(balanceAmount.textContent.replace(',', ''));
-                const randomChange = Math.floor(Math.random() * 10) - 5; // -5 to +5
-                const newBalance = Math.max(0, currentBalance + randomChange);
-                
-                balanceAmount.textContent = newBalance.toLocaleString();
-                
-                // Update equivalent USD value (simplified)
-                const usdValue = (newBalance * 0.01).toFixed(2);
-                const usdElement = document.querySelector('.balance-equivalent');
-                if (usdElement) {
-                    usdElement.textContent = `≈ $${usdValue}`;
-                }
-            }, 1000);
         });
     }
 }
