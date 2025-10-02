@@ -121,3 +121,11 @@ if (window.Telegram && window.Telegram.WebApp) {
         document.documentElement.style.setProperty('--tg-theme-button-text-color', themeParams.button_text_color || '#ffffff');
     }
 }
+
+// Prevent image drag
+document.addEventListener('DOMContentLoaded', function() {
+    const images = document.querySelectorAll('img');
+    images.forEach(img => {
+        img.setAttribute('draggable', 'false');
+    });
+});
