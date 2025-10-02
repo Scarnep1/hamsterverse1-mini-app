@@ -7,12 +7,6 @@ function initializeApp() {
     // Navigation functionality
     setupNavigation();
     
-    // Game card clicks
-    setupGameCards();
-    
-    // Exchange card clicks
-    setupExchangeCards();
-    
     // Copy referral link functionality
     setupReferralLink();
     
@@ -41,42 +35,6 @@ function setupNavigation() {
             });
         });
     });
-}
-
-function setupGameCards() {
-    const gameCards = document.querySelectorAll('.game-card');
-    
-    gameCards.forEach(card => {
-        card.addEventListener('click', function() {
-            const gameUrl = this.getAttribute('data-url');
-            if (gameUrl) {
-                openUrl(gameUrl);
-            }
-        });
-    });
-}
-
-function setupExchangeCards() {
-    const exchangeCards = document.querySelectorAll('.exchange-card');
-    
-    exchangeCards.forEach(card => {
-        card.addEventListener('click', function() {
-            const exchangeUrl = this.getAttribute('data-url');
-            if (exchangeUrl) {
-                openUrl(exchangeUrl);
-            }
-        });
-    });
-}
-
-function openUrl(url) {
-    if (window.Telegram && window.Telegram.WebApp) {
-        // Telegram Mini App environment
-        window.Telegram.WebApp.openLink(url);
-    } else {
-        // Regular web environment - open in new tab for demo
-        window.open(url, '_blank');
-    }
 }
 
 function setupReferralLink() {
@@ -163,28 +121,3 @@ if (window.Telegram && window.Telegram.WebApp) {
         document.documentElement.style.setProperty('--tg-theme-button-text-color', themeParams.button_text_color || '#ffffff');
     }
 }
-
-// Add some sample data and functionality for demo purposes
-function simulateUserActivity() {
-    // Simulate some random activity for demo
-    setInterval(() => {
-        const balanceElement = document.querySelector('.amount');
-        if (balanceElement) {
-            const currentBalance = parseInt(balanceElement.textContent.replace(',', ''));
-            // Small random increase to simulate mining
-            const randomIncrease = Math.floor(Math.random() * 3);
-            const newBalance = currentBalance + randomIncrease;
-            balanceElement.textContent = newBalance.toLocaleString();
-            
-            // Update USD equivalent
-            const usdValue = (newBalance * 0.01).toFixed(2);
-            const usdElement = document.querySelector('.balance-equivalent');
-            if (usdElement) {
-                usdElement.textContent = `≈ $${usdValue}`;
-            }
-        }
-    }, 30000); // Update every 30 seconds
-}
-
-// Start simulation when page loads
-setTimeout(simulateUserActivity, 5000);
