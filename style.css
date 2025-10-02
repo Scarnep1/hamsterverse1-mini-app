@@ -17,7 +17,7 @@ body {
     background: #ffffff;
     min-height: 100vh;
     position: relative;
-    padding-bottom: 90px;
+    padding-bottom: 80px;
 }
 
 /* Header */
@@ -364,86 +364,48 @@ body {
     font-weight: 500;
 }
 
-/* Bottom Navigation - УЛУЧШЕННАЯ ВЕРСИЯ */
+/* Bottom Navigation */
 .bottom-nav {
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    background: rgba(255, 255, 255, 0.95);
+    background: white;
     display: flex;
     justify-content: space-around;
-    padding: 16px 0;
-    border-top: 2px solid #e9ecef;
-    backdrop-filter: blur(20px);
+    padding: 12px 0;
+    border-top: 1px solid #e9ecef;
+    backdrop-filter: blur(10px);
     max-width: 400px;
     margin: 0 auto;
-    box-shadow: 0 -4px 25px rgba(0, 0, 0, 0.1);
-    z-index: 1000;
-    border-radius: 25px 25px 0 0;
 }
 
 .nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 4px;
     background: none;
     border: none;
-    padding: 12px 20px;
-    border-radius: 16px;
+    padding: 8px 16px;
+    border-radius: 12px;
     cursor: pointer;
     transition: all 0.3s ease;
     opacity: 0.6;
-    position: relative;
-    min-width: 70px;
 }
 
 .nav-item.active {
     opacity: 1;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    transform: translateY(-5px);
-    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
-}
-
-.nav-item.active .nav-icon {
-    transform: scale(1.1);
-    filter: brightness(0) invert(1);
-}
-
-.nav-item.active .nav-label {
-    color: white;
-    font-weight: 600;
+    background: #f8f9fa;
 }
 
 .nav-icon {
-    font-size: 22px;
-    transition: all 0.3s ease;
+    font-size: 20px;
 }
 
 .nav-label {
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 500;
-    transition: all 0.3s ease;
-    color: #666;
-}
-
-/* Активная точка-индикатор */
-.nav-item.active::before {
-    content: '';
-    position: absolute;
-    top: -8px;
-    width: 4px;
-    height: 4px;
-    background: #667eea;
-    border-radius: 50%;
-}
-
-/* Анимация при наведении */
-.nav-item:not(.active):hover {
-    opacity: 0.8;
-    background: #f8f9fa;
-    transform: translateY(-2px);
 }
 
 /* Notification */
@@ -470,7 +432,7 @@ body {
 /* Responsive */
 @media (max-width: 480px) {
     .app-container {
-        padding-bottom: 85px;
+        padding-bottom: 70px;
     }
     
     .header {
@@ -502,24 +464,6 @@ body {
     .referral-section {
         padding: 20px;
     }
-    
-    .bottom-nav {
-        padding: 14px 0;
-        border-radius: 20px 20px 0 0;
-    }
-    
-    .nav-item {
-        padding: 10px 16px;
-        min-width: 60px;
-    }
-    
-    .nav-icon {
-        font-size: 20px;
-    }
-    
-    .nav-label {
-        font-size: 10px;
-    }
 }
 
 /* Animations */
@@ -536,20 +480,4 @@ body {
 
 .content-section.active {
     animation: fadeIn 0.3s ease;
-}
-
-/* Анимация для нижней панели */
-@keyframes slideUp {
-    from {
-        transform: translateY(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-.bottom-nav {
-    animation: slideUp 0.4s ease;
 }
