@@ -12,6 +12,9 @@ function initializeApp() {
     
     // Balance refresh
     setupBalanceRefresh();
+    
+    // Game card click handlers
+    setupGameCards();
 }
 
 function setupNavigation() {
@@ -35,6 +38,38 @@ function setupNavigation() {
             });
         });
     });
+}
+
+function setupGameCards() {
+    const gameCards = document.querySelectorAll('.game-card');
+    
+    gameCards.forEach(card => {
+        card.addEventListener('click', function(e) {
+            // Don't trigger if play button was clicked
+            if (e.target.classList.contains('play-button')) {
+                return;
+            }
+            
+            const playButton = this.querySelector('.play-button');
+            if (playButton) {
+                const onclick = playButton.getAttribute('onclick');
+                const match = onclick.match(/openGame\('([^']+)'\)/);
+                if (match && match[1]) {
+                    openGame(match[1]);
+                }
+            }
+        });
+    });
+}
+
+function openGame(url) {
+    if (window.Telegram && window.Telegram.WebApp) {
+        // Telegram Mini App environment
+        window.Telegram.WebApp.openLink(url);
+    } else {
+        // Regular web environment - open in new tab
+        window.open(url, '_blank');
+    }
 }
 
 function setupReferralLink() {
