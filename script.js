@@ -13,8 +13,8 @@ function initializeApp() {
     // Balance refresh
     setupBalanceRefresh();
     
-    // Game card click handlers
-    setupGameCards();
+    // Play button functionality
+    setupPlayButtons();
 }
 
 function setupNavigation() {
@@ -40,24 +40,25 @@ function setupNavigation() {
     });
 }
 
-function setupGameCards() {
+function setupPlayButtons() {
+    const playButtons = document.querySelectorAll('.play-button');
+    
+    playButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation(); // Prevent card click event
+            const url = this.getAttribute('data-url');
+            openGame(url);
+        });
+    });
+    
+    // Also make entire game card clickable
     const gameCards = document.querySelectorAll('.game-card');
     
     gameCards.forEach(card => {
-        card.addEventListener('click', function(e) {
-            // Don't trigger if play button was clicked
-            if (e.target.classList.contains('play-button')) {
-                return;
-            }
-            
+        card.addEventListener('click', function() {
             const playButton = this.querySelector('.play-button');
-            if (playButton) {
-                const onclick = playButton.getAttribute('onclick');
-                const match = onclick.match(/openGame\('([^']+)'\)/);
-                if (match && match[1]) {
-                    openGame(match[1]);
-                }
-            }
+            const url = playButton.getAttribute('data-url');
+            openGame(url);
         });
     });
 }
