@@ -132,6 +132,7 @@ body {
     justify-content: center;
     font-size: 24px;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .game-avatar {
@@ -139,6 +140,10 @@ body {
     height: 100%;
     object-fit: cover;
     border-radius: 12px;
+}
+
+.game-info {
+    flex: 1;
 }
 
 .game-info h3 {
@@ -198,22 +203,24 @@ body {
 .exchange-logo {
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
     border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 700;
-    color: white;
-    font-size: 18px;
-    overflow: hidden;
+    background: #f8f9fa;
 }
 
 .exchange-avatar {
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     border-radius: 12px;
+}
+
+.exchange-info {
+    flex: 1;
 }
 
 .exchange-info h3 {
@@ -231,6 +238,7 @@ body {
     margin-left: auto;
     font-size: 20px;
     color: #666;
+    flex-shrink: 0;
 }
 
 /* Profile Section */
@@ -252,6 +260,7 @@ body {
     font-size: 32px;
     font-weight: 700;
     color: white;
+    flex-shrink: 0;
 }
 
 .profile-info h2 {
@@ -286,6 +295,9 @@ body {
 .balance-refresh {
     cursor: pointer;
     font-size: 16px;
+    background: none;
+    border: none;
+    color: white;
 }
 
 .balance-amount {
@@ -342,6 +354,7 @@ body {
     border-radius: 12px;
     background: white;
     font-size: 14px;
+    border: none;
 }
 
 #copy-btn {
@@ -353,6 +366,7 @@ body {
     font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    flex-shrink: 0;
 }
 
 #copy-btn:hover {
@@ -443,6 +457,7 @@ body {
     z-index: 1000;
     opacity: 0;
     transition: opacity 0.3s ease;
+    pointer-events: none;
 }
 
 .notification.show {
@@ -470,6 +485,10 @@ body {
     .game-card {
         padding: 12px;
     }
+    
+    .exchange-card {
+        padding: 12px;
+    }
 }
 
 /* Animations */
@@ -486,4 +505,13 @@ body {
 
 .content-section.active {
     animation: fadeIn 0.3s ease;
+}
+
+/* Utility classes */
+.flex-shrink-0 {
+    flex-shrink: 0;
+}
+
+.flex-1 {
+    flex: 1;
 }
