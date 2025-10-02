@@ -13,111 +13,96 @@
         }
         
         body {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             color: #fff;
             min-height: 100vh;
-            overflow: hidden;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
         
         .container {
-            max-width: 100%;
-            height: 100vh;
+            max-width: 1200px;
+            margin: 0 auto;
+            flex: 1;
             display: flex;
             flex-direction: column;
-            padding: 20px;
         }
         
-        .header {
+        header {
             text-align: center;
+            padding: 20px 0;
             margin-bottom: 30px;
-            padding-top: 10px;
         }
         
         .logo {
             font-size: 2.5rem;
             font-weight: 700;
-            background: linear-gradient(45deg, #ff9a00, #ff6a00);
+            background: linear-gradient(45deg, #ff7e5f, #feb47b);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
-            text-shadow: 0 0 20px rgba(255, 106, 0, 0.3);
         }
         
-        .subtitle {
-            color: #a0a0c0;
+        .tagline {
             font-size: 1rem;
+            opacity: 0.8;
             margin-bottom: 20px;
         }
         
         .games-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
-            flex-grow: 1;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            flex: 1;
         }
         
         .game-card {
-            background: rgba(255, 255, 255, 0.05);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 16px;
             padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .game-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(45deg, #ff9a00, #ff6a00);
         }
         
         .game-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
         }
         
         .game-icon {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
-            background: linear-gradient(45deg, #ff9a00, #ff6a00);
+            background: linear-gradient(45deg, #ff7e5f, #feb47b);
             display: flex;
             align-items: center;
             justify-content: center;
             margin-bottom: 15px;
             font-size: 1.8rem;
-            box-shadow: 0 4px 15px rgba(255, 106, 0, 0.4);
         }
         
         .game-title {
-            font-size: 1.1rem;
+            font-size: 1.3rem;
             font-weight: 600;
-            margin-bottom: 8px;
-            text-align: center;
+            margin-bottom: 10px;
         }
         
         .game-description {
-            font-size: 0.85rem;
-            color: #a0a0c0;
-            text-align: center;
+            font-size: 0.9rem;
+            opacity: 0.8;
             margin-bottom: 15px;
-            line-height: 1.4;
+            flex: 1;
         }
         
         .play-btn {
-            background: linear-gradient(45deg, #ff9a00, #ff6a00);
+            background: linear-gradient(45deg, #ff7e5f, #feb47b);
             color: white;
             border: none;
             padding: 10px 20px;
@@ -126,12 +111,11 @@
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
-            box-shadow: 0 4px 15px rgba(255, 106, 0, 0.3);
         }
         
         .play-btn:hover {
             transform: scale(1.05);
-            box-shadow: 0 6px 20px rgba(255, 106, 0, 0.5);
+            box-shadow: 0 5px 15px rgba(255, 126, 95, 0.4);
         }
         
         .bottom-nav {
@@ -139,8 +123,9 @@
             justify-content: space-around;
             background: rgba(255, 255, 255, 0.05);
             border-radius: 50px;
-            padding: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            margin-top: auto;
+            backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
@@ -148,118 +133,124 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            color: #a0a0c0;
-            font-size: 0.8rem;
             cursor: pointer;
+            padding: 5px 15px;
+            border-radius: 30px;
             transition: all 0.3s ease;
-            padding: 5px 10px;
-            border-radius: 20px;
         }
         
         .nav-item.active {
-            color: #ff9a00;
-            background: rgba(255, 154, 0, 0.1);
-        }
-        
-        .nav-item:hover {
-            color: #ff9a00;
+            background: rgba(255, 255, 255, 0.1);
         }
         
         .nav-icon {
-            font-size: 1.2rem;
+            font-size: 1.5rem;
             margin-bottom: 5px;
         }
         
-        @media (max-width: 480px) {
+        .nav-text {
+            font-size: 0.8rem;
+        }
+        
+        @media (max-width: 768px) {
             .games-grid {
-                grid-template-columns: 1fr;
-                gap: 15px;
+                grid-template-columns: 1fr 1fr;
             }
             
             .game-card {
                 padding: 15px;
             }
         }
+        
+        @media (max-width: 480px) {
+            .games-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bottom-nav {
+                padding: 10px;
+            }
+            
+            .nav-text {
+                font-size: 0.7rem;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <header>
             <div class="logo">HamsterVerse</div>
-            <div class="subtitle">Игровая экосистема в Telegram</div>
-        </div>
+            <div class="tagline">Игровая вселенная Hamster</div>
+        </header>
         
         <div class="games-grid">
             <div class="game-card">
-                <div class="game-icon">🎮</div>
+                <div class="game-icon">🐹</div>
                 <div class="game-title">Hamster GameDev</div>
-                <div class="game-description">Создайте свою студию разработки игр</div>
-                <button class="play-btn" onclick="openGame('https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584')">Играть</button>
+                <div class="game-description">Создайте свою собственную студию GameDev</div>
+                <button class="play-btn" onclick="openGame('Hamster GameDev', 'https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584')">Играть</button>
             </div>
             
             <div class="game-card">
                 <div class="game-icon">👑</div>
                 <div class="game-title">Hamster King</div>
                 <div class="game-description">Королевская битва хомяков</div>
-                <button class="play-btn" onclick="openGame('https://t.me/hamsterking_game_bot?startapp=6823288584')">Играть</button>
+                <button class="play-btn" onclick="openGame('Hamster King', 'https://t.me/hamsterking_game_bot?startapp=6823288584')">Играть</button>
             </div>
             
             <div class="game-card">
                 <div class="game-icon">🥊</div>
                 <div class="game-title">Hamster Fight Club</div>
                 <div class="game-description">Бойцовский клуб хомяков</div>
-                <button class="play-btn" onclick="openGame('https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyMS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5')">Играть</button>
+                <button class="play-btn" onclick="openGame('Hamster Fight Club', 'https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyMS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5')">Играть</button>
             </div>
             
             <div class="game-card">
                 <div class="game-icon">💰</div>
                 <div class="game-title">BitQuest</div>
-                <div class="game-description">Крипто-приключения</div>
-                <button class="play-btn" onclick="openGame('https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584')">Играть</button>
+                <div class="game-description">Крипто-приключения хомяков</div>
+                <button class="play-btn" onclick="openGame('BitQuest', 'https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584')">Играть</button>
             </div>
         </div>
         
         <div class="bottom-nav">
             <div class="nav-item active">
-                <div class="nav-icon">🏠</div>
-                <div>Главная</div>
-            </div>
-            <div class="nav-item">
                 <div class="nav-icon">🎮</div>
-                <div>Игры</div>
+                <div class="nav-text">Игры</div>
             </div>
             <div class="nav-item">
                 <div class="nav-icon">👛</div>
-                <div>Кошелек</div>
+                <div class="nav-text">Кошелек</div>
             </div>
             <div class="nav-item">
                 <div class="nav-icon">⚡</div>
-                <div>Зарядка</div>
+                <div class="nav-text">Зарядка</div>
             </div>
             <div class="nav-item">
                 <div class="nav-icon">👤</div>
-                <div>Профиль</div>
+                <div class="nav-text">Профиль</div>
             </div>
         </div>
     </div>
-
+    
     <script>
-        function openGame(url) {
-            // В реальном мини-приложении Telegram это будет открывать игру внутри Telegram
-            // Для демонстрации просто открываем в новом окне
-            window.open(url, '_blank');
+        function openGame(gameName, url) {
+            // В реальном приложении Telegram Mini App можно использовать Telegram.WebApp.openLink
+            if (window.Telegram && window.Telegram.WebApp) {
+                Telegram.WebApp.openLink(url);
+            } else {
+                // Для демонстрации в браузере
+                window.open(url, '_blank');
+                alert(`Запуск игры: ${gameName}`);
+            }
         }
         
-        // Добавляем обработчики для навигации
+        // Активация пунктов нижнего меню
         document.querySelectorAll('.nav-item').forEach(item => {
             item.addEventListener('click', function() {
-                document.querySelectorAll('.nav-item').forEach(nav => {
-                    nav.classList.remove('active');
-                });
+                document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
                 this.classList.add('active');
-                
-                // Здесь можно добавить логику переключения разделов
-                // В данном случае все разделы на одной странице, поэтому просто меняем активный элемент
             });
         });
     </script>
