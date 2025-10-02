@@ -1,0 +1,70 @@
+/* Добавьте эти стили в конец вашего style.css файла */
+
+/* Header Titles */
+.header-titles {
+    display: flex;
+    flex-direction: column;
+}
+
+.app-subtitle {
+    font-size: 12px;
+    opacity: 0.8;
+    margin-top: 2px;
+    font-weight: 400;
+}
+
+/* Улучшенные стили для кнопок */
+.nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    opacity: 0.6;
+    -webkit-tap-highlight-color: transparent;
+}
+
+.nav-item:active {
+    transform: scale(0.95);
+}
+
+.game-card,
+.exchange-card {
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+}
+
+.game-card:active,
+.exchange-card:active {
+    transform: scale(0.98);
+}
+
+/* Улучшенная доступность для кнопок */
+#copy-btn {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#copy-btn:active {
+    transform: scale(0.95);
+}
+
+/* Убедитесь, что все интерактивные элементы имеют правильный курсор */
+button, 
+[data-url], 
+[data-section] {
+    cursor: pointer;
+}
