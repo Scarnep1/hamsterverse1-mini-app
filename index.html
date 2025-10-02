@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,284 +16,250 @@
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             color: #fff;
             min-height: 100vh;
-            padding: 20px;
+            overflow: hidden;
         }
         
         .container {
-            max-width: 800px;
-            margin: 0 auto;
+            max-width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
         }
         
-        header {
+        .header {
             text-align: center;
-            margin-bottom: 40px;
-            padding-top: 20px;
+            margin-bottom: 30px;
+            padding-top: 10px;
         }
         
         .logo {
             font-size: 2.5rem;
             font-weight: 700;
-            background: linear-gradient(90deg, #ff6b6b, #feca57, #48dbfb, #ff9ff3);
+            background: linear-gradient(45deg, #ff9a00, #ff6a00);
             -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+            -webkit-text-fill-color: transparent;
             margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 106, 0, 0.3);
         }
         
-        .tagline {
-            color: #a5b1c2;
-            font-size: 1.1rem;
-            margin-bottom: 30px;
+        .subtitle {
+            color: #a0a0c0;
+            font-size: 1rem;
+            margin-bottom: 20px;
         }
         
         .games-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-            margin-bottom: 40px;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            flex-grow: 1;
+            margin-bottom: 20px;
         }
         
         .game-card {
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .game-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(45deg, #ff9a00, #ff6a00);
         }
         
         .game-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
-        }
-        
-        .game-header {
-            padding: 20px;
-            display: flex;
-            align-items: center;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.08);
         }
         
         .game-icon {
-            width: 50px;
-            height: 50px;
-            border-radius: 12px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #ff9a00, #ff6a00);
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 15px;
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-        
-        .icon-hamster {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a52);
-        }
-        
-        .icon-fight {
-            background: linear-gradient(135deg, #feca57, #ff9f43);
-        }
-        
-        .icon-king {
-            background: linear-gradient(135deg, #48dbfb, #0abde3);
-        }
-        
-        .icon-bitquest {
-            background: linear-gradient(135deg, #ff9ff3, #f368e0);
+            margin-bottom: 15px;
+            font-size: 1.8rem;
+            box-shadow: 0 4px 15px rgba(255, 106, 0, 0.4);
         }
         
         .game-title {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: 600;
+            margin-bottom: 8px;
+            text-align: center;
         }
         
         .game-description {
-            padding: 20px;
-            color: #a5b1c2;
-            line-height: 1.5;
-            min-height: 80px;
+            font-size: 0.85rem;
+            color: #a0a0c0;
+            text-align: center;
+            margin-bottom: 15px;
+            line-height: 1.4;
         }
         
         .play-btn {
-            display: block;
-            width: calc(100% - 40px);
-            margin: 0 20px 20px;
-            padding: 14px;
-            background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+            background: linear-gradient(45deg, #ff9a00, #ff6a00);
             color: white;
             border: none;
-            border-radius: 12px;
-            font-size: 1rem;
+            padding: 10px 20px;
+            border-radius: 50px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-align: center;
-            text-decoration: none;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(255, 106, 0, 0.3);
         }
         
         .play-btn:hover {
-            background: linear-gradient(90deg, #5b4fcf, #8c82f0);
-            transform: scale(1.02);
+            transform: scale(1.05);
+            box-shadow: 0 6px 20px rgba(255, 106, 0, 0.5);
         }
         
-        .wallet-section {
+        .bottom-nav {
+            display: flex;
+            justify-content: space-around;
             background: rgba(255, 255, 255, 0.05);
-            border-radius: 20px;
-            padding: 25px;
-            margin-top: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(10px);
+            border-radius: 50px;
+            padding: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .wallet-header {
+        .nav-item {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .wallet-title {
-            font-size: 1.3rem;
-            font-weight: 600;
-        }
-        
-        .wallet-actions {
-            display: flex;
-            gap: 15px;
-        }
-        
-        .wallet-btn {
-            padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 10px;
-            color: white;
+            color: #a0a0c0;
+            font-size: 0.8rem;
             cursor: pointer;
             transition: all 0.3s ease;
+            padding: 5px 10px;
+            border-radius: 20px;
         }
         
-        .wallet-btn:hover {
-            background: rgba(255, 255, 255, 0.15);
+        .nav-item.active {
+            color: #ff9a00;
+            background: rgba(255, 154, 0, 0.1);
         }
         
-        .wallet-balance {
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-            margin: 20px 0;
-            background: linear-gradient(90deg, #ff6b6b, #feca57);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
+        .nav-item:hover {
+            color: #ff9a00;
         }
         
-        footer {
-            text-align: center;
-            margin-top: 40px;
-            color: #a5b1c2;
-            font-size: 0.9rem;
-            padding-bottom: 20px;
+        .nav-icon {
+            font-size: 1.2rem;
+            margin-bottom: 5px;
         }
         
-        @media (max-width: 600px) {
+        @media (max-width: 480px) {
             .games-grid {
                 grid-template-columns: 1fr;
+                gap: 15px;
             }
             
-            .wallet-actions {
-                flex-direction: column;
+            .game-card {
+                padding: 15px;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
+        <div class="header">
             <div class="logo">HamsterVerse</div>
-            <div class="tagline">Your gateway to premium gaming experiences</div>
-        </header>
+            <div class="subtitle">Игровая экосистема в Telegram</div>
+        </div>
         
         <div class="games-grid">
-            <!-- Hamster GameDev -->
             <div class="game-card">
-                <div class="game-header">
-                    <div class="game-icon icon-hamster">H</div>
-                    <div class="game-title">Hamster GameDev</div>
-                </div>
-                <div class="game-description">
-                    Create your own GameDev studio and build amazing games. Become the ultimate game developer in the hamster world.
-                </div>
-                <a href="https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584" class="play-btn">Play Now</a>
+                <div class="game-icon">🎮</div>
+                <div class="game-title">Hamster GameDev</div>
+                <div class="game-description">Создайте свою студию разработки игр</div>
+                <button class="play-btn" onclick="openGame('https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584')">Играть</button>
             </div>
             
-            <!-- Hamster Fight Club -->
             <div class="game-card">
-                <div class="game-header">
-                    <div class="game-icon icon-fight">F</div>
-                    <div class="game-title">Hamster Fight Club</div>
-                </div>
-                <div class="game-description">
-                    Enter the arena and battle other hamsters in epic fights. Prove your strength and become the ultimate champion.
-                </div>
-                <a href="https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyMS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5" class="play-btn">Play Now</a>
+                <div class="game-icon">👑</div>
+                <div class="game-title">Hamster King</div>
+                <div class="game-description">Королевская битва хомяков</div>
+                <button class="play-btn" onclick="openGame('https://t.me/hamsterking_game_bot?startapp=6823288584')">Играть</button>
             </div>
             
-            <!-- Hamster King -->
             <div class="game-card">
-                <div class="game-header">
-                    <div class="game-icon icon-king">K</div>
-                    <div class="game-title">Hamster King</div>
-                </div>
-                <div class="game-description">
-                    Rule your kingdom with wisdom and strength. Build your empire and become the most powerful hamster king.
-                </div>
-                <a href="https://t.me/hamsterking_game_bot?startapp=6823288584" class="play-btn">Play Now</a>
+                <div class="game-icon">🥊</div>
+                <div class="game-title">Hamster Fight Club</div>
+                <div class="game-description">Бойцовский клуб хомяков</div>
+                <button class="play-btn" onclick="openGame('https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyMS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5')">Играть</button>
             </div>
             
-            <!-- BitQuest -->
             <div class="game-card">
-                <div class="game-header">
-                    <div class="game-icon icon-bitquest">B</div>
-                    <div class="game-title">BitQuest</div>
-                </div>
-                <div class="game-description">
-                    Embark on an epic adventure in the blockchain world. Complete quests and earn rewards in this crypto journey.
-                </div>
-                <a href="https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584" class="play-btn">Play Now</a>
+                <div class="game-icon">💰</div>
+                <div class="game-title">BitQuest</div>
+                <div class="game-description">Крипто-приключения</div>
+                <button class="play-btn" onclick="openGame('https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584')">Играть</button>
             </div>
         </div>
         
-        <div class="wallet-section">
-            <div class="wallet-header">
-                <div class="wallet-title">Your Wallet</div>
-                <div class="wallet-actions">
-                    <button class="wallet-btn">Charge</button>
-                    <button class="wallet-btn">Profile</button>
-                </div>
+        <div class="bottom-nav">
+            <div class="nav-item active">
+                <div class="nav-icon">🏠</div>
+                <div>Главная</div>
             </div>
-            <div class="wallet-balance">1,250 HAM</div>
+            <div class="nav-item">
+                <div class="nav-icon">🎮</div>
+                <div>Игры</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">👛</div>
+                <div>Кошелек</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">⚡</div>
+                <div>Зарядка</div>
+            </div>
+            <div class="nav-item">
+                <div class="nav-icon">👤</div>
+                <div>Профиль</div>
+            </div>
         </div>
-        
-        <footer>
-            &copy; 2025 HamsterVerse. All rights reserved.
-        </footer>
     </div>
 
     <script>
-        // Simple animation for game cards on load
-        document.addEventListener('DOMContentLoaded', function() {
-            const cards = document.querySelectorAll('.game-card');
-            cards.forEach((card, index) => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
+        function openGame(url) {
+            // В реальном мини-приложении Telegram это будет открывать игру внутри Telegram
+            // Для демонстрации просто открываем в новом окне
+            window.open(url, '_blank');
+        }
+        
+        // Добавляем обработчики для навигации
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                this.classList.add('active');
                 
-                setTimeout(() => {
-                    card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-                    card.style.opacity = '1';
-                    card.style.transform = 'translateY(0)';
-                }, 200 * index);
+                // Здесь можно добавить логику переключения разделов
+                // В данном случае все разделы на одной странице, поэтому просто меняем активный элемент
             });
         });
     </script>
