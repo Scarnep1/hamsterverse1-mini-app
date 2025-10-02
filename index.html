@@ -6,6 +6,7 @@
     <title>Hamster Verse</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -14,9 +15,9 @@
             <div class="header-content">
                 <div class="header-titles">
                     <h1 class="app-title">Hamster Verse</h1>
-                    <span class="app-subtitle">Игровая вселенная Hamster</span>
+                    <span class="app-subtitle">Ваша игровая панель</span>
                 </div>
-                <div class="user-avatar">H</div>
+                <div class="user-avatar" id="user-avatar">H</div>
             </div>
         </header>
 
@@ -26,17 +27,22 @@
             <section id="games-section" class="content-section active">
                 <div class="section-header">
                     <h2>Игры</h2>
-                    <span class="section-subtitle">Социальные медиа</span>
+                    <span class="section-subtitle">Выберите игру для начала</span>
                 </div>
                 
                 <div class="games-grid">
                     <div class="game-card">
                         <div class="game-image">
                             <img src="images/hamster-gamedev.jpg" alt="Hamster GameDev" class="game-avatar">
+                            <div class="game-status beta">Beta</div>
                         </div>
                         <div class="game-info">
                             <h3>Hamster GameDev</h3>
-                            <p>Создай свою студию</p>
+                            <p>Создай игровую студию и стань лидером</p>
+                            <div class="game-stats">
+                                <span class="stat">🎮 15K игроков</span>
+                                <span class="stat">⭐ 4.5</span>
+                            </div>
                         </div>
                         <button class="play-button" data-url="https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584">
                             Играть
@@ -46,10 +52,15 @@
                     <div class="game-card">
                         <div class="game-image">
                             <img src="images/hamster-king.jpg" alt="Hamster King" class="game-avatar">
+                            <div class="game-status live">Live</div>
                         </div>
                         <div class="game-info">
                             <h3>Hamster King</h3>
-                            <p>Бойцовский клуб</p>
+                            <p>Стань королём в эпических битвах</p>
+                            <div class="game-stats">
+                                <span class="stat">🎮 25K игроков</span>
+                                <span class="stat">⭐ 4.8</span>
+                            </div>
                         </div>
                         <button class="play-button" data-url="https://t.me/hamsterking_game_bot?startapp=6823288584">
                             Играть
@@ -59,10 +70,15 @@
                     <div class="game-card">
                         <div class="game-image">
                             <img src="images/hamstr-fight-club.jpg" alt="Hamster Fight Club" class="game-avatar">
+                            <div class="game-status new">New</div>
                         </div>
                         <div class="game-info">
                             <h3>Hamster Fight Club</h3>
-                            <p>Арена сражений</p>
+                            <p>Бойцовский клуб для чемпионов</p>
+                            <div class="game-stats">
+                                <span class="stat">🎮 8K игроков</span>
+                                <span class="stat">⭐ 4.3</span>
+                            </div>
                         </div>
                         <button class="play-button" data-url="https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyMS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5">
                             Играть
@@ -72,10 +88,15 @@
                     <div class="game-card">
                         <div class="game-image">
                             <img src="images/bitquest.jpg" alt="BitQuest" class="game-avatar">
+                            <div class="game-status popular">Hot</div>
                         </div>
                         <div class="game-info">
                             <h3>BitQuest</h3>
-                            <p>Снапшот готов</p>
+                            <p>Крипто-приключение с наградами</p>
+                            <div class="game-stats">
+                                <span class="stat">🎮 50K игроков</span>
+                                <span class="stat">⭐ 4.9</span>
+                            </div>
                         </div>
                         <button class="play-button" data-url="https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584">
                             Играть
@@ -84,88 +105,198 @@
                 </div>
             </section>
 
-            <!-- Wallet Section -->
-            <section id="wallet-section" class="content-section">
+            <!-- HMSTR Section -->
+            <section id="hmstr-section" class="content-section">
                 <div class="section-header">
-                    <h2>Лучшие Биржи</h2>
-                    <span class="section-subtitle">Купить HMSTR монеты</span>
+                    <h2>HMSTR</h2>
+                    <span class="section-subtitle">Токен Hamster Verse</span>
                 </div>
                 
-                <div class="exchanges-list">
-                    <a href="https://binance.com" class="exchange-card" target="_blank">
-                        <div class="exchange-logo">
-                            <img src="images/binance.png" alt="Binance" class="exchange-avatar">
+                <!-- Price Card -->
+                <div class="price-card">
+                    <div class="price-header">
+                        <div class="coin-info">
+                            <div class="coin-logo">H</div>
+                            <div class="coin-details">
+                                <h3>HMSTR</h3>
+                                <p>Hamster Verse</p>
+                            </div>
                         </div>
-                        <div class="exchange-info">
-                            <h3>Binance</h3>
-                            <p>Глобальная биржа</p>
+                        <div class="current-price">
+                            <span class="price" id="hmstr-price">$0.0100</span>
+                            <span class="change positive" id="hmstr-change">+5.2%</span>
                         </div>
-                        <div class="exchange-arrow">→</div>
-                    </a>
+                    </div>
+                    
+                    <!-- Price Chart -->
+                    <div class="chart-container">
+                        <canvas id="priceChart"></canvas>
+                    </div>
+                    
+                    <div class="price-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">24h Объем</span>
+                            <span class="stat-value">$2.1M</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Рыноч. кап.</span>
+                            <span class="stat-value">$15.4M</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Ликвидность</span>
+                            <span class="stat-value">$1.8M</span>
+                        </div>
+                    </div>
+                </div>
 
-                    <a href="https://bybit.com" class="exchange-card" target="_blank">
-                        <div class="exchange-logo">
-                            <img src="images/bybit.jpg" alt="Bybit" class="exchange-avatar">
-                        </div>
-                        <div class="exchange-info">
-                            <h3>Bybit</h3>
-                            <p>Быстрая торговля</p>
-                        </div>
-                        <div class="exchange-arrow">→</div>
-                    </a>
+                <!-- Exchanges List -->
+                <div class="exchanges-section">
+                    <h3>Где купить HMSTR</h3>
+                    <div class="exchanges-list">
+                        <a href="https://binance.com" class="exchange-card" target="_blank">
+                            <div class="exchange-logo">
+                                <img src="images/binance.png" alt="Binance" class="exchange-avatar">
+                            </div>
+                            <div class="exchange-info">
+                                <h3>Binance</h3>
+                                <p>Крупнейшая биржа • HMSTR/USDT</p>
+                                <div class="exchange-volume">Объем: $1.2M</div>
+                            </div>
+                            <div class="exchange-arrow">→</div>
+                        </a>
 
-                    <a href="https://okx.com" class="exchange-card" target="_blank">
-                        <div class="exchange-logo">
-                            <img src="images/okx.jpg" alt="OKX" class="exchange-avatar">
-                        </div>
-                        <div class="exchange-info">
-                            <h3>OKX</h3>
-                            <p>Безопасная платформа</p>
-                        </div>
-                        <div class="exchange-arrow">→</div>
-                    </a>
+                        <a href="https://bybit.com" class="exchange-card" target="_blank">
+                            <div class="exchange-logo">
+                                <img src="images/bybit.jpg" alt="Bybit" class="exchange-avatar">
+                            </div>
+                            <div class="exchange-info">
+                                <h3>Bybit</h3>
+                                <p>Фьючерсы и спот • HMSTR/USDT</p>
+                                <div class="exchange-volume">Объем: $450K</div>
+                            </div>
+                            <div class="exchange-arrow">→</div>
+                        </a>
 
-                    <a href="https://kucoin.com" class="exchange-card" target="_blank">
-                        <div class="exchange-logo">
-                            <img src="images/kucoin.png" alt="KuCoin" class="exchange-avatar">
+                        <a href="https://okx.com" class="exchange-card" target="_blank">
+                            <div class="exchange-logo">
+                                <img src="images/okx.jpg" alt="OKX" class="exchange-avatar">
+                            </div>
+                            <div class="exchange-info">
+                                <h3>OKX</h3>
+                                <p>Много пар • HMSTR/USDC</p>
+                                <div class="exchange-volume">Объем: $320K</div>
+                            </div>
+                            <div class="exchange-arrow">→</div>
+                        </a>
+
+                        <a href="https://kucoin.com" class="exchange-card" target="_blank">
+                            <div class="exchange-logo">
+                                <img src="images/kucoin.png" alt="KuCoin" class="exchange-avatar">
+                            </div>
+                            <div class="exchange-info">
+                                <h3>KuCoin</h3>
+                                <p>Альткойны • HMSTR/USDT</p>
+                                <div class="exchange-volume">Объем: $180K</div>
+                            </div>
+                            <div class="exchange-arrow">→</div>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Buy Guide -->
+                <div class="buy-guide">
+                    <h3>📖 Как купить HMSTR</h3>
+                    <div class="guide-steps">
+                        <div class="guide-step">
+                            <span class="step-number">1</span>
+                            <div class="step-content">
+                                <strong>Выберите биржу</strong>
+                                <p>Зарегистрируйтесь на Binance, Bybit или другой бирже из списка</p>
+                            </div>
                         </div>
-                        <div class="exchange-info">
-                            <h3>KuCoin</h3>
-                            <p>Много пар</p>
+                        <div class="guide-step">
+                            <span class="step-number">2</span>
+                            <div class="step-content">
+                                <strong>Пополните баланс</strong>
+                                <p>Внесите USDT или другую стабильную монету на биржу</p>
+                            </div>
                         </div>
-                        <div class="exchange-arrow">→</div>
-                    </a>
+                        <div class="guide-step">
+                            <span class="step-number">3</span>
+                            <div class="step-content">
+                                <strong>Купите HMSTR</strong>
+                                <p>Найдите пару HMSTR/USDT и совершите покупку</p>
+                            </div>
+                        </div>
+                        <div class="guide-step">
+                            <span class="step-number">4</span>
+                            <div class="step-content">
+                                <strong>Выведите на кошелек</strong>
+                                <p>Для безопасности выведите токены на Trust Wallet или MetaMask</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <!-- Profile Section -->
             <section id="profile-section" class="content-section">
                 <div class="profile-header">
-                    <div class="profile-avatar">H</div>
+                    <div class="profile-avatar" id="tg-avatar">H</div>
                     <div class="profile-info">
-                        <h2>Хомяк Пользователь</h2>
-                        <p>@hamster_fan</p>
+                        <h2 id="tg-name">Хомяк Пользователь</h2>
+                        <p id="tg-username">@hamster_fan</p>
+                        <div class="user-rank" id="user-rank">
+                            <span class="rank-badge beginner">Новичок</span>
+                            <span class="rank-progress">15/30 очков</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">🎯</div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="total-points">15</span>
+                            <span class="stat-label">Всего очков</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📅</div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="daily-streak">5</span>
+                            <span class="stat-label">Дней подряд</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">👥</div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="friends-invited">3</span>
+                            <span class="stat-label">Друзей</span>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚡</div>
+                        <div class="stat-content">
+                            <span class="stat-number" id="games-played">12</span>
+                            <span class="stat-label">Игр сыграно</span>
+                        </div>
                     </div>
                 </div>
 
                 <div class="referral-section">
                     <h3>Пригласи друзей</h3>
-                    <p>Получи 10 очков за каждого друга!</p>
+                    <p>Получи 3 очка за каждого друга!</p>
                     
                     <div class="referral-link">
                         <input type="text" id="referral-input" readonly value="https://t.me/hamster_app_bot?start=ref_12345">
                         <button id="copy-btn">Копировать</button>
                     </div>
                     
-                    <div class="referral-stats">
-                        <div class="stat-item">
-                            <span class="stat-number">5</span>
-                            <span class="stat-label">Друзей приглашено</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-number">50</span>
-                            <span class="stat-label">Очков заработано</span>
-                        </div>
+                    <div class="daily-bonus">
+                        <h4>🎁 Ежедневный бонус</h4>
+                        <p>Заходи каждый день и получай 1 очко!</p>
+                        <button class="claim-button" id="claim-daily">Получить 1 очко</button>
                     </div>
                 </div>
             </section>
@@ -177,9 +308,9 @@
                 <span class="nav-icon">🎮</span>
                 <span class="nav-label">Игры</span>
             </button>
-            <button class="nav-item" data-section="wallet-section">
+            <button class="nav-item" data-section="hmstr-section">
                 <span class="nav-icon">💰</span>
-                <span class="nav-label">Кошелек</span>
+                <span class="nav-label">HMSTR</span>
             </button>
             <button class="nav-item" data-section="profile-section">
                 <span class="nav-icon">👤</span>
