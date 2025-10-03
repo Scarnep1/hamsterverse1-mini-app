@@ -64,13 +64,16 @@ function updatePriceDisplay(tickerData) {
     changeElement.textContent = `${priceChangePercent >= 0 ? '+' : ''}${priceChangePercent.toFixed(2)}%`;
     
     // Add update animation
+    priceElement.classList.add('price-update');
     if (currentPrice > previousPrice) {
-        priceElement.classList.add('price-update');
-        setTimeout(() => priceElement.classList.remove('price-update'), 500);
+        priceElement.classList.add('positive');
     } else if (currentPrice < previousPrice) {
-        priceElement.classList.add('price-update', 'negative');
-        setTimeout(() => priceElement.classList.remove('price-update', 'negative'), 500);
+        priceElement.classList.add('negative');
     }
+    
+    setTimeout(() => {
+        priceElement.classList.remove('price-update', 'positive', 'negative');
+    }, 500);
     
     if (priceChangePercent >= 0) {
         changeElement.className = 'change positive';
@@ -113,10 +116,10 @@ function createPriceChart(tickerData) {
     const ctx = document.getElementById('priceChart').getContext('2d');
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
-    // Generate mock price history based on current price
+    // Generate realistic price history based on current price
     const currentPrice = parseFloat(tickerData.lastPrice);
-    const prices = generatePriceHistory(currentPrice);
-    const labels = generateChartLabels(prices.length);
+    const prices = generateRealisticPriceHistory(currentPrice);
+    const labels = ['6d', '5d', '4d', '3d', '2d', '1d', 'Now'];
     
     // Determine trend for color
     const firstPrice = prices[0];
@@ -136,15 +139,17 @@ function createPriceChart(tickerData) {
             datasets: [{
                 data: prices,
                 borderColor: isPositive ? '#00c851' : '#ff4444',
-                backgroundColor: isPositive ? 'rgba(0, 200, 81, 0.1)' : 'rgba(255, 68, 68, 0.1)',
+                backgroundColor: isPositive ? 
+                    'rgba(0, 200, 81, 0.1)' : 
+                    'rgba(255, 68, 68, 0.1)',
                 borderWidth: 2,
                 fill: true,
                 tension: 0.4,
                 pointBackgroundColor: isPositive ? '#00c851' : '#ff4444',
                 pointBorderColor: isDark ? '#2d2d2d' : '#ffffff',
                 pointBorderWidth: 2,
-                pointRadius: 2,
-                pointHoverRadius: 4
+                pointRadius: 3,
+                pointHoverRadius: 5
             }]
         },
         options: {
@@ -155,9 +160,11 @@ function createPriceChart(tickerData) {
                 tooltip: {
                     mode: 'index',
                     intersect: false,
-                    backgroundColor: isDark ? 'rgba(45, 45, 45, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                    backgroundColor: isDark ? 'rgba(45, 45, 45, 0.95)' : 'rgba(255, 255, 255, 0.95)',
                     bodyColor: isDark ? '#ffffff' : '#1a1a1a',
                     titleColor: isDark ? '#ffffff' : '#1a1a1a',
+                    borderColor: isDark ? '#404040' : '#e9ecef',
+                    borderWidth: 1,
                     callbacks: {
                         label: function(context) {
                             return `$${context.parsed.y.toFixed(6)}`;
@@ -167,7 +174,10 @@ function createPriceChart(tickerData) {
             },
             scales: {
                 x: {
-                    grid: { display: false },
+                    grid: { 
+                        display: false,
+                        drawBorder: false
+                    },
                     ticks: {
                         color: isDark ? '#b0b0b0' : '#666',
                         font: { size: 9 }
@@ -181,22 +191,29 @@ function createPriceChart(tickerData) {
             interaction: {
                 intersect: false,
                 mode: 'nearest'
+            },
+            elements: {
+                line: {
+                    tension: 0.4
+                }
             }
         }
     });
 }
 
-function generatePriceHistory(currentPrice) {
+function generateRealisticPriceHistory(currentPrice) {
     const prices = [];
     let price = currentPrice;
     
-    // Generate 7 data points including current price
+    // Generate 6 historical prices + current price
     for (let i = 6; i >= 0; i--) {
         if (i === 0) {
             prices.push(currentPrice);
         } else {
-            const change = (Math.random() - 0.5) * 0.008;
-            price = Math.max(currentPrice * 0.5, price * (1 + change));
+            // More realistic price fluctuations
+            const volatility = 0.02; // 2% volatility
+            const change = (Math.random() - 0.5) * volatility;
+            price = Math.max(currentPrice * 0.8, price * (1 + change));
             prices.push(price);
         }
     }
@@ -204,28 +221,20 @@ function generatePriceHistory(currentPrice) {
     return prices;
 }
 
-function generateChartLabels(count) {
-    const labels = [];
-    for (let i = count - 1; i >= 0; i--) {
-        if (i === 0) {
-            labels.push('Now');
-        } else {
-            labels.push(`${i}d`);
-        }
-    }
-    return labels;
-}
-
 function useMockData() {
     console.log('Using mock data as fallback');
     
+    const basePrice = 0.01;
+    const changePercent = (Math.random() - 0.5) * 10;
+    const currentPrice = basePrice * (1 + changePercent / 100);
+    
     const mockTicker = {
-        lastPrice: (0.01 + (Math.random() - 0.5) * 0.002).toFixed(6),
-        priceChange: (Math.random() - 0.5) * 0.001,
-        priceChangePercent: (Math.random() - 0.5) * 2,
+        lastPrice: currentPrice.toFixed(6),
+        priceChange: (currentPrice - basePrice).toFixed(6),
+        priceChangePercent: changePercent.toFixed(2),
         volume: (100000 + Math.random() * 50000).toFixed(2),
-        highPrice: (0.011 + Math.random() * 0.001).toFixed(6),
-        lowPrice: (0.009 - Math.random() * 0.001).toFixed(6)
+        highPrice: (currentPrice * (1 + Math.random() * 0.1)).toFixed(6),
+        lowPrice: (currentPrice * (1 - Math.random() * 0.05)).toFixed(6)
     };
     
     updatePriceDisplay(mockTicker);
@@ -272,9 +281,11 @@ function setupNavigation() {
         item.addEventListener('click', function() {
             const targetSection = this.getAttribute('data-section');
             
+            // Update navigation
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
             
+            // Update sections
             sections.forEach(section => {
                 section.classList.remove('active');
                 if (section.id === targetSection) {
@@ -332,6 +343,7 @@ function setupReferralLink() {
                 }, 2000);
             }).catch(function(err) {
                 console.error('Failed to copy text: ', err);
+                // Fallback for older browsers
                 try {
                     document.execCommand('copy');
                     notification.classList.add('show');
@@ -357,7 +369,7 @@ function setupTelegramIntegration() {
             if (user.photo_url) {
                 avatar.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%;">`;
             } else {
-                avatar.textContent = user.first_name?.[0] || 'U';
+                avatar.querySelector('.avatar-icon').textContent = user.first_name?.[0] || 'U';
             }
             
             const name = document.getElementById('tg-name');
@@ -378,6 +390,15 @@ function setupDailyBonus() {
     const claimButton = document.getElementById('claim-daily');
     
     if (claimButton) {
+        // Check if already claimed today
+        const lastClaim = localStorage.getItem('lastDailyClaim');
+        const today = new Date().toDateString();
+        
+        if (lastClaim === today) {
+            claimButton.disabled = true;
+            claimButton.textContent = '🎁 Получено сегодня';
+        }
+        
         claimButton.addEventListener('click', function() {
             const lastClaim = localStorage.getItem('lastDailyClaim');
             const today = new Date().toDateString();
@@ -387,6 +408,7 @@ function setupDailyBonus() {
                 return;
             }
             
+            // Claim bonus
             localStorage.setItem('lastDailyClaim', today);
             
             const pointsElement = document.getElementById('total-points');
@@ -399,12 +421,16 @@ function setupDailyBonus() {
             
             updateUserRank(currentPoints + 1);
             
-            alert('🎉 Вы получили 1 очко за ежедневный вход!');
+            // Update button state
             claimButton.disabled = true;
-            claimButton.textContent = 'Получено сегодня';
+            claimButton.textContent = '🎁 Получено сегодня';
+            
+            // Show success message
+            alert('🎉 Вы получили 1 очко за ежедневный вход!');
         });
     }
     
+    // Initial rank update
     updateUserRank(parseInt(document.getElementById('total-points').textContent));
 }
 
@@ -419,8 +445,12 @@ function updateUserRank(points) {
         rank = 'beginner';
         nextRank = 30;
         progress = `${points}/30 очков`;
-    } else if (points < 300) {
+    } else if (points < 100) {
         rank = 'player';
+        nextRank = 100;
+        progress = `${points}/100 очков`;
+    } else if (points < 300) {
+        rank = 'pro';
         nextRank = 300;
         progress = `${points}/300 очков`;
     } else {
@@ -438,6 +468,7 @@ function getRankName(rank) {
     switch(rank) {
         case 'beginner': return 'Новичок';
         case 'player': return 'Игрок';
+        case 'pro': return 'Профи';
         case 'whale': return 'Кит';
         default: return 'Новичок';
     }
@@ -487,6 +518,7 @@ function setupThemeToggle() {
             themeText.textContent = 'Темная тема';
         }
         
+        // Update chart theme if it exists
         updateChartTheme();
     }
 }
@@ -499,19 +531,47 @@ function updateChartTheme() {
             const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
             
             chart.options.scales.x.ticks.color = isDark ? '#b0b0b0' : '#666';
-            chart.options.plugins.tooltip.backgroundColor = isDark ? 'rgba(45, 45, 45, 0.9)' : 'rgba(255, 255, 255, 0.9)';
+            chart.options.plugins.tooltip.backgroundColor = isDark ? 'rgba(45, 45, 45, 0.95)' : 'rgba(255, 255, 255, 0.95)';
             chart.options.plugins.tooltip.bodyColor = isDark ? '#ffffff' : '#1a1a1a';
             chart.options.plugins.tooltip.titleColor = isDark ? '#ffffff' : '#1a1a1a';
+            chart.options.plugins.tooltip.borderColor = isDark ? '#404040' : '#e9ecef';
             
-            chart.update();
+            chart.update('none'); // Update without animation
         }
     }
 }
 
-// Prevent image drag
-document.addEventListener('DOMContentLoaded', function() {
-    const images = document.querySelectorAll('img');
-    images.forEach(img => {
-        img.setAttribute('draggable', 'false');
-    });
-});
+// Add CSS for price update animation
+const style = document.createElement('style');
+style.textContent = `
+    .price-update {
+        animation: priceUpdate 0.5s ease;
+    }
+    
+    .price-update.positive {
+        animation: priceUpdatePositive 0.5s ease;
+    }
+    
+    .price-update.negative {
+        animation: priceUpdateNegative 0.5s ease;
+    }
+    
+    @keyframes priceUpdate {
+        0% { background-color: transparent; }
+        50% { background-color: rgba(102, 126, 234, 0.1); }
+        100% { background-color: transparent; }
+    }
+    
+    @keyframes priceUpdatePositive {
+        0% { background-color: transparent; }
+        50% { background-color: rgba(0, 200, 81, 0.1); }
+        100% { background-color: transparent; }
+    }
+    
+    @keyframes priceUpdateNegative {
+        0% { background-color: transparent; }
+        50% { background-color: rgba(255, 68, 68, 0.1); }
+        100% { background-color: transparent; }
+    }
+`;
+document.head.appendChild(style);
