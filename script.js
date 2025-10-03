@@ -1,3 +1,7 @@
+// API Configuration
+const MEXC_API_BASE = 'https://api.mexc.com';
+const HMSTR_SYMBOL = 'HMSTRUSDT';
+
 // Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -11,9 +15,255 @@ function initializeApp() {
     setupPriceData();
     setupDailyBonus();
     setupGuideButton();
-    setupThemeToggle(); // Добавь эту строку
+    setupThemeToggle();
+    
+    // Start real-time updates
+    startRealTimeUpdates();
 }
 
+// API Functions
+async function fetchPriceData() {
+    try {
+        updateApiStatus('loading', 'Загрузка данных...');
+        
+        const [tickerResponse, klinesResponse] = await Promise.all([
+            fetch(`${MEXC_API_BASE}/api/v3/ticker/24hr?symbol=${HMSTR_SYMBOL}`),
+            fetch(`${MEXC_API_BASE}/api/v3/klines?symbol=${HMSTR_SYMBOL}&interval=1d&limit=7`)
+        ]);
+
+        if (!tickerResponse.ok || !klinesResponse.ok) {
+            throw new Error('API request failed');
+        }
+
+        const tickerData = await tickerResponse.json();
+        const klinesData = await klinesResponse.json();
+
+        updateApiStatus('connected', 'Данные обновлены');
+        updatePriceDisplay(tickerData);
+        updateMarketStats(tickerData);
+        createPriceChart(klinesData);
+        
+        return true;
+    } catch (error) {
+        console.error('Error fetching price data:', error);
+        updateApiStatus('error', 'Ошибка загрузки данных');
+        
+        // Fallback to mock data
+        setTimeout(() => {
+            useMockData();
+        }, 2000);
+        
+        return false;
+    }
+}
+
+function updatePriceDisplay(tickerData) {
+    const priceElement = document.getElementById('hmstr-price');
+    const changeElement = document.getElementById('hmstr-change');
+    
+    const currentPrice = parseFloat(tickerData.lastPrice);
+    const priceChange = parseFloat(tickerData.priceChange);
+    const priceChangePercent = parseFloat(tickerData.priceChangePercent);
+    
+    const previousPrice = parseFloat(priceElement.textContent.replace('$', '')) || currentPrice;
+    
+    priceElement.textContent = `$${currentPrice.toFixed(4)}`;
+    changeElement.textContent = `${priceChangePercent >= 0 ? '+' : ''}${priceChangePercent.toFixed(2)}%`;
+    
+    // Add update animation
+    if (currentPrice > previousPrice) {
+        priceElement.classList.add('price-update');
+        setTimeout(() => priceElement.classList.remove('price-update'), 500);
+    } else if (currentPrice < previousPrice) {
+        priceElement.classList.add('price-update', 'negative');
+        setTimeout(() => priceElement.classList.remove('price-update', 'negative'), 500);
+    }
+    
+    if (priceChangePercent >= 0) {
+        changeElement.className = 'change positive';
+    } else {
+        changeElement.className = 'change negative';
+    }
+}
+
+function updateMarketStats(tickerData) {
+    document.getElementById('volume-24h').textContent = `$${formatVolume(parseFloat(tickerData.volume))}`;
+    document.getElementById('high-24h').textContent = `$${parseFloat(tickerData.highPrice).toFixed(4)}`;
+    document.getElementById('low-24h').textContent = `$${parseFloat(tickerData.lowPrice).toFixed(4)}`;
+}
+
+function formatVolume(volume) {
+    if (volume >= 1000000) {
+        return (volume / 1000000).toFixed(2) + 'M';
+    } else if (volume >= 1000) {
+        return (volume / 1000).toFixed(2) + 'K';
+    }
+    return volume.toFixed(2);
+}
+
+function updateApiStatus(status, message) {
+    const statusElement = document.getElementById('api-status');
+    const dotElement = statusElement.querySelector('.status-dot');
+    const textElement = statusElement.querySelector('.status-text');
+    
+    dotElement.className = 'status-dot';
+    if (status === 'connected') {
+        dotElement.classList.add('connected');
+    } else if (status === 'error') {
+        dotElement.classList.add('error');
+    }
+    
+    textElement.textContent = message;
+}
+
+function createPriceChart(klinesData) {
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    const prices = klinesData.map(kline => parseFloat(kline[4])); // Close prices
+    const labels = generateChartLabels(klinesData.length);
+    
+    // Determine trend for color
+    const firstPrice = prices[0];
+    const lastPrice = prices[prices.length - 1];
+    const isPositive = lastPrice >= firstPrice;
+    
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: prices,
+                borderColor: isPositive ? '#00c851' : '#ff4444',
+                backgroundColor: isPositive ? 'rgba(0, 200, 81, 0.1)' : 'rgba(255, 68, 68, 0.1)',
+                borderWidth: 2,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: isPositive ? '#00c851' : '#ff4444',
+                pointBorderColor: isDark ? '#2d2d2d' : '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 2,
+                pointHoverRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: isDark ? 'rgba(45, 45, 45, 0.9)' : 'rgba(255, 255, 255, 0.9)',
+                    bodyColor: isDark ? '#ffffff' : '#1a1a1a',
+                    titleColor: isDark ? '#ffffff' : '#1a1a1a',
+                    callbacks: {
+                        label: function(context) {
+                            return `$${context.parsed.y.toFixed(4)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { display: false },
+                    ticks: {
+                        color: isDark ? '#b0b0b0' : '#666',
+                        font: { size: 9 }
+                    }
+                },
+                y: { 
+                    display: false,
+                    grid: { display: false }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'nearest'
+            }
+        }
+    });
+    
+    return chart;
+}
+
+function generateChartLabels(count) {
+    const labels = [];
+    for (let i = count - 1; i >= 0; i--) {
+        if (i === 0) {
+            labels.push('Now');
+        } else {
+            labels.push(`${i}d`);
+        }
+    }
+    return labels;
+}
+
+function useMockData() {
+    console.log('Using mock data as fallback');
+    
+    const mockTicker = {
+        lastPrice: (0.01 + (Math.random() - 0.5) * 0.002).toFixed(6),
+        priceChange: (Math.random() - 0.5) * 0.001,
+        priceChangePercent: (Math.random() - 0.5) * 2,
+        volume: (100000 + Math.random() * 50000).toFixed(2),
+        highPrice: (0.011 + Math.random() * 0.001).toFixed(6),
+        lowPrice: (0.009 - Math.random() * 0.001).toFixed(6)
+    };
+    
+    updatePriceDisplay(mockTicker);
+    updateMarketStats(mockTicker);
+    updateApiStatus('connected', 'Данные (тестовые)');
+    
+    // Create mock chart data
+    const mockKlines = [];
+    let basePrice = 0.01;
+    for (let i = 0; i < 7; i++) {
+        const change = (Math.random() - 0.5) * 0.008;
+        basePrice = Math.max(0.005, basePrice * (1 + change));
+        mockKlines.push([0, 0, 0, 0, basePrice]);
+    }
+    createPriceChart(mockKlines);
+}
+
+function startRealTimeUpdates() {
+    // Initial data load
+    fetchPriceData();
+    
+    // Update every 30 seconds
+    setInterval(() => {
+        fetchPriceData();
+    }, 30000);
+    
+    // Add manual refresh button
+    addRefreshButton();
+}
+
+function addRefreshButton() {
+    const sectionHeader = document.querySelector('#hmstr-section .section-header');
+    const refreshButton = document.createElement('button');
+    refreshButton.className = 'refresh-button';
+    refreshButton.innerHTML = '🔄 Обновить';
+    refreshButton.onclick = () => {
+        refreshButton.style.transform = 'rotate(180deg)';
+        setTimeout(() => {
+            refreshButton.style.transform = 'rotate(0deg)';
+        }, 300);
+        fetchPriceData();
+    };
+    
+    sectionHeader.style.display = 'flex';
+    sectionHeader.style.justifyContent = 'space-between';
+    sectionHeader.style.alignItems = 'flex-start';
+    
+    const headerContent = document.createElement('div');
+    headerContent.innerHTML = sectionHeader.innerHTML;
+    sectionHeader.innerHTML = '';
+    sectionHeader.appendChild(headerContent);
+    sectionHeader.appendChild(refreshButton);
+}
+
+// Остальные функции остаются без изменений
 function setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.content-section');
@@ -121,102 +371,7 @@ function setupTelegramIntegration() {
                 username.textContent = `@${user.username}`;
             }
         }
-        
-        const themeParams = window.Telegram.WebApp.themeParams;
-        if (themeParams) {
-            document.documentElement.style.setProperty('--tg-theme-bg-color', themeParams.bg_color || '#ffffff');
-            document.documentElement.style.setProperty('--tg-theme-text-color', themeParams.text_color || '#000000');
-            document.documentElement.style.setProperty('--tg-theme-button-color', themeParams.button_color || '#667eea');
-            document.documentElement.style.setProperty('--tg-theme-button-text-color', themeParams.button_text_color || '#ffffff');
-        }
     }
-}
-
-function setupPriceData() {
-    const priceElement = document.getElementById('hmstr-price');
-    const changeElement = document.getElementById('hmstr-change');
-    
-    const basePrice = 0.01;
-    const randomChange = (Math.random() - 0.5) * 0.02;
-    const currentPrice = basePrice * (1 + randomChange);
-    const changePercent = (randomChange * 100).toFixed(2);
-    
-    priceElement.textContent = `$${currentPrice.toFixed(4)}`;
-    changeElement.textContent = `${changePercent >= 0 ? '+' : ''}${changePercent}%`;
-    
-    if (changePercent >= 0) {
-        changeElement.className = 'change positive';
-    } else {
-        changeElement.className = 'change negative';
-    }
-    
-    createPriceChart();
-}
-
-function createPriceChart() {
-    const ctx = document.getElementById('priceChart').getContext('2d');
-    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    
-    const prices = [];
-    let currentPrice = 0.01;
-    
-    for (let i = 0; i < 7; i++) {
-        const change = (Math.random() - 0.5) * 0.008;
-        currentPrice = Math.max(0.005, currentPrice * (1 + change));
-        prices.push(currentPrice);
-    }
-    
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['6d', '5d', '4d', '3d', '2d', '1d', 'Now'],
-            datasets: [{
-                data: prices,
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                borderWidth: 2,
-                fill: true,
-                tension: 0.4,
-                pointBackgroundColor: '#667eea',
-                pointBorderColor: isDark ? '#2d2d2d' : '#ffffff',
-                pointBorderWidth: 2,
-                pointRadius: 2
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: {
-                    mode: 'index',
-                    intersect: false,
-                    backgroundColor: isDark ? 'rgba(45, 45, 45, 0.9)' : 'rgba(255, 255, 255, 0.9)',
-                    bodyColor: isDark ? '#ffffff' : '#1a1a1a',
-                    titleColor: isDark ? '#ffffff' : '#1a1a1a',
-                    callbacks: {
-                        label: function(context) {
-                            return `$${context.parsed.y.toFixed(4)}`;
-                        }
-                    }
-                }
-            },
-            scales: {
-                x: {
-                    grid: { display: false },
-                    ticks: {
-                        color: isDark ? '#b0b0b0' : '#666',
-                        font: { size: 9 }
-                    }
-                },
-                y: { display: false }
-            },
-            interaction: {
-                intersect: false,
-                mode: 'nearest'
-            }
-        }
-    });
 }
 
 function setupDailyBonus() {
@@ -305,13 +460,11 @@ function setupGuideButton() {
     }
 }
 
-// НОВАЯ ФУНКЦИЯ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ТЕМЫ
 function setupThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = themeToggle.querySelector('.theme-icon');
     const themeText = themeToggle.querySelector('.theme-text');
     
-    // Load saved theme
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
     
@@ -333,7 +486,6 @@ function setupThemeToggle() {
             themeText.textContent = 'Темная тема';
         }
         
-        // Update chart if it exists
         updateChartTheme();
     }
 }
