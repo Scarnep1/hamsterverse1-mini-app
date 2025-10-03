@@ -880,4 +880,107 @@ img {
     -moz-user-drag: none;
     -o-user-drag: none;
     user-drag: none;
+}    
+
+/* API Status */
+.api-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ffa500;
+    animation: pulse 2s infinite;
+}
+
+.status-dot.connected {
+    background: #00c851;
+    animation: none;
+}
+
+.status-dot.error {
+    background: #ff4444;
+    animation: none;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.5; }
+    100% { opacity: 1; }
+}
+
+/* Market Stats */
+.market-stats {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.market-stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+}
+
+.stat-name {
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.stat-value {
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+/* Price Update Animation */
+.price-update {
+    animation: priceUpdate 0.5s ease;
+}
+
+@keyframes priceUpdate {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(0, 200, 81, 0.1); }
+    100% { background-color: transparent; }
+}
+
+.price-update.negative {
+    animation: priceUpdateNegative 0.5s ease;
+}
+
+@keyframes priceUpdateNegative {
+    0% { background-color: transparent; }
+    50% { background-color: rgba(255, 68, 68, 0.1); }
+    100% { background-color: transparent; }
+}
+
+/* Refresh Button */
+.refresh-button {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+}
+
+.refresh-button:hover {
+    background: var(--bg-secondary);
+    transform: translateY(-1px);
+}
+
+.refresh-button:active {
+    transform: translateY(0);
 }
