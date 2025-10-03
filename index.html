@@ -32,8 +32,8 @@
                 
                 <div class="games-grid">
                     <div class="game-card">
-                        <div class="game-image">
-                            <div class="game-avatar">🎮</div>
+                        <div class="game-image game-dev">
+                            <div class="game-icon">🎮</div>
                         </div>
                         <div class="game-info">
                             <div class="game-header">
@@ -48,8 +48,8 @@
                     </div>
 
                     <div class="game-card">
-                        <div class="game-image">
-                            <div class="game-avatar">👑</div>
+                        <div class="game-image game-king">
+                            <div class="game-icon">👑</div>
                         </div>
                         <div class="game-info">
                             <h3>Hamster King</h3>
@@ -61,8 +61,8 @@
                     </div>
 
                     <div class="game-card">
-                        <div class="game-image">
-                            <div class="game-avatar">🥊</div>
+                        <div class="game-image game-fight">
+                            <div class="game-icon">🥊</div>
                         </div>
                         <div class="game-info">
                             <h3>Hamster Fight Club</h3>
@@ -74,8 +74,8 @@
                     </div>
 
                     <div class="game-card">
-                        <div class="game-image">
-                            <div class="game-avatar">₿</div>
+                        <div class="game-image game-quest">
+                            <div class="game-icon">₿</div>
                         </div>
                         <div class="game-info">
                             <h3>BitQuest</h3>
@@ -111,7 +111,7 @@
                     <div class="price-header">
                         <div class="coin-info">
                             <div class="coin-logo">
-                                <div class="coin-avatar">🐹</div>
+                                <div class="coin-icon">🐹</div>
                             </div>
                             <div class="coin-details">
                                 <h3>HMSTR / USDT</h3>
@@ -151,8 +151,8 @@
                     <h3>Где купить HMSTR</h3>
                     <div class="exchanges-list">
                         <a href="https://www.mexc.com/exchange/HMSTR_USDT" class="exchange-card" target="_blank">
-                            <div class="exchange-logo">
-                                <div class="exchange-avatar">M</div>
+                            <div class="exchange-logo mexc">
+                                <div class="exchange-icon">M</div>
                             </div>
                             <div class="exchange-info">
                                 <h3>MEXC</h3>
@@ -162,8 +162,8 @@
                         </a>
 
                         <a href="https://binance.com" class="exchange-card" target="_blank">
-                            <div class="exchange-logo">
-                                <div class="exchange-avatar">B</div>
+                            <div class="exchange-logo binance">
+                                <div class="exchange-icon">B</div>
                             </div>
                             <div class="exchange-info">
                                 <h3>Binance</h3>
@@ -173,8 +173,8 @@
                         </a>
 
                         <a href="https://bybit.com" class="exchange-card" target="_blank">
-                            <div class="exchange-logo">
-                                <div class="exchange-avatar">B</div>
+                            <div class="exchange-logo bybit">
+                                <div class="exchange-icon">B</div>
                             </div>
                             <div class="exchange-info">
                                 <h3>Bybit</h3>
@@ -184,8 +184,8 @@
                         </a>
 
                         <a href="https://kucoin.com" class="exchange-card" target="_blank">
-                            <div class="exchange-logo">
-                                <div class="exchange-avatar">K</div>
+                            <div class="exchange-logo kucoin">
+                                <div class="exchange-icon">K</div>
                             </div>
                             <div class="exchange-info">
                                 <h3>KuCoin</h3>
@@ -196,14 +196,13 @@
                     </div>
                 </div>
 
-                <!-- Buy Guide Button -->
+                <!-- Buy Guide -->
                 <div class="guide-button-container">
                     <button class="guide-button" id="show-guide">
                         📖 Как купить HMSTR
                     </button>
                 </div>
 
-                <!-- Buy Guide (hidden by default) -->
                 <div class="buy-guide hidden" id="buy-guide">
                     <div class="guide-steps">
                         <div class="guide-step">
@@ -242,7 +241,9 @@
                 </div>
 
                 <div class="profile-header">
-                    <div class="profile-avatar" id="tg-avatar">H</div>
+                    <div class="profile-avatar" id="tg-avatar">
+                        <div class="avatar-icon">H</div>
+                    </div>
                     <div class="profile-info">
                         <h2 id="tg-name">Хомяк Пользователь</h2>
                         <p id="tg-username">@hamster_fan</p>
@@ -299,7 +300,7 @@
                 <span class="nav-label">HMSTR</span>
             </button>
             <button class="nav-item" data-section="profile-section">
-                <span class="nav-icon">👨‍💼</span>
+                <span class="nav-icon">👤</span>
                 <span class="nav-label">Профиль</span>
             </button>
         </nav>
