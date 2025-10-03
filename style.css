@@ -33,7 +33,7 @@ body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.5;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .app-container {
@@ -43,7 +43,6 @@ body {
     min-height: 100vh;
     position: relative;
     padding-bottom: 90px;
-    transition: background-color 0.3s ease;
 }
 
 /* Header */
@@ -119,7 +118,6 @@ body {
 
 .theme-icon {
     font-size: 16px;
-    transition: transform 0.3s ease;
 }
 
 /* Main Content */
@@ -133,6 +131,12 @@ body {
 
 .content-section.active {
     display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Section Headers */
@@ -215,10 +219,6 @@ body {
     transform: translateY(-1px);
 }
 
-.refresh-button:active {
-    transform: translateY(0);
-}
-
 .refresh-button.loading {
     animation: spin 1s linear infinite;
 }
@@ -256,17 +256,31 @@ body {
 .game-image {
     width: 50px;
     height: 50px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
     flex-shrink: 0;
-    position: relative;
 }
 
-.game-avatar {
+.game-dev {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.game-king {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.game-fight {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.game-quest {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.game-icon {
     font-size: 24px;
 }
 
@@ -356,10 +370,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-secondary);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
 }
 
-.coin-avatar {
+.coin-icon {
     font-size: 18px;
 }
 
@@ -404,6 +418,7 @@ body {
     height: 80px;
     position: relative;
     width: 100%;
+    margin: 10px 0;
 }
 
 /* Market Stats */
@@ -431,27 +446,6 @@ body {
 .stat-value {
     color: var(--text-primary);
     font-weight: 600;
-}
-
-/* Price Update Animation */
-.price-update {
-    animation: priceUpdate 0.5s ease;
-}
-
-@keyframes priceUpdate {
-    0% { background-color: transparent; }
-    50% { background-color: rgba(0, 200, 81, 0.1); }
-    100% { background-color: transparent; }
-}
-
-.price-update.negative {
-    animation: priceUpdateNegative 0.5s ease;
-}
-
-@keyframes priceUpdateNegative {
-    0% { background-color: transparent; }
-    50% { background-color: rgba(255, 68, 68, 0.1); }
-    100% { background-color: transparent; }
 }
 
 /* Exchanges Section */
@@ -501,12 +495,17 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: var(--bg-secondary);
+    font-weight: 600;
+    color: white;
 }
 
-.exchange-avatar {
+.mexc { background: linear-gradient(135deg, #00c851 0%, #007e33 100%); }
+.binance { background: linear-gradient(135deg, #f0b90b 0%, #f0b90b 100%); color: #000; }
+.bybit { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.kucoin { background: linear-gradient(135deg, #23c4d4 0%, #1b7d8b 100%); }
+
+.exchange-icon {
     font-size: 16px;
-    font-weight: 600;
 }
 
 .exchange-info {
@@ -624,10 +623,13 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+}
+
+.avatar-icon {
     font-size: 28px;
     font-weight: 700;
     color: white;
-    flex-shrink: 0;
 }
 
 .profile-info h2 {
@@ -881,7 +883,6 @@ body {
     letter-spacing: -0.2px;
 }
 
-/* Анимация при наведении */
 .nav-item:not(.active):hover {
     opacity: 0.9;
     background: rgba(102, 126, 234, 0.08);
@@ -979,31 +980,6 @@ body {
     }
 }
 
-/* Animations */
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.content-section.active {
-    animation: fadeIn 0.3s ease;
-}
-
 .hidden {
     display: none !important;
-}
-
-/* Prevent image drag */
-img {
-    -webkit-user-drag: none;
-    -khtml-user-drag: none;
-    -moz-user-drag: none;
-    -o-user-drag: none;
-    user-drag: none;
 }
