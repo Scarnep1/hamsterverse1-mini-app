@@ -190,10 +190,15 @@ function generatePriceHistory(currentPrice) {
     const prices = [];
     let price = currentPrice;
     
-    for (let i = 0; i < 7; i++) {
-        const change = (Math.random() - 0.5) * 0.008;
-        price = Math.max(currentPrice * 0.5, price * (1 + change));
-        prices.unshift(price); // Add to beginning to show history from past to present
+    // Generate 7 data points including current price
+    for (let i = 6; i >= 0; i--) {
+        if (i === 0) {
+            prices.push(currentPrice);
+        } else {
+            const change = (Math.random() - 0.5) * 0.008;
+            price = Math.max(currentPrice * 0.5, price * (1 + change));
+            prices.push(price);
+        }
     }
     
     return prices;
@@ -460,6 +465,7 @@ function setupThemeToggle() {
     const themeIcon = themeToggle.querySelector('.theme-icon');
     const themeText = themeToggle.querySelector('.theme-text');
     
+    // Load saved theme or default to light
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
     
