@@ -26,22 +26,18 @@ async function fetchPriceData() {
     try {
         updateApiStatus('loading', 'Загрузка данных...');
         
-        const [tickerResponse, klinesResponse] = await Promise.all([
-            fetch(`${MEXC_API_BASE}/api/v3/ticker/24hr?symbol=${HMSTR_SYMBOL}`),
-            fetch(`${MEXC_API_BASE}/api/v3/klines?symbol=${HMSTR_SYMBOL}&interval=1d&limit=7`)
-        ]);
-
-        if (!tickerResponse.ok || !klinesResponse.ok) {
+        const response = await fetch(`${MEXC_API_BASE}/api/v3/ticker/24hr?symbol=${HMSTR_SYMBOL}`);
+        
+        if (!response.ok) {
             throw new Error('API request failed');
         }
 
-        const tickerData = await tickerResponse.json();
-        const klinesData = await klinesResponse.json();
-
+        const tickerData = await response.json();
+        
         updateApiStatus('connected', 'Данные обновлены');
         updatePriceDisplay(tickerData);
         updateMarketStats(tickerData);
-        createPriceChart(klinesData);
+        createPriceChart(tickerData);
         
         return true;
     } catch (error) {
@@ -49,9 +45,7 @@ async function fetchPriceData() {
         updateApiStatus('error', 'Ошибка загрузки данных');
         
         // Fallback to mock data
-        setTimeout(() => {
-            useMockData();
-        }, 2000);
+        useMockData();
         
         return false;
     }
@@ -62,12 +56,11 @@ function updatePriceDisplay(tickerData) {
     const changeElement = document.getElementById('hmstr-change');
     
     const currentPrice = parseFloat(tickerData.lastPrice);
-    const priceChange = parseFloat(tickerData.priceChange);
     const priceChangePercent = parseFloat(tickerData.priceChangePercent);
     
     const previousPrice = parseFloat(priceElement.textContent.replace('$', '')) || currentPrice;
     
-    priceElement.textContent = `$${currentPrice.toFixed(4)}`;
+    priceElement.textContent = `$${currentPrice.toFixed(6)}`;
     changeElement.textContent = `${priceChangePercent >= 0 ? '+' : ''}${priceChangePercent.toFixed(2)}%`;
     
     // Add update animation
@@ -88,8 +81,8 @@ function updatePriceDisplay(tickerData) {
 
 function updateMarketStats(tickerData) {
     document.getElementById('volume-24h').textContent = `$${formatVolume(parseFloat(tickerData.volume))}`;
-    document.getElementById('high-24h').textContent = `$${parseFloat(tickerData.highPrice).toFixed(4)}`;
-    document.getElementById('low-24h').textContent = `$${parseFloat(tickerData.lowPrice).toFixed(4)}`;
+    document.getElementById('high-24h').textContent = `$${parseFloat(tickerData.highPrice).toFixed(6)}`;
+    document.getElementById('low-24h').textContent = `$${parseFloat(tickerData.lowPrice).toFixed(6)}`;
 }
 
 function formatVolume(volume) {
@@ -116,19 +109,27 @@ function updateApiStatus(status, message) {
     textElement.textContent = message;
 }
 
-function createPriceChart(klinesData) {
+function createPriceChart(tickerData) {
     const ctx = document.getElementById('priceChart').getContext('2d');
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
-    const prices = klinesData.map(kline => parseFloat(kline[4])); // Close prices
-    const labels = generateChartLabels(klinesData.length);
+    // Generate mock price history based on current price
+    const currentPrice = parseFloat(tickerData.lastPrice);
+    const prices = generatePriceHistory(currentPrice);
+    const labels = generateChartLabels(prices.length);
     
     // Determine trend for color
     const firstPrice = prices[0];
     const lastPrice = prices[prices.length - 1];
     const isPositive = lastPrice >= firstPrice;
     
-    const chart = new Chart(ctx, {
+    // Destroy existing chart if it exists
+    const existingChart = Chart.getChart(ctx);
+    if (existingChart) {
+        existingChart.destroy();
+    }
+    
+    new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
@@ -159,7 +160,7 @@ function createPriceChart(klinesData) {
                     titleColor: isDark ? '#ffffff' : '#1a1a1a',
                     callbacks: {
                         label: function(context) {
-                            return `$${context.parsed.y.toFixed(4)}`;
+                            return `$${context.parsed.y.toFixed(6)}`;
                         }
                     }
                 }
@@ -183,8 +184,19 @@ function createPriceChart(klinesData) {
             }
         }
     });
+}
+
+function generatePriceHistory(currentPrice) {
+    const prices = [];
+    let price = currentPrice;
     
-    return chart;
+    for (let i = 0; i < 7; i++) {
+        const change = (Math.random() - 0.5) * 0.008;
+        price = Math.max(currentPrice * 0.5, price * (1 + change));
+        prices.unshift(price); // Add to beginning to show history from past to present
+    }
+    
+    return prices;
 }
 
 function generateChartLabels(count) {
@@ -214,16 +226,7 @@ function useMockData() {
     updatePriceDisplay(mockTicker);
     updateMarketStats(mockTicker);
     updateApiStatus('connected', 'Данные (тестовые)');
-    
-    // Create mock chart data
-    const mockKlines = [];
-    let basePrice = 0.01;
-    for (let i = 0; i < 7; i++) {
-        const change = (Math.random() - 0.5) * 0.008;
-        basePrice = Math.max(0.005, basePrice * (1 + change));
-        mockKlines.push([0, 0, 0, 0, basePrice]);
-    }
-    createPriceChart(mockKlines);
+    createPriceChart(mockTicker);
 }
 
 function startRealTimeUpdates() {
@@ -235,35 +238,27 @@ function startRealTimeUpdates() {
         fetchPriceData();
     }, 30000);
     
-    // Add manual refresh button
-    addRefreshButton();
+    // Setup refresh button
+    setupRefreshButton();
 }
 
-function addRefreshButton() {
-    const sectionHeader = document.querySelector('#hmstr-section .section-header');
-    const refreshButton = document.createElement('button');
-    refreshButton.className = 'refresh-button';
-    refreshButton.innerHTML = '🔄 Обновить';
-    refreshButton.onclick = () => {
-        refreshButton.style.transform = 'rotate(180deg)';
-        setTimeout(() => {
-            refreshButton.style.transform = 'rotate(0deg)';
-        }, 300);
-        fetchPriceData();
-    };
+function setupRefreshButton() {
+    const refreshButton = document.getElementById('refresh-data');
     
-    sectionHeader.style.display = 'flex';
-    sectionHeader.style.justifyContent = 'space-between';
-    sectionHeader.style.alignItems = 'flex-start';
-    
-    const headerContent = document.createElement('div');
-    headerContent.innerHTML = sectionHeader.innerHTML;
-    sectionHeader.innerHTML = '';
-    sectionHeader.appendChild(headerContent);
-    sectionHeader.appendChild(refreshButton);
+    refreshButton.addEventListener('click', function() {
+        // Add loading animation
+        this.classList.add('loading');
+        
+        fetchPriceData().finally(() => {
+            // Remove loading animation after a delay
+            setTimeout(() => {
+                this.classList.remove('loading');
+            }, 1000);
+        });
+    });
 }
 
-// Остальные функции остаются без изменений
+// Navigation and UI Functions
 function setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.content-section');
