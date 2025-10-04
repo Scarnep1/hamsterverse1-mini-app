@@ -33,7 +33,7 @@ body {
     background-color: var(--bg-primary);
     color: var(--text-primary);
     line-height: 1.5;
-    transition: all 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .app-container {
@@ -43,6 +43,7 @@ body {
     min-height: 100vh;
     position: relative;
     padding-bottom: 90px;
+    transition: background-color 0.3s ease;
 }
 
 /* Header */
@@ -118,6 +119,7 @@ body {
 
 .theme-icon {
     font-size: 16px;
+    transition: transform 0.3s ease;
 }
 
 /* Main Content */
@@ -131,24 +133,11 @@ body {
 
 .content-section.active {
     display: block;
-    animation: fadeIn 0.3s ease;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
 }
 
 /* Section Headers */
 .section-header {
     margin-bottom: 20px;
-}
-
-.section-header-content {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    gap: 10px;
 }
 
 .section-header h2 {
@@ -161,71 +150,6 @@ body {
     color: var(--text-secondary);
     font-size: 13px;
     font-weight: 500;
-}
-
-/* API Status */
-.api-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 8px;
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.status-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #ffa500;
-    animation: pulse 2s infinite;
-}
-
-.status-dot.connected {
-    background: #00c851;
-    animation: none;
-}
-
-.status-dot.error {
-    background: #ff4444;
-    animation: none;
-}
-
-@keyframes pulse {
-    0% { opacity: 1; }
-    50% { opacity: 0.5; }
-    100% { opacity: 1; }
-}
-
-/* Refresh Button */
-.refresh-button {
-    background: var(--bg-card);
-    border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 8px;
-    font-size: 16px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: var(--text-primary);
-    min-width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.refresh-button:hover {
-    background: var(--bg-secondary);
-    transform: translateY(-1px);
-}
-
-.refresh-button.loading {
-    animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 /* Games Grid */
@@ -256,32 +180,22 @@ body {
 .game-image {
     width: 50px;
     height: 50px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 20px;
+    overflow: hidden;
     flex-shrink: 0;
+    position: relative;
 }
 
-.game-dev {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.game-king {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.game-fight {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.game-quest {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.game-icon {
-    font-size: 24px;
+.game-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 12px;
 }
 
 .game-info {
@@ -370,11 +284,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: var(--bg-secondary);
 }
 
-.coin-icon {
-    font-size: 18px;
+.coin-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
 }
 
 .coin-details h3 {
@@ -417,35 +334,6 @@ body {
 .chart-container {
     height: 80px;
     position: relative;
-    width: 100%;
-    margin: 10px 0;
-}
-
-/* Market Stats */
-.market-stats {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 8px;
-    margin-top: 16px;
-    padding-top: 16px;
-    border-top: 1px solid var(--border-color);
-}
-
-.market-stat {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 12px;
-}
-
-.stat-name {
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.stat-value {
-    color: var(--text-primary);
-    font-weight: 600;
 }
 
 /* Exchanges Section */
@@ -495,17 +383,14 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-weight: 600;
-    color: white;
+    background: var(--bg-secondary);
 }
 
-.mexc { background: linear-gradient(135deg, #00c851 0%, #007e33 100%); }
-.binance { background: linear-gradient(135deg, #f0b90b 0%, #f0b90b 100%); color: #000; }
-.bybit { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.kucoin { background: linear-gradient(135deg, #23c4d4 0%, #1b7d8b 100%); }
-
-.exchange-icon {
-    font-size: 16px;
+.exchange-avatar {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 10px;
 }
 
 .exchange-info {
@@ -623,13 +508,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    flex-shrink: 0;
-}
-
-.avatar-icon {
     font-size: 28px;
     font-weight: 700;
     color: white;
+    flex-shrink: 0;
 }
 
 .profile-info h2 {
@@ -783,7 +665,6 @@ body {
     background: var(--bg-secondary);
     font-size: 12px;
     color: var(--text-primary);
-    border: none;
 }
 
 #copy-btn {
@@ -883,6 +764,7 @@ body {
     letter-spacing: -0.2px;
 }
 
+/* Анимация при наведении */
 .nav-item:not(.active):hover {
     opacity: 0.9;
     background: rgba(102, 126, 234, 0.08);
@@ -969,17 +851,33 @@ body {
         padding: 8px 14px;
         font-size: 13px;
     }
-    
-    .section-header-content {
-        flex-direction: column;
-        gap: 12px;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
     }
-    
-    .refresh-button {
-        align-self: flex-start;
+    to {
+        opacity: 1;
+        transform: translateY(0);
     }
+}
+
+.content-section.active {
+    animation: fadeIn 0.3s ease;
 }
 
 .hidden {
     display: none !important;
+}
+
+/* Prevent image drag */
+img {
+    -webkit-user-drag: none;
+    -khtml-user-drag: none;
+    -moz-user-drag: none;
+    -o-user-drag: none;
+    user-drag: none;
 }
