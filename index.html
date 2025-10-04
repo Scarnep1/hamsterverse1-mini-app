@@ -32,8 +32,8 @@
                 
                 <div class="games-grid">
                     <div class="game-card">
-                        <div class="game-image game-dev">
-                            <div class="game-icon">🎮</div>
+                        <div class="game-image">
+                            <img src="images/hamster-gamedev.jpg" alt="Hamster GameDev" class="game-avatar">
                         </div>
                         <div class="game-info">
                             <div class="game-header">
@@ -48,8 +48,8 @@
                     </div>
 
                     <div class="game-card">
-                        <div class="game-image game-king">
-                            <div class="game-icon">👑</div>
+                        <div class="game-image">
+                            <img src="images/hamster-king.jpg" alt="Hamster King" class="game-avatar">
                         </div>
                         <div class="game-info">
                             <h3>Hamster King</h3>
@@ -61,8 +61,8 @@
                     </div>
 
                     <div class="game-card">
-                        <div class="game-image game-fight">
-                            <div class="game-icon">🥊</div>
+                        <div class="game-image">
+                            <img src="images/hamstr-fight-club.jpg" alt="Hamster Fight Club" class="game-avatar">
                         </div>
                         <div class="game-info">
                             <h3>Hamster Fight Club</h3>
@@ -74,8 +74,8 @@
                     </div>
 
                     <div class="game-card">
-                        <div class="game-image game-quest">
-                            <div class="game-icon">₿</div>
+                        <div class="game-image">
+                            <img src="images/bitquest.jpg" alt="BitQuest" class="game-avatar">
                         </div>
                         <div class="game-info">
                             <h3>BitQuest</h3>
@@ -91,19 +91,8 @@
             <!-- HMSTR Section -->
             <section id="hmstr-section" class="content-section">
                 <div class="section-header">
-                    <div class="section-header-content">
-                        <div>
-                            <h2>HMSTR</h2>
-                            <span class="section-subtitle">Токен Хамстер Комбат</span>
-                            <div class="api-status" id="api-status">
-                                <span class="status-dot"></span>
-                                <span class="status-text">Загрузка данных...</span>
-                            </div>
-                        </div>
-                        <button class="refresh-button" id="refresh-data">
-                            <span class="refresh-icon">🔄</span>
-                        </button>
-                    </div>
+                    <h2>HMSTR</h2>
+                    <span class="section-subtitle">Токен Хамстер Комбат</span>
                 </div>
                 
                 <!-- Price Card -->
@@ -111,7 +100,7 @@
                     <div class="price-header">
                         <div class="coin-info">
                             <div class="coin-logo">
-                                <div class="coin-icon">🐹</div>
+                                <img src="images/hmstr-token.png" alt="HMSTR" class="coin-avatar">
                             </div>
                             <div class="coin-details">
                                 <h3>HMSTR / USDT</h3>
@@ -120,7 +109,7 @@
                         </div>
                         <div class="current-price">
                             <span class="price" id="hmstr-price">$0.0100</span>
-                            <span class="change" id="hmstr-change">+5.2%</span>
+                            <span class="change positive" id="hmstr-change">+5.2%</span>
                         </div>
                     </div>
                     
@@ -128,42 +117,15 @@
                     <div class="chart-container">
                         <canvas id="priceChart"></canvas>
                     </div>
-
-                    <!-- Market Stats -->
-                    <div class="market-stats">
-                        <div class="market-stat">
-                            <span class="stat-name">24h Объем:</span>
-                            <span class="stat-value" id="volume-24h">-</span>
-                        </div>
-                        <div class="market-stat">
-                            <span class="stat-name">24h High:</span>
-                            <span class="stat-value" id="high-24h">-</span>
-                        </div>
-                        <div class="market-stat">
-                            <span class="stat-name">24h Low:</span>
-                            <span class="stat-value" id="low-24h">-</span>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- Exchanges List -->
                 <div class="exchanges-section">
                     <h3>Где купить HMSTR</h3>
                     <div class="exchanges-list">
-                        <a href="https://www.mexc.com/exchange/HMSTR_USDT" class="exchange-card" target="_blank">
-                            <div class="exchange-logo mexc">
-                                <div class="exchange-icon">M</div>
-                            </div>
-                            <div class="exchange-info">
-                                <h3>MEXC</h3>
-                                <p>Официальная биржа</p>
-                            </div>
-                            <div class="exchange-arrow">→</div>
-                        </a>
-
                         <a href="https://binance.com" class="exchange-card" target="_blank">
-                            <div class="exchange-logo binance">
-                                <div class="exchange-icon">B</div>
+                            <div class="exchange-logo">
+                                <img src="images/binance.png" alt="Binance" class="exchange-avatar">
                             </div>
                             <div class="exchange-info">
                                 <h3>Binance</h3>
@@ -173,8 +135,8 @@
                         </a>
 
                         <a href="https://bybit.com" class="exchange-card" target="_blank">
-                            <div class="exchange-logo bybit">
-                                <div class="exchange-icon">B</div>
+                            <div class="exchange-logo">
+                                <img src="images/bybit.jpg" alt="Bybit" class="exchange-avatar">
                             </div>
                             <div class="exchange-info">
                                 <h3>Bybit</h3>
@@ -183,9 +145,20 @@
                             <div class="exchange-arrow">→</div>
                         </a>
 
+                        <a href="https://okx.com" class="exchange-card" target="_blank">
+                            <div class="exchange-logo">
+                                <img src="images/okx.jpg" alt="OKX" class="exchange-avatar">
+                            </div>
+                            <div class="exchange-info">
+                                <h3>OKX</h3>
+                                <p>Много пар</p>
+                            </div>
+                            <div class="exchange-arrow">→</div>
+                        </a>
+
                         <a href="https://kucoin.com" class="exchange-card" target="_blank">
-                            <div class="exchange-logo kucoin">
-                                <div class="exchange-icon">K</div>
+                            <div class="exchange-logo">
+                                <img src="images/kucoin.png" alt="KuCoin" class="exchange-avatar">
                             </div>
                             <div class="exchange-info">
                                 <h3>KuCoin</h3>
@@ -196,34 +169,35 @@
                     </div>
                 </div>
 
-                <!-- Buy Guide -->
+                <!-- Buy Guide Button -->
                 <div class="guide-button-container">
                     <button class="guide-button" id="show-guide">
                         📖 Как купить HMSTR
                     </button>
                 </div>
 
+                <!-- Buy Guide (hidden by default) -->
                 <div class="buy-guide hidden" id="buy-guide">
                     <div class="guide-steps">
                         <div class="guide-step">
                             <span class="step-number">1</span>
                             <div class="step-content">
-                                <strong>Зарегистрируйтесь на MEXC</strong>
-                                <p>Создайте аккаунт на бирже MEXC и пройдите верификацию</p>
+                                <strong>Выберите биржу</strong>
+                                <p>Зарегистрируйтесь на Binance, Bybit или другой бирже</p>
                             </div>
                         </div>
                         <div class="guide-step">
                             <span class="step-number">2</span>
                             <div class="step-content">
-                                <strong>Пополните баланс USDT</strong>
-                                <p>Внесите USDT на биржу через карту или P2P</p>
+                                <strong>Пополните баланс</strong>
+                                <p>Внесите USDT на биржу</p>
                             </div>
                         </div>
                         <div class="guide-step">
                             <span class="step-number">3</span>
                             <div class="step-content">
                                 <strong>Купите HMSTR</strong>
-                                <p>Найдите пару HMSTR/USDT и совершите покупку</p>
+                                <p>Найдите пару HMSTR/USDT и купите</p>
                             </div>
                         </div>
                     </div>
@@ -241,9 +215,7 @@
                 </div>
 
                 <div class="profile-header">
-                    <div class="profile-avatar" id="tg-avatar">
-                        <div class="avatar-icon">H</div>
-                    </div>
+                    <div class="profile-avatar" id="tg-avatar">H</div>
                     <div class="profile-info">
                         <h2 id="tg-name">Хомяк Пользователь</h2>
                         <p id="tg-username">@hamster_fan</p>
@@ -300,7 +272,7 @@
                 <span class="nav-label">HMSTR</span>
             </button>
             <button class="nav-item" data-section="profile-section">
-                <span class="nav-icon">👤</span>
+                <span class="nav-icon">👨‍💼</span>
                 <span class="nav-label">Профиль</span>
             </button>
         </nav>
