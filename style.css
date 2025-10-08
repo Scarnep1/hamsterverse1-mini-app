@@ -582,7 +582,7 @@ body {
     margin-bottom: 6px;
 }
 
-/* Bottom Navigation - Improved */
+/* Bottom Navigation - Minimal Style */
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -591,7 +591,7 @@ body {
     background: var(--bg-card);
     display: flex;
     justify-content: space-around;
-    padding: 12px 0 16px;
+    padding: 16px 0 20px;
     border-top: 1px solid var(--border-color);
     backdrop-filter: blur(20px);
     max-width: 400px;
@@ -606,38 +606,39 @@ body {
     gap: 6px;
     background: none;
     border: none;
-    padding: 8px 12px;
+    padding: 8px 16px;
     border-radius: 16px;
     cursor: pointer;
     transition: all 0.3s ease;
-    opacity: 0.6;
+    opacity: 0.7;
     position: relative;
-    min-width: 60px;
+    min-width: 70px;
     flex: 1;
     margin: 0 4px;
 }
 
 .nav-item.active {
     opacity: 1;
-    background: var(--bg-secondary);
-    transform: translateY(-2px);
+    transform: translateY(-4px) scale(1.1);
 }
 
 .nav-item.active .nav-icon {
-    transform: scale(1.15);
+    transform: scale(1.2);
     background: var(--accent-gradient);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    filter: drop-shadow(0 2px 4px rgba(102, 126, 234, 0.3));
 }
 
 .nav-item.active .nav-label {
     color: var(--text-primary);
     font-weight: 600;
+    transform: scale(1.05);
 }
 
 .nav-icon {
-    font-size: 22px;
+    font-size: 24px;
     transition: all 0.3s ease;
     display: block;
 }
@@ -649,37 +650,27 @@ body {
     color: var(--text-secondary);
 }
 
-/* Активный индикатор - упрощенный */
+/* Активный индикатор - тонкая линия */
 .nav-active-indicator {
     position: absolute;
-    top: -6px;
-    width: 4px;
-    height: 4px;
+    top: -8px;
+    width: 20px;
+    height: 3px;
     background: var(--accent-gradient);
-    border-radius: 50%;
+    border-radius: 2px;
     opacity: 0;
     transition: all 0.3s ease;
 }
 
 .nav-item.active .nav-active-indicator {
     opacity: 1;
-    transform: scale(1.2);
+    transform: scaleX(1.2);
 }
 
 /* Анимация при наведении */
 .nav-item:not(.active):hover {
-    opacity: 0.8;
-    background: var(--bg-secondary);
+    opacity: 0.9;
     transform: translateY(-1px);
-}
-
-/* Для темной темы - дополнительные улучшения */
-[data-theme="dark"] .nav-item.active {
-    background: rgba(255, 255, 255, 0.1);
-}
-
-[data-theme="dark"] .nav-item:not(.active):hover {
-    background: rgba(255, 255, 255, 0.05);
 }
 
 /* Responsive */
@@ -715,16 +706,16 @@ body {
     }
     
     .bottom-nav {
-        padding: 10px 0 14px;
+        padding: 14px 0 18px;
     }
     
     .nav-item {
-        padding: 6px 10px;
-        min-width: 55px;
+        padding: 6px 12px;
+        min-width: 65px;
     }
     
     .nav-icon {
-        font-size: 20px;
+        font-size: 22px;
     }
     
     .nav-label {
