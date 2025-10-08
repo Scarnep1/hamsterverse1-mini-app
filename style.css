@@ -265,44 +265,45 @@ body {
 .price-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
+    align-items: flex-start;
+    margin-bottom: 10px;
 }
 
 .coin-info {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 12px;
 }
 
 .coin-logo {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
     overflow: hidden;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
 }
 
 .coin-avatar {
     width: 100%;
     height: 100%;
-    object-fit: contain;
-    border-radius: 10px;
+    object-fit: cover;
+    border-radius: 12px;
 }
 
 .coin-details h3 {
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
-    margin-bottom: 2px;
+    margin-bottom: 4px;
     color: var(--text-primary);
 }
 
 .coin-details p {
-    font-size: 11px;
+    font-size: 13px;
     color: var(--text-secondary);
 }
 
@@ -311,29 +312,39 @@ body {
 }
 
 .price {
-    font-size: 20px;
+    font-size: 26px;
     font-weight: 700;
     display: block;
     color: var(--text-primary);
+    font-family: 'Inter', monospace;
+    letter-spacing: -0.5px;
+    margin-bottom: 4px;
 }
 
 .change {
-    font-size: 13px;
+    font-size: 15px;
     font-weight: 600;
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
 }
 
 .change.positive {
-    color: #00c851;
+    background: rgba(0, 200, 81, 0.1);
+    color: #00C851;
 }
 
 .change.negative {
-    color: #ff4444;
+    background: rgba(255, 68, 68, 0.1);
+    color: #FF4444;
 }
 
 /* Chart */
 .chart-container {
     height: 80px;
     position: relative;
+    margin: 15px 0 5px 0;
 }
 
 /* Exchanges Section */
@@ -851,6 +862,28 @@ body {
         padding: 8px 14px;
         font-size: 13px;
     }
+    
+    .price {
+        font-size: 22px;
+    }
+    
+    .change {
+        font-size: 13px;
+        padding: 4px 8px;
+    }
+    
+    .coin-logo {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .chart-container {
+        height: 70px;
+    }
+    
+    .coin-details h3 {
+        font-size: 16px;
+    }
 }
 
 /* Animations */
@@ -880,113 +913,4 @@ img {
     -moz-user-drag: none;
     -o-user-drag: none;
     user-drag: none;
-}
-
-/* Профессиональный график как в TON */
-.chart-container {
-    height: 80px;
-    position: relative;
-    margin: 10px 0;
-}
-
-/* Стили для цены как в TON */
-.current-price {
-    text-align: left;
-    margin-bottom: 8px;
-}
-
-.price {
-    font-size: 24px;
-    font-weight: 700;
-    display: block;
-    color: var(--text-primary);
-    font-family: 'Inter', monospace;
-    letter-spacing: -0.5px;
-}
-
-.change {
-    font-size: 14px;
-    font-weight: 600;
-    margin-top: 4px;
-    display: inline-block;
-    padding: 4px 8px;
-    border-radius: 6px;
-    font-family: 'Inter', sans-serif;
-}
-
-.change.positive {
-    background: rgba(0, 200, 83, 0.1);
-    color: #00c853;
-}
-
-.change.negative {
-    background: rgba(255, 68, 68, 0.1);
-    color: #ff4444;
-}
-
-/* Улучшенный header для цены */
-.price-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 5px;
-}
-
-.coin-info {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.coin-logo {
-    width: 40px;
-    height: 40px;
-    border-radius: 12px;
-    overflow: hidden;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
-}
-
-.coin-avatar {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border-radius: 12px;
-}
-
-.coin-details h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 2px;
-    color: var(--text-primary);
-}
-
-.coin-details p {
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-/* Адаптация для мобильных */
-@media (max-width: 480px) {
-    .price {
-        font-size: 22px;
-    }
-    
-    .change {
-        font-size: 13px;
-        padding: 3px 6px;
-    }
-    
-    .coin-logo {
-        width: 36px;
-        height: 36px;
-    }
-    
-    .chart-container {
-        height: 70px;
-    }
 }
