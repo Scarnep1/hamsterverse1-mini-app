@@ -8,10 +8,10 @@ function initializeApp() {
     setupReferralLink();
     setupPlayButtons();
     setupTelegramIntegration();
-    setupPriceData();
+    setupRealPriceData(); // ИЗМЕНЕНО: теперь используем реальные данные
     setupDailyBonus();
     setupGuideButton();
-    setupThemeToggle(); // Добавь эту строку
+    setupThemeToggle();
 }
 
 function setupNavigation() {
@@ -132,11 +132,82 @@ function setupTelegramIntegration() {
     }
 }
 
-function setupPriceData() {
+// НОВАЯ ФУНКЦИЯ: Получение реальной цены HMSTR
+async function setupRealPriceData() {
     const priceElement = document.getElementById('hmstr-price');
     const changeElement = document.getElementById('hmstr-change');
     
-    const basePrice = 0.01;
+    try {
+        // Пробуем разные биржи, где торгуется HMSTR
+        const exchanges = [
+            'https://api.binance.com/api/v3/ticker/price?symbol=HMSTRUSDT',
+            'https://api.mexc.com/api/v3/ticker/price?symbol=HMSTRUSDT',
+            'https://api.gate.io/api2/1/ticker/hmstr_usdt'
+        ];
+        
+        let price = null;
+        let change24h = null;
+        
+        // Пробуем получить данные с Binance
+        try {
+            const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=HMSTRUSDT');
+            if (response.ok) {
+                const data = await response.json();
+                price = parseFloat(data.lastPrice);
+                change24h = parseFloat(data.priceChangePercent);
+            }
+        } catch (error) {
+            console.log('Binance API недоступен, пробуем другие биржи...');
+        }
+        
+        // Если Binance не сработал, пробуем MEXC
+        if (!price) {
+            try {
+                const response = await fetch('https://api.mexc.com/api/v3/ticker/24hr?symbol=HMSTRUSDT');
+                if (response.ok) {
+                    const data = await response.json();
+                    price = parseFloat(data.lastPrice);
+                    change24h = parseFloat(data.priceChange);
+                }
+            } catch (error) {
+                console.log('MEXC API недоступен...');
+            }
+        }
+        
+        // Если API не работают, используем fallback данные
+        if (!price) {
+            price = 0.0101;
+            change24h = 0.65;
+            console.log('Используются fallback данные');
+        }
+        
+        // Обновляем интерфейс
+        priceElement.textContent = `$${price.toFixed(4)}`;
+        changeElement.textContent = `${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%`;
+        
+        if (change24h >= 0) {
+            changeElement.className = 'change positive';
+        } else {
+            changeElement.className = 'change negative';
+        }
+        
+        createPriceChart(price, change24h);
+        
+        // Обновляем цену каждые 30 секунд
+        setInterval(updatePrice, 30000);
+        
+    } catch (error) {
+        console.error('Ошибка при получении данных:', error);
+        // Fallback на случай ошибки
+        setupFallbackPrice();
+    }
+}
+
+function setupFallbackPrice() {
+    const priceElement = document.getElementById('hmstr-price');
+    const changeElement = document.getElementById('hmstr-change');
+    
+    const basePrice = 0.0101;
     const randomChange = (Math.random() - 0.5) * 0.02;
     const currentPrice = basePrice * (1 + randomChange);
     const changePercent = (randomChange * 100).toFixed(2);
@@ -150,21 +221,50 @@ function setupPriceData() {
         changeElement.className = 'change negative';
     }
     
-    createPriceChart();
+    createPriceChart(currentPrice, parseFloat(changePercent));
 }
 
-function createPriceChart() {
+async function updatePrice() {
+    try {
+        const response = await fetch('https://api.binance.com/api/v3/ticker/24hr?symbol=HMSTRUSDT');
+        if (response.ok) {
+            const data = await response.json();
+            const price = parseFloat(data.lastPrice);
+            const change24h = parseFloat(data.priceChangePercent);
+            
+            const priceElement = document.getElementById('hmstr-price');
+            const changeElement = document.getElementById('hmstr-change');
+            
+            priceElement.textContent = `$${price.toFixed(4)}`;
+            changeElement.textContent = `${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%`;
+            
+            if (change24h >= 0) {
+                changeElement.className = 'change positive';
+            } else {
+                changeElement.className = 'change negative';
+            }
+        }
+    } catch (error) {
+        console.log('Ошибка при обновлении цены:', error);
+    }
+}
+
+function createPriceChart(currentPrice, changePercent) {
     const ctx = document.getElementById('priceChart').getContext('2d');
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
+    // Создаем реалистичные данные на основе текущей цены и изменения
     const prices = [];
-    let currentPrice = 0.01;
+    let price = currentPrice / (1 + changePercent / 100); // Начинаем с цены 24 часа назад
     
     for (let i = 0; i < 7; i++) {
         const change = (Math.random() - 0.5) * 0.008;
-        currentPrice = Math.max(0.005, currentPrice * (1 + change));
-        prices.push(currentPrice);
+        price = Math.max(0.005, price * (1 + change));
+        prices.push(price);
     }
+    
+    // Добавляем текущую цену
+    prices.push(currentPrice);
     
     new Chart(ctx, {
         type: 'line',
@@ -172,12 +272,12 @@ function createPriceChart() {
             labels: ['6d', '5d', '4d', '3d', '2d', '1d', 'Now'],
             datasets: [{
                 data: prices,
-                borderColor: '#667eea',
-                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                borderColor: changePercent >= 0 ? '#00c851' : '#ff4444',
+                backgroundColor: changePercent >= 0 ? 'rgba(0, 200, 81, 0.1)' : 'rgba(255, 68, 68, 0.1)',
                 borderWidth: 2,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: '#667eea',
+                pointBackgroundColor: changePercent >= 0 ? '#00c851' : '#ff4444',
                 pointBorderColor: isDark ? '#2d2d2d' : '#ffffff',
                 pointBorderWidth: 2,
                 pointRadius: 2
@@ -305,7 +405,6 @@ function setupGuideButton() {
     }
 }
 
-// НОВАЯ ФУНКЦИЯ ДЛЯ ПЕРЕКЛЮЧЕНИЯ ТЕМЫ
 function setupThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = themeToggle.querySelector('.theme-icon');
