@@ -104,15 +104,15 @@ function setupTelegramIntegration() {
 let currentChart = null;
 let priceUpdateInterval = null;
 let currentPriceData = {
-    current: 0.0006099,
-    change24h: -3.7
+    current: 0,
+    change24h: 0
 };
 
-// Основные адреса пар HMSTR для получения данных
-const HMSTR_PAIRS = [
-    'ton/hmstr_usdt', // Основная пара на TON
-    'bsc/0x96371b5905d34e465beacdcf679dcaf235e0ea19', // Резервный адрес
-];
+// MEXC API endpoints
+const MEXC_API = {
+    TICKER: 'https://api.mexc.com/api/v3/ticker/24hr?symbol=HMSTRUSDT',
+    KLINES: 'https://api.mexc.com/api/v3/klines'
+};
 
 function setupTimePeriodSelector() {
     const timeButtons = document.querySelectorAll('.time-btn');
@@ -129,18 +129,20 @@ function setupTimePeriodSelector() {
 }
 
 async function setupPriceData() {
-    await fetchRealPriceData();
-    updateChartForPeriod('1D');
-    
-    // Обновляем данные каждые 30 секунд
-    priceUpdateInterval = setInterval(fetchRealPriceData, 30000);
+    const success = await fetchRealPriceData();
+    if (success) {
+        updateChartForPeriod('1D');
+        
+        // Обновляем данные каждые 10 секунд
+        priceUpdateInterval = setInterval(fetchRealPriceData, 10000);
+    }
 }
 
 async function fetchRealPriceData() {
     showLoading(true);
     
     try {
-        const priceData = await fetchHMSTRPrice();
+        const priceData = await fetchMEXCPrice();
         
         if (priceData && priceData.current) {
             updatePriceDisplay(priceData.current, priceData.change24h);
@@ -149,7 +151,7 @@ async function fetchRealPriceData() {
             showLoading(false);
             return true;
         } else {
-            throw new Error('No price data received');
+            throw new Error('No price data received from MEXC');
         }
     } catch (error) {
         console.error('Error fetching price data:', error);
@@ -158,104 +160,36 @@ async function fetchRealPriceData() {
     }
 }
 
-async function fetchHMSTRPrice() {
-    // Пробуем разные методы получения данных
-    const methods = [
-        fetchDexScreenerData,
-        fetchGeckoterminalData,
-        fetchCoinGeckoData
-    ];
-    
-    for (let method of methods) {
-        try {
-            const data = await method();
-            if (data && data.current) {
-                console.log(`Price data from ${method.name}:`, data);
-                return data;
-            }
-        } catch (error) {
-            console.log(`${method.name} failed:`, error);
-            continue;
-        }
-    }
-    
-    return null;
-}
-
-async function fetchDexScreenerData() {
+async function fetchMEXCPrice() {
     try {
-        // Пробуем найти HMSTR через поиск
-        const searchResponse = await fetch('https://api.dexscreener.com/latest/dex/search?q=HMSTR');
-        if (!searchResponse.ok) throw new Error('Search failed');
+        const response = await fetch(MEXC_API.TICKER);
+        if (!response.ok) throw new Error(`MEXC API error: ${response.status}`);
         
-        const searchData = await searchResponse.json();
+        const data = await response.json();
         
-        if (searchData.pairs && searchData.pairs.length > 0) {
-            // Ищем пару с наибольшей ликвидностью
-            const hmstrPairs = searchData.pairs.filter(pair => 
-                pair.baseToken && 
-                pair.baseToken.symbol.toUpperCase() === 'HMSTR'
-            );
-            
-            if (hmstrPairs.length > 0) {
-                // Сортируем по ликвидности и берем самую ликвидную пару
-                hmstrPairs.sort((a, b) => (b.liquidity?.usd || 0) - (a.liquidity?.usd || 0));
-                const bestPair = hmstrPairs[0];
-                
-                return {
-                    current: parseFloat(bestPair.priceUsd),
-                    change24h: parseFloat(bestPair.priceChange?.h24 || 0),
-                    pairAddress: bestPair.pairAddress,
-                    dexId: bestPair.dexId
-                };
-            }
-        }
-        
-        throw new Error('No HMSTR pairs found');
+        return {
+            current: parseFloat(data.lastPrice),
+            change24h: parseFloat(data.priceChangePercent),
+            high: parseFloat(data.highPrice),
+            low: parseFloat(data.lowPrice),
+            volume: parseFloat(data.volume)
+        };
     } catch (error) {
+        console.error('MEXC price fetch failed:', error);
         throw error;
     }
 }
 
-async function fetchGeckoterminalData() {
+async function fetchMEXCKlines(interval, limit) {
     try {
-        const response = await fetch('https://api.geckoterminal.com/api/v2/networks/ton/tokens/EQBg3_S0EgK5r1dVIbYBMsdYv7uKxWJbB4e1jR8Zzq1dF_BR/pools?page=1');
-        if (!response.ok) throw new Error('Geckoterminal API failed');
+        const url = `${MEXC_API.KLINES}?symbol=HMSTRUSDT&interval=${interval}&limit=${limit}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`MEXC Klines error: ${response.status}`);
         
         const data = await response.json();
-        
-        if (data.data && data.data.length > 0) {
-            const pool = data.data[0];
-            const attributes = pool.attributes;
-            
-            return {
-                current: parseFloat(attributes.base_token_price_usd),
-                change24h: parseFloat(attributes.price_change_percentage?.h24 || 0)
-            };
-        }
-        
-        throw new Error('No pool data');
+        return data;
     } catch (error) {
-        throw error;
-    }
-}
-
-async function fetchCoinGeckoData() {
-    try {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=hamster-combat&vs_currencies=usd&include_24hr_change=true');
-        if (!response.ok) throw new Error('CoinGecko API failed');
-        
-        const data = await response.json();
-        
-        if (data['hamster-combat']) {
-            return {
-                current: data['hamster-combat'].usd,
-                change24h: data['hamster-combat'].usd_24h_change
-            };
-        }
-        
-        throw new Error('No CoinGecko data');
-    } catch (error) {
+        console.error('MEXC klines fetch failed:', error);
         throw error;
     }
 }
@@ -288,7 +222,7 @@ function showLoading(show) {
     if (loadingElement) {
         if (show) {
             loadingElement.classList.remove('hidden');
-            loadingElement.innerHTML = '<span>Загрузка реальных данных HMSTR...</span>';
+            loadingElement.innerHTML = '<span>Загрузка данных с MEXC...</span>';
         } else {
             loadingElement.classList.add('hidden');
         }
@@ -299,7 +233,7 @@ function showStaticDataMessage() {
     const loadingElement = document.getElementById('price-loading');
     if (loadingElement) {
         loadingElement.classList.remove('hidden');
-        loadingElement.innerHTML = '<span style="color: var(--text-secondary);">⚠️ Данные временно недоступны • Обновление через 30 сек</span>';
+        loadingElement.innerHTML = '<span style="color: var(--negative-color);">⚠️ Ошибка загрузки данных • Повтор через 10 сек</span>';
     }
 }
 
@@ -311,8 +245,8 @@ function showChartError(show) {
         chartContainer.innerHTML = `
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); text-align: center; padding: 20px;">
                 <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
-                <div style="font-weight: 500; margin-bottom: 5px;">График недоступен</div>
-                <div style="font-size: 12px; opacity: 0.7;">Обновите страницу или попробуйте позже</div>
+                <div style="font-weight: 500; margin-bottom: 5px;">График временно недоступен</div>
+                <div style="font-size: 12px; opacity: 0.7;">Обновление через 10 секунд</div>
             </div>
         `;
     } else {
@@ -342,7 +276,7 @@ async function createRealPriceChart(period) {
     }
     
     try {
-        const chartData = await fetchChartData(period);
+        const chartData = await fetchMEXCChartData(period);
         
         if (!chartData || !chartData.labels || !chartData.prices) {
             throw new Error('No chart data available');
@@ -411,7 +345,8 @@ async function createRealPriceChart(period) {
                         },
                         ticks: {
                             color: isDark ? '#b0b0b0' : '#666',
-                            font: { size: 10 }
+                            font: { size: 10 },
+                            maxTicksLimit: 8
                         }
                     },
                     y: {
@@ -435,89 +370,153 @@ async function createRealPriceChart(period) {
     }
 }
 
-async function fetchChartData(period) {
-    // Для демонстрации создаем реалистичные данные на основе текущей цены
-    // В реальном приложении здесь должен быть API запрос
-    const basePrice = currentPriceData.current;
-    const change24h = currentPriceData.change24h;
+async function fetchMEXCChartData(period) {
+    let interval, limit;
+    
+    switch(period) {
+        case '1D':
+            interval = '1h';
+            limit = 24;
+            break;
+        case '1W':
+            interval = '4h';
+            limit = 42; // 7 дней * 6 точек в день
+            break;
+        case '1M':
+            interval = '1d';
+            limit = 30;
+            break;
+        case '1Y':
+            interval = '1d';
+            limit = 365;
+            break;
+        case 'ALL':
+            interval = '1d';
+            limit = 365; // Максимум 1 год данных
+            break;
+        default:
+            interval = '1h';
+            limit = 24;
+    }
+    
+    try {
+        const klines = await fetchMEXCKlines(interval, limit);
+        
+        if (!klines || klines.length === 0) {
+            throw new Error('No klines data');
+        }
+        
+        const prices = [];
+        const labels = [];
+        
+        klines.forEach((kline, index) => {
+            // kline: [openTime, open, high, low, close, volume, closeTime, ...]
+            const price = parseFloat(kline[4]); // close price
+            const timestamp = kline[0];
+            
+            prices.push(price);
+            
+            // Создаем метки времени
+            const date = new Date(timestamp);
+            let label;
+            
+            switch(period) {
+                case '1D':
+                    label = date.getHours() + ':00';
+                    break;
+                case '1W':
+                    if (index % 6 === 0) { // Показываем каждую 4-ю точку
+                        label = date.getDate() + '.' + (date.getMonth() + 1);
+                    } else {
+                        label = '';
+                    }
+                    break;
+                case '1M':
+                    if (index % 3 === 0) { // Показываем каждую 3-ю точку
+                        label = date.getDate() + '.' + (date.getMonth() + 1);
+                    } else {
+                        label = '';
+                    }
+                    break;
+                case '1Y':
+                    if (index % 30 === 0) { // Показываем каждый месяц
+                        label = date.toLocaleDateString('ru', { month: 'short' });
+                    } else {
+                        label = '';
+                    }
+                    break;
+                case 'ALL':
+                    if (index % 60 === 0) { // Показываем каждые 2 месяца
+                        label = date.toLocaleDateString('ru', { month: 'short', year: '2-digit' });
+                    } else {
+                        label = '';
+                    }
+                    break;
+                default:
+                    label = date.getHours() + ':00';
+            }
+            
+            labels.push(label);
+        });
+        
+        // Последнюю метку всегда показываем как "Сейчас"
+        if (labels.length > 0) {
+            labels[labels.length - 1] = 'Сейчас';
+        }
+        
+        return { labels, prices };
+    } catch (error) {
+        console.error('Error fetching MEXC chart data:', error);
+        // Fallback: генерируем данные на основе текущей цены
+        return generateFallbackChartData(period);
+    }
+}
+
+function generateFallbackChartData(period) {
+    const basePrice = currentPriceData.current || 0.0006099;
+    const change24h = currentPriceData.change24h || -3.7;
     
     let labels, prices;
     
     switch(period) {
         case '1D':
-            // 24 точки за последние 24 часа
-            labels = generateTimeLabels(24, 'hour');
-            prices = generateRealisticPrices(basePrice, change24h, 24);
+            labels = ['00:00', '06:00', '12:00', '18:00', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, change24h, 5);
             break;
         case '1W':
-            // 7 точек за последние 7 дней
-            labels = generateTimeLabels(7, 'day');
-            prices = generateRealisticPrices(basePrice, change24h * 7, 7);
+            labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, change24h * 2, 7);
             break;
         case '1M':
-            // 30 точек за последние 30 дней
-            labels = generateTimeLabels(30, 'day');
-            prices = generateRealisticPrices(basePrice, change24h * 30, 30);
+            labels = ['Нед1', 'Нед2', 'Нед3', 'Нед4', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, change24h * 4, 5);
             break;
         case '1Y':
-            // 12 точек за последние 12 месяцев
-            labels = generateTimeLabels(12, 'month');
-            prices = generateRealisticPrices(basePrice, change24h * 365, 12);
+            labels = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, change24h * 12, 12);
             break;
         case 'ALL':
-            // 6 точек с момента запуска
-            labels = ['Запуск', 'М1', 'М2', 'М3', 'М4', 'Сейчас'];
-            prices = generateRealisticPrices(basePrice, 150, 6); // +150% за все время
+            labels = ['Запуск', 'М1', 'М2', 'М3', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, 50, 5);
             break;
         default:
-            labels = generateTimeLabels(24, 'hour');
-            prices = generateRealisticPrices(basePrice, change24h, 24);
+            labels = ['00:00', '06:00', '12:00', '18:00', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, change24h, 5);
     }
     
     return { labels, prices };
-}
-
-function generateTimeLabels(count, type) {
-    const labels = [];
-    const now = new Date();
-    
-    for (let i = count - 1; i >= 0; i--) {
-        const date = new Date();
-        
-        if (type === 'hour') {
-            date.setHours(now.getHours() - i);
-            labels.push(date.getHours() + ':00');
-        } else if (type === 'day') {
-            date.setDate(now.getDate() - i);
-            labels.push(date.getDate() + '.' + (date.getMonth() + 1));
-        } else if (type === 'month') {
-            date.setMonth(now.getMonth() - i);
-            labels.push(date.toLocaleString('ru', { month: 'short' }));
-        }
-    }
-    
-    // Заменяем последнюю метку на "Сейчас"
-    if (labels.length > 0) {
-        labels[labels.length - 1] = 'Сейчас';
-    }
-    
-    return labels;
 }
 
 function generateRealisticPrices(basePrice, totalChangePercent, points) {
     const prices = [];
     const startPrice = basePrice / (1 + totalChangePercent / 100);
     
-    // Создаем реалистичное движение цены
     for (let i = 0; i < points; i++) {
         const progress = i / (points - 1);
-        
-        // Базовое линейное изменение
         let price = startPrice + (basePrice - startPrice) * progress;
         
-        // Добавляем случайные колебания для реалистичности
-        const volatility = 0.02; // 2% волатильность
-        const randomFactor = 1 + (Math.random() - 0.5) * volatility * 2;
+        // Добавляем небольшие случайные колебания для реалистичности
+        const randomFactor = 1 + (Math.random() - 0.5) * 0.02;
         price *= randomFactor;
         
         // Гарантируем, что последняя цена равна текущей
