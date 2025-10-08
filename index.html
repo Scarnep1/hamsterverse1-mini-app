@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="no-referrer">
     <title>Hamster Verse</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -114,6 +115,11 @@
                         </div>
                     </div>
                     
+                    <!-- Loading Indicator -->
+                    <div class="loading-indicator hidden" id="price-loading">
+                        <span>Обновление данных...</span>
+                    </div>
+                    
                     <!-- Time Period Selector -->
                     <div class="time-selector">
                         <button class="time-btn active" data-period="1D">1Д</button>
@@ -133,7 +139,7 @@
                 <div class="exchanges-section">
                     <h3>Где купить HMSTR</h3>
                     <div class="exchanges-list">
-                        <a href="https://binance.com" class="exchange-card" target="_blank">
+                        <a href="https://www.binance.com/ru/trade/HMSTR_USDT" class="exchange-card" target="_blank">
                             <div class="exchange-logo">
                                 <img src="images/binance.png" alt="Binance" class="exchange-avatar">
                             </div>
@@ -144,7 +150,7 @@
                             <div class="exchange-arrow">→</div>
                         </a>
 
-                        <a href="https://bybit.com" class="exchange-card" target="_blank">
+                        <a href="https://www.bybit.com/trade/spot/HMSTR/USDT" class="exchange-card" target="_blank">
                             <div class="exchange-logo">
                                 <img src="images/bybit.jpg" alt="Bybit" class="exchange-avatar">
                             </div>
@@ -155,7 +161,7 @@
                             <div class="exchange-arrow">→</div>
                         </a>
 
-                        <a href="https://okx.com" class="exchange-card" target="_blank">
+                        <a href="https://www.okx.com/ru/trade-spot/hmstr-usdt" class="exchange-card" target="_blank">
                             <div class="exchange-logo">
                                 <img src="images/okx.jpg" alt="OKX" class="exchange-avatar">
                             </div>
@@ -166,7 +172,7 @@
                             <div class="exchange-arrow">→</div>
                         </a>
 
-                        <a href="https://kucoin.com" class="exchange-card" target="_blank">
+                        <a href="https://www.kucoin.com/ru/trade/HMSTR-USDT" class="exchange-card" target="_blank">
                             <div class="exchange-logo">
                                 <img src="images/kucoin.png" alt="KuCoin" class="exchange-avatar">
                             </div>
