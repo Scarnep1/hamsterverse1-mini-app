@@ -13,7 +13,7 @@ function initializeApp() {
     setupTimePeriodSelector();
 }
 
-// Навигация - Fixed
+// Навигация
 function setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.content-section');
@@ -310,7 +310,7 @@ function createPriceChart(chartData) {
             }]
         },
         options: {
-            responsive: true;
+            responsive: true,
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
