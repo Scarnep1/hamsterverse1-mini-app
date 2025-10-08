@@ -95,110 +95,28 @@
                     <span class="section-subtitle">Токен Хамстер Комбат</span>
                 </div>
                 
-                <!-- Price Card в стиле Telegram Wallet -->
-                <div class="wallet-card">
-                    <div class="wallet-header">
-                        <span class="chain-badge">Этот актив на базе Блокчейна TON</span>
+                <!-- Price Card -->
+                <div class="price-card">
+                    <div class="price-header">
+                        <div class="coin-info">
+                            <div class="coin-logo">
+                                <img src="images/hmstr-token.png" alt="HMSTR" class="coin-avatar">
+                            </div>
+                            <div class="coin-details">
+                                <h3>HMSTR / USDT</h3>
+                                <p>Хамстер Комбат</p>
+                            </div>
+                        </div>
+                        <div class="current-price">
+                            <span class="price" id="hmstr-price">$0.00061234</span>
+                            <span class="change negative" id="hmstr-change">-4.92%</span>
+                        </div>
                     </div>
                     
-                    <div class="asset-header">
-                        <div class="asset-info">
-                            <div class="asset-logo">
-                                <img src="images/hmstr-token.png" alt="HMSTR" class="asset-avatar">
-                            </div>
-                            <div class="asset-details">
-                                <h3>Hamster Kombat HMSTR</h3>
-                                <div class="asset-price" id="hmstr-price">0,000621 $</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Price Change Info -->
-                    <div class="price-change-info">
-                        <div class="change-main" id="hmstr-change-main">
-                            <span class="change-percent negative">-3,98%</span>
-                            <span class="change-amount">-0,000026 $</span>
-                        </div>
-                        <div class="change-period" id="hmstr-change-period">Сегодня</div>
-                    </div>
-
-                    <!-- Chart Container -->
+                    <!-- Price Chart -->
                     <div class="chart-container">
                         <canvas id="priceChart"></canvas>
                     </div>
-
-                    <!-- Time Period Selector -->
-                    <div class="time-selector">
-                        <button class="time-btn active" data-period="1D">1Д</button>
-                        <button class="time-btn" data-period="7D">7Д</button>
-                        <button class="time-btn" data-period="1M">1М</button>
-                        <button class="time-btn" data-period="1Y">1Г</button>
-                        <button class="time-btn" data-period="ALL">Все</button>
-                    </div>
-                </div>
-
-                <!-- Balance Card -->
-                <div class="balance-card">
-                    <h3>Ваш баланс в HMSTR</h3>
-                    <div class="balance-amount">
-                        <div class="balance-usd">0,00 $</div>
-                        <div class="balance-hmstr">0,000005 HMSTR</div>
-                    </div>
-                </div>
-
-                <!-- About Crypto -->
-                <div class="about-card">
-                    <h3>О криптовалюте</h3>
-                    <p>Это токен, заработанный в Hamster Kombat – мини-игре в Telegram с более чем 250 млн игроков.</p>
-                    <ul class="crypto-features">
-                        <li>Отправляйте контактам мгновенно, без комиссии.</li>
-                        <li>Обменивайте на другие криптовалюты.</li>
-                    </ul>
-                </div>
-
-                <!-- Statistics -->
-                <div class="stats-card">
-                    <h3>Обзор</h3>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-value">100B HMSTR</div>
-                            <div class="stat-label">Общее предложение</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">64.38B HMSTR</div>
-                            <div class="stat-label">В обороте</div>
-                        </div>
-                        <div class="stat-item">
-                            <div class="stat-value">HMSTR</div>
-                            <div class="stat-label">Тикер</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Market Data -->
-                <div class="market-card">
-                    <h3>Динамика за 24 часа</h3>
-                    <div class="market-stats">
-                        <div class="market-stat">
-                            <div class="market-value">$40.03M <span class="market-change positive">+3,98%</span></div>
-                            <div class="market-label">Капитализация</div>
-                        </div>
-                        <div class="market-stat">
-                            <div class="market-value">$7.82M <span class="market-change positive">↑ 15,81%</span></div>
-                            <div class="market-label">Торговый объём</div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Provider Info -->
-                <div class="provider-info">
-                    <p>График цены, обзор и динамика предоставлены<br>@simkrabot.com</p>
-                </div>
-
-                <!-- Action Buttons -->
-                <div class="action-buttons">
-                    <button class="action-btn buy-btn">Купить</button>
-                    <button class="action-btn sell-btn">Продать</button>
                 </div>
 
                 <!-- Exchanges List -->
@@ -248,6 +166,40 @@
                             </div>
                             <div class="exchange-arrow">→</div>
                         </a>
+                    </div>
+                </div>
+
+                <!-- Buy Guide Button -->
+                <div class="guide-button-container">
+                    <button class="guide-button" id="show-guide">
+                        📖 Как купить HMSTR
+                    </button>
+                </div>
+
+                <!-- Buy Guide (hidden by default) -->
+                <div class="buy-guide hidden" id="buy-guide">
+                    <div class="guide-steps">
+                        <div class="guide-step">
+                            <span class="step-number">1</span>
+                            <div class="step-content">
+                                <strong>Выберите биржу</strong>
+                                <p>Зарегистрируйтесь на Binance, Bybit или другой бирже</p>
+                            </div>
+                        </div>
+                        <div class="guide-step">
+                            <span class="step-number">2</span>
+                            <div class="step-content">
+                                <strong>Пополните баланс</strong>
+                                <p>Внесите USDT на биржу</p>
+                            </div>
+                        </div>
+                        <div class="guide-step">
+                            <span class="step-number">3</span>
+                            <div class="step-content">
+                                <strong>Купите HMSTR</strong>
+                                <p>Найдите пару HMSTR/USDT и купите</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
