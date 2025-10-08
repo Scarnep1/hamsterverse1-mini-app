@@ -132,54 +132,66 @@ function setupTelegramIntegration() {
     }
 }
 
-// ОБНОВЛЕННАЯ ФУНКЦИЯ: Получение реальной цены HMSTR
+// Глобальные переменные для данных цены
+let currentHMSTRPrice = 0.00061234;
+let currentHMSTRChange = -4.92;
+let priceChart = null;
+
+// ОСНОВНАЯ ФУНКЦИЯ: Работа с ценой HMSTR
 async function setupRealPriceData() {
+    await updateHMSTRPrice();
+    createTONStyleChart();
+    
+    // Обновляем каждые 30 секунд
+    setInterval(updateHMSTRPrice, 30000);
+}
+
+// Функция обновления цены HMSTR
+async function updateHMSTRPrice() {
+    try {
+        // Пробуем получить реальные данные
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=hamster-combat&vs_currencies=usd&include_24hr_change=true');
+        
+        if (response.ok) {
+            const data = await response.json();
+            if (data['hamster-combat']) {
+                currentHMSTRPrice = data['hamster-combat'].usd;
+                currentHMSTRChange = data['hamster-combat'].usd_24h_change;
+            }
+        }
+    } catch (error) {
+        console.log('Используем локальные данные HMSTR');
+        // Симулируем небольшие изменения цены
+        const randomChange = (Math.random() - 0.5) * 2; // ±1%
+        currentHMSTRPrice = currentHMSTRPrice * (1 + randomChange / 100);
+        currentHMSTRChange = currentHMSTRChange + randomChange;
+        
+        // Ограничиваем изменения разумными пределами
+        currentHMSTRChange = Math.max(-20, Math.min(20, currentHMSTRChange));
+    }
+    
+    updatePriceDisplay();
+    updateChartData();
+}
+
+// Обновление отображения цены
+function updatePriceDisplay() {
     const priceElement = document.getElementById('hmstr-price');
     const changeElement = document.getElementById('hmstr-change');
     
-    try {
-        // Реальные данные для HMSTR (примерные)
-        let price = 0.00061234; // Реальная цена с 8 знаками
-        let change24h = -4.92; // Реальное изменение
+    if (priceElement && changeElement) {
+        priceElement.textContent = formatPrice(currentHMSTRPrice);
+        changeElement.textContent = `${currentHMSTRChange >= 0 ? '+' : ''}${currentHMSTRChange.toFixed(2)}%`;
         
-        // Пробуем получить актуальные данные с API
-        try {
-            // Попытка получить данные с CoinGecko
-            const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=hamster-combat&vs_currencies=usd&include_24hr_change=true');
-            if (response.ok) {
-                const data = await response.json();
-                if (data['hamster-combat']) {
-                    price = data['hamster-combat'].usd;
-                    change24h = data['hamster-combat'].usd_24h_change;
-                }
-            }
-        } catch (error) {
-            console.log('CoinGecko API недоступен, используем локальные данные');
-        }
-        
-        // Обновляем интерфейс с правильным форматированием
-        priceElement.textContent = formatPrice(price);
-        changeElement.textContent = `${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%`;
-        
-        if (change24h >= 0) {
+        if (currentHMSTRChange >= 0) {
             changeElement.className = 'change positive';
         } else {
             changeElement.className = 'change negative';
         }
-        
-        // Создаем профессиональный график как в TON
-        createProfessionalChart(price, change24h);
-        
-        // Обновляем цену каждые 30 секунд
-        setInterval(updatePrice, 30000);
-        
-    } catch (error) {
-        console.error('Ошибка при получении данных:', error);
-        setupFallbackPrice();
     }
 }
 
-// Функция для форматирования цены (8 знаков после запятой)
+// Форматирование цены
 function formatPrice(price) {
     if (price >= 1) {
         return `$${price.toFixed(4)}`;
@@ -192,49 +204,55 @@ function formatPrice(price) {
     }
 }
 
-// ПРОФЕССИОНАЛЬНЫЙ ГРАФИК как в TON
-function createProfessionalChart(currentPrice, change24h) {
+// СОЗДАНИЕ ГРАФИКА В СТИЛЕ TON
+function createTONStyleChart() {
     const ctx = document.getElementById('priceChart').getContext('2d');
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
-    // Генерируем реалистичные данные для графика
-    const prices = generateRealisticChartData(currentPrice, change24h);
-    const isPositive = change24h >= 0;
+    // Генерируем данные для графика как в TON
+    const chartData = generateTONStyleData();
     
-    // Цвета для графика
-    const chartColor = isPositive ? '#00c853' : '#ff4444';
+    // Цвета как в TON
+    const lineColor = currentHMSTRChange >= 0 ? '#00C851' : '#FF4444';
     const gradient = ctx.createLinearGradient(0, 0, 0, 80);
     
-    if (isPositive) {
-        gradient.addColorStop(0, 'rgba(0, 200, 83, 0.3)');
-        gradient.addColorStop(1, 'rgba(0, 200, 83, 0.05)');
+    if (currentHMSTRChange >= 0) {
+        gradient.addColorStop(0, 'rgba(0, 200, 81, 0.2)');
+        gradient.addColorStop(1, 'rgba(0, 200, 81, 0.02)');
     } else {
-        gradient.addColorStop(0, 'rgba(255, 68, 68, 0.3)');
-        gradient.addColorStop(1, 'rgba(255, 68, 68, 0.05)');
+        gradient.addColorStop(0, 'rgba(255, 68, 68, 0.2)');
+        gradient.addColorStop(1, 'rgba(255, 68, 68, 0.02)');
     }
     
-    new Chart(ctx, {
+    // Уничтожаем старый график если есть
+    if (priceChart) {
+        priceChart.destroy();
+    }
+    
+    priceChart = new Chart(ctx, {
         type: 'line',
         data: {
             labels: ['10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00'],
             datasets: [{
-                data: prices,
-                borderColor: chartColor,
+                data: chartData,
+                borderColor: lineColor,
                 backgroundColor: gradient,
                 borderWidth: 2,
                 fill: true,
                 tension: 0.4,
-                pointBackgroundColor: 'transparent',
-                pointBorderColor: 'transparent',
                 pointRadius: 0,
-                pointHoverRadius: 0
+                pointHoverRadius: 0,
+                pointBackgroundColor: 'transparent',
+                pointBorderColor: 'transparent'
             }]
         },
         options: {
             responsive: true,
             maintainAspectRatio: false,
             plugins: {
-                legend: { display: false },
+                legend: {
+                    display: false
+                },
                 tooltip: {
                     enabled: false
                 }
@@ -242,20 +260,20 @@ function createProfessionalChart(currentPrice, change24h) {
             scales: {
                 x: {
                     display: true,
-                    grid: { 
+                    grid: {
                         display: false,
                         drawBorder: false
                     },
                     ticks: {
                         color: isDark ? '#888888' : '#666666',
                         font: {
-                            size: 10,
+                            size: 11,
                             family: "'Inter', sans-serif"
                         },
-                        padding: 5
+                        padding: 8
                     }
                 },
-                y: { 
+                y: {
                     display: false,
                     grid: {
                         display: false
@@ -264,18 +282,21 @@ function createProfessionalChart(currentPrice, change24h) {
             },
             interaction: {
                 intersect: false,
-                mode: 'index'
+                mode: 'nearest'
             },
             elements: {
                 line: {
-                    borderWidth: 2
+                    tension: 0.4
+                },
+                point: {
+                    radius: 0
                 }
             },
             layout: {
                 padding: {
                     left: 0,
                     right: 0,
-                    top: 10,
+                    top: 5,
                     bottom: 0
                 }
             }
@@ -283,91 +304,53 @@ function createProfessionalChart(currentPrice, change24h) {
     });
 }
 
-// Генерация реалистичных данных для графика
-function generateRealisticChartData(currentPrice, change24h) {
-    const dataPoints = 7;
-    const prices = [];
+// Генерация данных в стиле TON
+function generateTONStyleData() {
+    const data = [];
+    const basePrice = currentHMSTRPrice / (1 + currentHMSTRChange / 100);
+    const volatility = 0.0001;
     
-    // Начинаем с цены 24 часа назад
-    let price = currentPrice / (1 + change24h / 100);
-    
-    for (let i = 0; i < dataPoints; i++) {
-        // Реалистичные колебания
-        const progress = i / (dataPoints - 1);
-        const baseChange = change24h / 100 * progress;
-        const randomChange = (Math.random() - 0.5) * 0.002; // Небольшие случайные колебания
+    for (let i = 0; i < 7; i++) {
+        const progress = i / 6;
+        const trend = currentHMSTRChange / 100 * progress;
+        const random = (Math.random() - 0.5) * volatility;
         
-        price = currentPrice * (1 + baseChange + randomChange);
-        prices.push(price);
-    }
-    
-    return prices;
-}
-
-async function updatePrice() {
-    try {
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=hamster-combat&vs_currencies=usd&include_24hr_change=true');
-        if (response.ok) {
-            const data = await response.json();
-            if (data['hamster-combat']) {
-                const price = data['hamster-combat'].usd;
-                const change24h = data['hamster-combat'].usd_24h_change;
-                
-                const priceElement = document.getElementById('hmstr-price');
-                const changeElement = document.getElementById('hmstr-change');
-                
-                priceElement.textContent = formatPrice(price);
-                changeElement.textContent = `${change24h >= 0 ? '+' : ''}${change24h.toFixed(2)}%`;
-                
-                if (change24h >= 0) {
-                    changeElement.className = 'change positive';
-                } else {
-                    changeElement.className = 'change negative';
-                }
-                
-                updateChart(price, change24h);
-            }
+        let price = basePrice * (1 + trend + random);
+        
+        if (i === 6) {
+            price = currentHMSTRPrice;
         }
-    } catch (error) {
-        console.log('Ошибка при обновлении цены:', error);
+        
+        data.push(price);
     }
+    
+    return data;
 }
 
-function updateChart(newPrice, newChange) {
-    const chartCanvas = document.getElementById('priceChart');
-    if (chartCanvas) {
-        const chart = Chart.getChart(chartCanvas);
-        if (chart) {
-            const newData = generateRealisticChartData(newPrice, newChange);
-            chart.data.datasets[0].data = newData;
-            
-            const isPositive = newChange >= 0;
-            const chartColor = isPositive ? '#00c853' : '#ff4444';
-            
-            chart.data.datasets[0].borderColor = chartColor;
-            chart.update('none');
-        }
-    }
-}
-
-function setupFallbackPrice() {
-    const priceElement = document.getElementById('hmstr-price');
-    const changeElement = document.getElementById('hmstr-change');
+// Обновление данных графика
+function updateChartData() {
+    if (!priceChart) return;
     
-    // Реалистичные данные как на скриншоте
-    const price = 0.00061234;
-    const change = -4.92;
+    const newData = generateTONStyleData();
+    const isPositive = currentHMSTRChange >= 0;
+    const lineColor = isPositive ? '#00C851' : '#FF4444';
     
-    priceElement.textContent = formatPrice(price);
-    changeElement.textContent = `${change >= 0 ? '+' : ''}${change.toFixed(2)}%`;
+    const ctx = priceChart.ctx;
+    const gradient = ctx.createLinearGradient(0, 0, 0, 80);
     
-    if (change >= 0) {
-        changeElement.className = 'change positive';
+    if (isPositive) {
+        gradient.addColorStop(0, 'rgba(0, 200, 81, 0.2)');
+        gradient.addColorStop(1, 'rgba(0, 200, 81, 0.02)');
     } else {
-        changeElement.className = 'change negative';
+        gradient.addColorStop(0, 'rgba(255, 68, 68, 0.2)');
+        gradient.addColorStop(1, 'rgba(255, 68, 68, 0.02)');
     }
     
-    createProfessionalChart(price, change);
+    priceChart.data.datasets[0].data = newData;
+    priceChart.data.datasets[0].borderColor = lineColor;
+    priceChart.data.datasets[0].backgroundColor = gradient;
+    
+    priceChart.update('none');
 }
 
 function setupDailyBonus() {
@@ -483,20 +466,11 @@ function setupThemeToggle() {
             themeText.textContent = 'Темная тема';
         }
         
-        // Update chart if it exists
-        updateChartTheme();
-    }
-}
-
-function updateChartTheme() {
-    const chartCanvas = document.getElementById('priceChart');
-    if (chartCanvas) {
-        const chart = Chart.getChart(chartCanvas);
-        if (chart) {
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            
-            chart.options.scales.x.ticks.color = isDark ? '#888888' : '#666666';
-            chart.update();
+        // Update chart theme
+        if (priceChart) {
+            const isDark = theme === 'dark';
+            priceChart.options.scales.x.ticks.color = isDark ? '#888888' : '#666666';
+            priceChart.update();
         }
     }
 }
