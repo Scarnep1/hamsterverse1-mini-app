@@ -5,11 +5,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
 function initializeApp() {
     setupNavigation();
-    setupReferralLink();
     setupPlayButtons();
     setupTelegramIntegration();
     setupPriceData();
-    setupDailyBonus();
     setupGuideButton();
     setupThemeToggle();
     setupTimePeriodSelector();
@@ -24,9 +22,16 @@ function setupNavigation() {
         item.addEventListener('click', function() {
             const targetSection = this.getAttribute('data-section');
             
-            navItems.forEach(nav => nav.classList.remove('active'));
+            // Убираем активный класс у всех кнопок
+            navItems.forEach(nav => {
+                nav.classList.remove('active');
+                nav.style.background = 'transparent';
+            });
+            
+            // Добавляем активный класс текущей кнопке
             this.classList.add('active');
             
+            // Показываем соответствующую секцию
             sections.forEach(section => {
                 section.classList.remove('active');
                 if (section.id === targetSection) {
@@ -67,37 +72,6 @@ function openGame(url) {
     }
 }
 
-function setupReferralLink() {
-    const copyBtn = document.getElementById('copy-btn');
-    const referralInput = document.getElementById('referral-input');
-    const notification = document.getElementById('notification');
-    
-    if (copyBtn && referralInput && notification) {
-        copyBtn.addEventListener('click', function() {
-            referralInput.select();
-            referralInput.setSelectionRange(0, 99999);
-            
-            navigator.clipboard.writeText(referralInput.value).then(function() {
-                notification.classList.add('show');
-                setTimeout(function() {
-                    notification.classList.remove('show');
-                }, 2000);
-            }).catch(function(err) {
-                console.error('Failed to copy text: ', err);
-                try {
-                    document.execCommand('copy');
-                    notification.classList.add('show');
-                    setTimeout(function() {
-                        notification.classList.remove('show');
-                    }, 2000);
-                } catch (e) {
-                    console.error('Fallback copy failed: ', e);
-                }
-            });
-        });
-    }
-}
-
 function setupTelegramIntegration() {
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.expand();
@@ -106,10 +80,15 @@ function setupTelegramIntegration() {
         
         if (user) {
             const avatar = document.getElementById('tg-avatar');
+            const headerAvatar = document.getElementById('user-avatar');
+            
             if (user.photo_url) {
                 avatar.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%;">`;
+                headerAvatar.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%;">`;
             } else {
-                avatar.textContent = user.first_name?.[0] || 'U';
+                const initial = user.first_name?.[0] || 'U';
+                avatar.textContent = initial;
+                headerAvatar.textContent = initial;
             }
             
             const name = document.getElementById('tg-name');
@@ -121,9 +100,12 @@ function setupTelegramIntegration() {
             
             if (user.username) {
                 username.textContent = `@${user.username}`;
+            } else {
+                username.textContent = 'Telegram пользователь';
             }
         }
         
+        // Применяем тему Telegram
         const themeParams = window.Telegram.WebApp.themeParams;
         if (themeParams) {
             document.documentElement.style.setProperty('--tg-theme-bg-color', themeParams.bg_color || '#ffffff');
@@ -134,7 +116,7 @@ function setupTelegramIntegration() {
     }
 }
 
-// НОВЫЕ ФУНКЦИИ ДЛЯ РЕАЛЬНЫХ ДАННЫХ HMSTR
+// Функции для данных HMSTR
 let currentChart = null;
 let priceUpdateInterval = null;
 
@@ -162,8 +144,8 @@ async function setupPriceData() {
 
 async function fetchRealPriceData() {
     try {
-        // Используем CoinGecko API для получения реальной цены HMSTR
-        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=hamster-kombat&vs_currencies=usd&include_24hr_change=true&include_24hr_vol=true&include_last_updated_at=true');
+        // Пробуем получить реальные данные с CoinGecko
+        const response = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=hamster-kombat&vs_currencies=usd&include_24hr_change=true');
         const data = await response.json();
         
         if (data['hamster-kombat']) {
@@ -172,7 +154,7 @@ async function fetchRealPriceData() {
             
             updatePriceDisplay(price, change24h);
         } else {
-            // Fallback на статические данные если API не работает
+            // Fallback данные
             useFallbackData();
         }
     } catch (error) {
@@ -182,7 +164,7 @@ async function fetchRealPriceData() {
 }
 
 function useFallbackData() {
-    // Данные с ваших скриншотов
+    // Реалистичные данные для HMSTR
     const fallbackPrice = 0.000621;
     const fallbackChange = -4.13;
     
@@ -212,12 +194,9 @@ function updateChartForPeriod(period) {
     const periodText = getPeriodText(period);
     document.getElementById('current-period').textContent = periodText;
     
-    // Создаем данные для графика в зависимости от периода
-    const chartData = generateChartData(period);
+    // Создаем реалистичные данные для графика
+    const chartData = generateRealisticChartData(period);
     createPriceChart(chartData);
-    
-    // Обновляем статистику цены
-    updatePriceStats(chartData.prices);
 }
 
 function getPeriodText(period) {
@@ -231,48 +210,53 @@ function getPeriodText(period) {
     }
 }
 
-function generateChartData(period) {
+function generateRealisticChartData(period) {
     const basePrice = 0.000621;
-    let dataPoints, volatility, trend;
+    let dataPoints, timeRange, volatility;
     
     switch(period) {
         case '1D':
             dataPoints = 24;
-            volatility = 0.02;
-            trend = -0.0413;
+            timeRange = 24;
+            volatility = 0.015;
             break;
         case '1W':
             dataPoints = 7;
-            volatility = 0.05;
-            trend = 0.0025;
+            timeRange = 7;
+            volatility = 0.025;
             break;
         case '1M':
             dataPoints = 30;
-            volatility = 0.08;
-            trend = -0.1099;
+            timeRange = 30;
+            volatility = 0.04;
             break;
         case '1Y':
             dataPoints = 12;
-            volatility = 0.15;
-            trend = -0.8680;
+            timeRange = 365;
+            volatility = 0.08;
             break;
         case 'ALL':
             dataPoints = 6;
-            volatility = 0.2;
-            trend = -0.9041;
+            timeRange = 180;
+            volatility = 0.12;
             break;
         default:
             dataPoints = 24;
-            volatility = 0.02;
-            trend = 0;
+            timeRange = 24;
+            volatility = 0.015;
     }
     
-    const prices = [];
+    const prices = [basePrice];
     let currentPrice = basePrice;
     
-    for (let i = 0; i < dataPoints; i++) {
-        const randomChange = (Math.random() - 0.5) * volatility + trend/dataPoints;
-        currentPrice = Math.max(0.0001, currentPrice * (1 + randomChange));
+    // Создаем более реалистичный график с трендом и шумом
+    for (let i = 1; i < dataPoints; i++) {
+        // Добавляем тренд и случайные колебания
+        const trend = (Math.random() - 0.5) * 0.002;
+        const noise = (Math.random() - 0.5) * volatility;
+        const change = trend + noise;
+        
+        currentPrice = Math.max(0.0001, currentPrice * (1 + change));
         prices.push(currentPrice);
     }
     
@@ -292,18 +276,22 @@ function createPriceChart(chartData) {
     }
     
     const labels = generateLabels(chartData.period, chartData.prices.length);
+    
+    // Определяем цвет графика на основе тренда
+    const firstPrice = chartData.prices[0];
+    const lastPrice = chartData.prices[chartData.prices.length - 1];
+    const isPositive = lastPrice >= firstPrice;
+    
     const gradient = ctx.createLinearGradient(0, 0, 0, 200);
     
-    if (chartData.prices[0] > chartData.prices[chartData.prices.length - 1]) {
-        // Нисходящий тренд - красный
-        gradient.addColorStop(0, 'rgba(255, 68, 68, 0.3)');
-        gradient.addColorStop(1, 'rgba(255, 68, 68, 0.05)');
-        var borderColor = '#ff4444';
-    } else {
-        // Восходящий тренд - зеленый
+    if (isPositive) {
         gradient.addColorStop(0, 'rgba(0, 200, 81, 0.3)');
         gradient.addColorStop(1, 'rgba(0, 200, 81, 0.05)');
         var borderColor = '#00c851';
+    } else {
+        gradient.addColorStop(0, 'rgba(255, 68, 68, 0.3)');
+        gradient.addColorStop(1, 'rgba(255, 68, 68, 0.05)');
+        var borderColor = '#ff4444';
     }
     
     currentChart = new Chart(ctx, {
@@ -314,14 +302,14 @@ function createPriceChart(chartData) {
                 data: chartData.prices,
                 borderColor: borderColor,
                 backgroundColor: gradient,
-                borderWidth: 2,
+                borderWidth: 3,
                 fill: true,
                 tension: 0.4,
                 pointBackgroundColor: borderColor,
                 pointBorderColor: isDark ? '#2d2d2d' : '#ffffff',
                 pointBorderWidth: 2,
                 pointRadius: 0,
-                pointHoverRadius: 4
+                pointHoverRadius: 5
             }]
         },
         options: {
@@ -365,6 +353,11 @@ function createPriceChart(chartData) {
             interaction: {
                 intersect: false,
                 mode: 'nearest'
+            },
+            elements: {
+                line: {
+                    tension: 0.4
+                }
             }
         }
     });
@@ -373,94 +366,25 @@ function createPriceChart(chartData) {
 function generateLabels(period, dataPoints) {
     switch(period) {
         case '1D':
-            return Array.from({length: dataPoints}, (_, i) => `${i}:00`);
+            return Array.from({length: dataPoints}, (_, i) => {
+                if (i === 0) return '00:00';
+                if (i === dataPoints - 1) return 'Сейчас';
+                return `${i}:00`;
+            });
         case '1W':
             return ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
         case '1M':
-            return Array.from({length: dataPoints}, (_, i) => `${i+1}`);
+            return Array.from({length: dataPoints}, (_, i) => {
+                if (i === 0) return '1';
+                if (i === dataPoints - 1) return 'Сейчас';
+                return `${i + 1}`;
+            });
         case '1Y':
             return ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
         case 'ALL':
             return ['Запуск', 'М1', 'М2', 'М3', 'М4', 'Сейчас'];
         default:
             return Array.from({length: dataPoints}, (_, i) => `${i}`);
-    }
-}
-
-function updatePriceStats(prices) {
-    const high = Math.max(...prices);
-    const low = Math.min(...prices);
-    
-    document.getElementById('price-high').textContent = `$${high.toFixed(6)}`;
-    document.getElementById('price-low').textContent = `$${low.toFixed(6)}`;
-}
-
-function setupDailyBonus() {
-    const claimButton = document.getElementById('claim-daily');
-    
-    if (claimButton) {
-        claimButton.addEventListener('click', function() {
-            const lastClaim = localStorage.getItem('lastDailyClaim');
-            const today = new Date().toDateString();
-            
-            if (lastClaim === today) {
-                alert('Вы уже получили бонус сегодня! Возвращайтесь завтра.');
-                return;
-            }
-            
-            localStorage.setItem('lastDailyClaim', today);
-            
-            const pointsElement = document.getElementById('total-points');
-            const currentPoints = parseInt(pointsElement.textContent);
-            pointsElement.textContent = currentPoints + 1;
-            
-            const streakElement = document.getElementById('daily-streak');
-            const currentStreak = parseInt(streakElement.textContent);
-            streakElement.textContent = currentStreak + 1;
-            
-            updateUserRank(currentPoints + 1);
-            
-            alert('🎉 Вы получили 1 очко за ежедневный вход!');
-            claimButton.disabled = true;
-            claimButton.textContent = 'Получено сегодня';
-        });
-    }
-    
-    updateUserRank(parseInt(document.getElementById('total-points').textContent));
-}
-
-function updateUserRank(points) {
-    const rankElement = document.getElementById('user-rank');
-    const rankBadge = rankElement.querySelector('.rank-badge');
-    const rankProgress = rankElement.querySelector('.rank-progress');
-    
-    let rank, nextRank, progress;
-    
-    if (points < 30) {
-        rank = 'beginner';
-        nextRank = 30;
-        progress = `${points}/30 очков`;
-    } else if (points < 300) {
-        rank = 'player';
-        nextRank = 300;
-        progress = `${points}/300 очков`;
-    } else {
-        rank = 'whale';
-        nextRank = '∞';
-        progress = `${points}+ очков`;
-    }
-    
-    rankBadge.className = `rank-badge ${rank}`;
-    rankBadge.textContent = getRankName(rank);
-    rankProgress.textContent = progress;
-}
-
-function getRankName(rank) {
-    switch(rank) {
-        case 'beginner': return 'Новичок';
-        case 'player': return 'Игрок';
-        case 'whale': return 'Кит';
-        default: return 'Новичок';
     }
 }
 
