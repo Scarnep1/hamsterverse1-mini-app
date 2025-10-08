@@ -22,13 +22,9 @@ function setupNavigation() {
         item.addEventListener('click', function() {
             const targetSection = this.getAttribute('data-section');
             
-            // Убираем активный класс у всех кнопок
             navItems.forEach(nav => nav.classList.remove('active'));
-            
-            // Добавляем активный класс текущей кнопке
             this.classList.add('active');
             
-            // Показываем соответствующую секцию
             sections.forEach(section => {
                 section.classList.remove('active');
                 if (section.id === targetSection) {
@@ -101,21 +97,13 @@ function setupTelegramIntegration() {
                 username.textContent = 'Telegram пользователь';
             }
         }
-        
-        // Применяем тему Telegram
-        const themeParams = window.Telegram.WebApp.themeParams;
-        if (themeParams) {
-            document.documentElement.style.setProperty('--tg-theme-bg-color', themeParams.bg_color || '#ffffff');
-            document.documentElement.style.setProperty('--tg-theme-text-color', themeParams.text_color || '#000000');
-            document.documentElement.style.setProperty('--tg-theme-button-color', themeParams.button_color || '#667eea');
-            document.documentElement.style.setProperty('--tg-theme-button-text-color', themeParams.button_text_color || '#ffffff');
-        }
     }
 }
 
 // Функции для данных HMSTR
 let currentChart = null;
 let priceUpdateInterval = null;
+let currentPriceData = null;
 
 function setupTimePeriodSelector() {
     const timeButtons = document.querySelectorAll('.time-btn');
@@ -141,64 +129,53 @@ async function fetchRealPriceData() {
     showLoading(true);
     
     try {
-        // Пробуем несколько API для получения цены HMSTR
-        const priceData = await fetchHMSTRPriceFromMultipleSources();
+        const priceData = await fetchHMSTRPrice();
         
         if (priceData && priceData.current) {
             updatePriceDisplay(priceData.current, priceData.change24h);
+            currentPriceData = priceData;
             showChartError(false);
+            showLoading(false);
         } else {
-            showNoDataMessage();
+            throw new Error('No price data received');
         }
     } catch (error) {
         console.error('Error fetching price data:', error);
         showNoDataMessage();
-    } finally {
-        showLoading(false);
     }
 }
 
-async function fetchHMSTRPriceFromMultipleSources() {
-    // Пробуем разные API endpoints для HMSTR
-    const endpoints = [
-        'https://api.dexscreener.com/latest/dex/tokens/0x18c5e...', // Замените на реальный адрес контракта HMSTR
-        'https://api.coingecko.com/api/v3/simple/price?ids=hamster-kombat&vs_currencies=usd&include_24hr_change=true'
-    ];
-    
-    for (let endpoint of endpoints) {
-        try {
-            const response = await fetch(endpoint);
-            if (response.ok) {
-                const data = await response.json();
-                
-                // Обработка данных от DexScreener
-                if (data.pairs && data.pairs.length > 0) {
-                    const hmstrPair = data.pairs[0];
-                    return {
-                        current: parseFloat(hmstrPair.priceUsd),
-                        change24h: parseFloat(hmstrPair.priceChange.h24)
-                    };
-                }
-                
-                // Обработка данных от CoinGecko
-                if (data['hamster-kombat']) {
-                    return {
-                        current: data['hamster-kombat'].usd,
-                        change24h: data['hamster-kombat'].usd_24h_change
-                    };
-                }
-            }
-        } catch (error) {
-            console.log(`API ${endpoint} failed:`, error);
-            continue;
+async function fetchHMSTRPrice() {
+    try {
+        // Используем реальный адрес контракта HMSTR
+        const response = await fetch('https://api.dexscreener.com/latest/dex/tokens/0x96371b5905d34e465beacdcf679dcaf235e0ea19');
+        
+        if (!response.ok) {
+            throw new Error('API not available');
         }
+        
+        const data = await response.json();
+        
+        console.log('DexScreener response:', data); // Для отладки
+        
+        if (data.pairs && data.pairs.length > 0) {
+            // Берем первую пару (обычно самая ликвидная)
+            const hmstrPair = data.pairs[0];
+            
+            return {
+                current: parseFloat(hmstrPair.priceUsd),
+                change24h: parseFloat(hmstrPair.priceChange.h24),
+                volume: parseFloat(hmstrPair.volume.h24),
+                liquidity: parseFloat(hmstrPair.liquidity.usd),
+                pairAddress: hmstrPair.pairAddress
+            };
+        }
+        
+        return null;
+    } catch (error) {
+        console.error('DexScreener error:', error);
+        return null;
     }
-    
-    // Если все API недоступны, используем статические данные
-    return {
-        current: 0.000621,
-        change24h: -4.13
-    };
 }
 
 function updatePriceDisplay(price, change24h) {
@@ -229,7 +206,7 @@ function showLoading(show) {
     if (loadingElement) {
         if (show) {
             loadingElement.classList.remove('hidden');
-            loadingElement.innerHTML = '<span>Загрузка данных...</span>';
+            loadingElement.innerHTML = '<span>Загрузка реальных данных...</span>';
         } else {
             loadingElement.classList.add('hidden');
         }
@@ -241,16 +218,16 @@ function showNoDataMessage() {
     const changeElement = document.getElementById('hmstr-change');
     const loadingElement = document.getElementById('price-loading');
     
-    priceElement.textContent = '$0.000621';
-    changeElement.textContent = '-4.13%';
-    changeElement.className = 'change negative';
+    priceElement.textContent = '$--.--';
+    changeElement.textContent = '--%';
+    changeElement.className = 'change';
     
     if (loadingElement) {
         loadingElement.classList.remove('hidden');
-        loadingElement.innerHTML = '<span style="color: var(--text-secondary);">Используются статические данные</span>';
+        loadingElement.innerHTML = '<span style="color: var(--negative-color);">Данные временно недоступны</span>';
     }
     
-    showChartError(false);
+    showChartError(true);
 }
 
 function showChartError(show) {
@@ -262,7 +239,7 @@ function showChartError(show) {
             <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); text-align: center; padding: 20px;">
                 <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
                 <div style="font-weight: 500; margin-bottom: 5px;">График недоступен</div>
-                <div style="font-size: 12px; opacity: 0.7;">Нет данных для отображения графика</div>
+                <div style="font-size: 12px; opacity: 0.7;">Обновите страницу или попробуйте позже</div>
             </div>
         `;
     } else {
@@ -275,10 +252,15 @@ function setupPriceUpdateInterval() {
         clearInterval(priceUpdateInterval);
     }
     
-    priceUpdateInterval = setInterval(fetchRealPriceData, 60000); // Обновляем каждую минуту
+    priceUpdateInterval = setInterval(fetchRealPriceData, 30000);
 }
 
 function updateChartForPeriod(period) {
+    if (!currentPriceData) {
+        showChartError(true);
+        return;
+    }
+    
     const periodText = getPeriodText(period);
     document.getElementById('current-period').textContent = periodText;
     
@@ -287,56 +269,49 @@ function updateChartForPeriod(period) {
 
 function createPriceChart(period) {
     const chartContainer = document.getElementById('priceChart');
-    if (!chartContainer) {
-        console.error('Chart container not found');
-        return;
-    }
+    if (!chartContainer) return;
     
     const ctx = chartContainer.getContext('2d');
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
-    // Уничтожаем предыдущий график если существует
     if (currentChart) {
         currentChart.destroy();
     }
     
-    // Получаем текущую цену для построения графика
-    const currentPriceText = document.getElementById('hmstr-price').textContent;
-    const basePrice = parseFloat(currentPriceText.replace('$', '')) || 0.000621;
+    const basePrice = currentPriceData.current;
+    const change24h = currentPriceData.change24h;
     
-    let labels, data;
+    let labels, prices;
     
+    // Генерируем реалистичные данные на основе реальной цены
     switch(period) {
         case '1D':
-            labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', 'Сейчас'];
-            data = generateChartData(basePrice, 7, 0.02);
+            labels = ['00:00', '06:00', '12:00', '18:00', 'Сейчас'];
+            prices = generatePriceMovement(basePrice, change24h, 5, 0.02);
             break;
         case '1W':
             labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Сейчас'];
-            data = generateChartData(basePrice, 7, 0.05);
+            prices = generatePriceMovement(basePrice, change24h, 7, 0.05);
             break;
         case '1M':
             labels = ['Нед1', 'Нед2', 'Нед3', 'Нед4', 'Сейчас'];
-            data = generateChartData(basePrice, 5, 0.08);
+            prices = generatePriceMovement(basePrice, change24h, 5, 0.08);
             break;
         case '1Y':
-            labels = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Сейчас'];
-            data = generateChartData(basePrice, 12, 0.15);
+            labels = ['Янв', 'Мар', 'Май', 'Июл', 'Сен', 'Ноя', 'Сейчас'];
+            prices = generatePriceMovement(basePrice, change24h, 7, 0.15);
             break;
         case 'ALL':
-            labels = ['Запуск', 'М1', 'М2', 'М3', 'М4', 'Сейчас'];
-            data = generateChartData(basePrice, 6, 0.25);
+            labels = ['Запуск', 'М1', 'М2', 'М3', 'Сейчас'];
+            prices = generatePriceMovement(basePrice, change24h, 5, 0.25);
             break;
         default:
-            labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', 'Сейчас'];
-            data = generateChartData(basePrice, 7, 0.02);
+            labels = ['00:00', '06:00', '12:00', '18:00', 'Сейчас'];
+            prices = generatePriceMovement(basePrice, change24h, 5, 0.02);
     }
     
-    // Убедимся, что последняя точка равна текущей цене
-    data[data.length - 1] = basePrice;
-    
-    const firstPrice = data[0];
-    const lastPrice = data[data.length - 1];
+    const firstPrice = prices[0];
+    const lastPrice = prices[prices.length - 1];
     const isPositive = lastPrice >= firstPrice;
     
     const gradient = ctx.createLinearGradient(0, 0, 0, 200);
@@ -356,7 +331,7 @@ function createPriceChart(period) {
         data: {
             labels: labels,
             datasets: [{
-                data: data,
+                data: prices,
                 borderColor: borderColor,
                 backgroundColor: gradient,
                 borderWidth: 3,
@@ -415,21 +390,26 @@ function createPriceChart(period) {
     });
 }
 
-function generateChartData(basePrice, points, volatility) {
-    const data = [];
-    let currentPrice = basePrice * (1 - volatility / 2);
+function generatePriceMovement(basePrice, change24h, points, volatility) {
+    const prices = [];
+    
+    // Начинаем с цены, которая соответствует общему тренду
+    let currentPrice = basePrice * (1 - (change24h / 100));
     
     for (let i = 0; i < points - 1; i++) {
         const progress = i / (points - 1);
-        const change = (Math.random() - 0.5 + progress * 0.5) * volatility;
-        currentPrice = Math.max(0.000001, currentPrice * (1 + change));
-        data.push(currentPrice);
+        // Плавно приближаемся к текущей цене
+        const targetPrice = basePrice * (1 - (change24h / 100) + (change24h / 100) * progress);
+        const noise = (Math.random() - 0.5) * volatility * basePrice;
+        
+        currentPrice = targetPrice + noise;
+        prices.push(Math.max(0.000001, currentPrice));
     }
     
     // Последняя точка - текущая цена
-    data.push(basePrice);
+    prices.push(basePrice);
     
-    return data;
+    return prices;
 }
 
 function getPeriodText(period) {
@@ -486,8 +466,7 @@ function setupThemeToggle() {
             themeText.textContent = 'Темная тема';
         }
         
-        // Перерисовываем график при смене темы
-        if (currentChart) {
+        if (currentChart && currentPriceData) {
             const activePeriod = document.querySelector('.time-btn.active').getAttribute('data-period');
             updateChartForPeriod(activePeriod);
         }
