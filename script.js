@@ -25,7 +25,6 @@ function setupNavigation() {
             // Убираем активный класс у всех кнопок
             navItems.forEach(nav => {
                 nav.classList.remove('active');
-                nav.style.background = 'transparent';
             });
             
             // Добавляем активный класс текущей кнопке
@@ -313,7 +312,7 @@ function createPriceChart(chartData) {
             }]
         },
         options: {
-            responsive: true,
+            responsive: true;
             maintainAspectRatio: false,
             plugins: {
                 legend: { display: false },
