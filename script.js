@@ -116,6 +116,7 @@ function setupTelegramIntegration() {
 // Функции для данных HMSTR
 let currentChart = null;
 let priceUpdateInterval = null;
+let currentPriceData = null;
 
 function setupTimePeriodSelector() {
     const timeButtons = document.querySelectorAll('.time-btn');
@@ -132,11 +133,11 @@ function setupTimePeriodSelector() {
 }
 
 async function setupPriceData() {
-    await fetchRealPriceData();
-    setupPriceUpdateInterval();
-    
-    // Инициализируем график для 1 дня
-    updateChartForPeriod('1D');
+    const success = await fetchRealPriceData();
+    if (success) {
+        setupPriceUpdateInterval();
+        updateChartForPeriod('1D');
+    }
 }
 
 async function fetchRealPriceData() {
@@ -146,12 +147,17 @@ async function fetchRealPriceData() {
         const priceData = await fetchHMSTRPrice();
         if (priceData && priceData.current) {
             updatePriceDisplay(priceData.current, priceData.change24h);
+            currentPriceData = priceData;
+            showChartError(false);
+            return true;
         } else {
-            useFallbackData();
+            showNoDataMessage();
+            return false;
         }
     } catch (error) {
         console.error('Error fetching price data:', error);
-        useFallbackData();
+        showNoDataMessage();
+        return false;
     } finally {
         showLoading(false);
     }
@@ -161,6 +167,8 @@ async function fetchHMSTRPrice() {
     try {
         // Пробуем DexScreener API для HMSTR
         const response = await fetch('https://api.dexscreener.com/latest/dex/search?q=HMSTR');
+        if (!response.ok) throw new Error('API not available');
+        
         const data = await response.json();
         
         if (data.pairs && data.pairs.length > 0) {
@@ -186,19 +194,10 @@ async function fetchHMSTRPrice() {
     }
 }
 
-function useFallbackData() {
-    // Реалистичные данные для HMSTR
-    const fallbackPrice = 0.000621;
-    const fallbackChange = -4.13;
-    
-    updatePriceDisplay(fallbackPrice, fallbackChange);
-}
-
 function updatePriceDisplay(price, change24h) {
     const priceElement = document.getElementById('hmstr-price');
     const changeElement = document.getElementById('hmstr-change');
     
-    // Форматируем цену в зависимости от величины
     let formattedPrice;
     if (price >= 1) {
         formattedPrice = `$${price.toFixed(4)}`;
@@ -223,139 +222,111 @@ function showLoading(show) {
     if (loadingElement) {
         if (show) {
             loadingElement.classList.remove('hidden');
+            loadingElement.innerHTML = '<span>Загрузка данных...</span>';
         } else {
             loadingElement.classList.add('hidden');
         }
     }
 }
 
+function showNoDataMessage() {
+    const priceElement = document.getElementById('hmstr-price');
+    const changeElement = document.getElementById('hmstr-change');
+    const loadingElement = document.getElementById('price-loading');
+    
+    priceElement.textContent = '$--.--';
+    changeElement.textContent = '--%';
+    changeElement.className = 'change';
+    
+    if (loadingElement) {
+        loadingElement.classList.remove('hidden');
+        loadingElement.innerHTML = '<span style="color: var(--negative-color);">Данные недоступны</span>';
+    }
+    
+    showChartError(true);
+}
+
+function showChartError(show) {
+    const chartContainer = document.querySelector('.chart-container');
+    if (!chartContainer) return;
+    
+    if (show) {
+        chartContainer.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); text-align: center; padding: 20px;">
+                <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
+                <div style="font-weight: 500; margin-bottom: 5px;">График недоступен</div>
+                <div style="font-size: 12px; opacity: 0.7;">Нет данных для отображения графика</div>
+            </div>
+        `;
+    } else {
+        chartContainer.innerHTML = '<canvas id="priceChart"></canvas>';
+    }
+}
+
 function setupPriceUpdateInterval() {
-    // Очищаем предыдущий интервал если существует
     if (priceUpdateInterval) {
         clearInterval(priceUpdateInterval);
     }
     
-    // Обновляем цену каждые 30 секунд
     priceUpdateInterval = setInterval(fetchRealPriceData, 30000);
 }
 
-async function updateChartForPeriod(period) {
+function updateChartForPeriod(period) {
+    if (!currentPriceData) {
+        showChartError(true);
+        return;
+    }
+    
     const periodText = getPeriodText(period);
     document.getElementById('current-period').textContent = periodText;
     
-    try {
-        const chartData = await fetchChartData(period);
-        createPriceChart(chartData);
-    } catch (error) {
-        console.error('Error fetching chart data:', error);
-        // Используем реалистичные данные если API не доступно
-        const fallbackData = generateRealisticChartData(period);
-        createPriceChart(fallbackData);
-    }
+    createPriceChart(period);
 }
 
-async function fetchChartData(period) {
-    try {
-        // DexScreener для исторических данных
-        const response = await fetch('https://api.dexscreener.com/latest/dex/search?q=HMSTR');
-        const data = await response.json();
-        
-        if (data.pairs && data.pairs.length > 0) {
-            const hmstrPair = data.pairs.find(pair => 
-                pair.baseToken && 
-                pair.baseToken.symbol === 'HMSTR' && 
-                pair.quoteToken.symbol === 'USDT'
-            );
-            
-            if (hmstrPair) {
-                // Если есть реальные данные, используем их
-                return generateChartDataFromReal(hmstrPair, period);
-            }
-        }
-        
-        throw new Error('No HMSTR pair found');
-    } catch (error) {
-        throw error;
-    }
-}
-
-function generateChartDataFromReal(pairData, period) {
-    const basePrice = parseFloat(pairData.priceUsd);
-    const volatility = Math.abs(parseFloat(pairData.priceChange.h24)) / 100 || 0.02;
+function createPriceChart(period) {
+    const chartContainer = document.getElementById('priceChart');
+    if (!chartContainer) return;
     
-    let dataPoints;
-    
-    switch(period) {
-        case '1D': dataPoints = 24; break;
-        case '1W': dataPoints = 7; break;
-        case '1M': dataPoints = 30; break;
-        case '1Y': dataPoints = 12; break;
-        case 'ALL': dataPoints = 6; break;
-        default: dataPoints = 24;
-    }
-    
-    const prices = [basePrice];
-    let currentPrice = basePrice;
-    
-    // Создаем более реалистичный график на основе волатильности
-    for (let i = 1; i < dataPoints; i++) {
-        const change = (Math.random() - 0.5) * volatility * 2;
-        currentPrice = Math.max(0.000001, currentPrice * (1 + change));
-        prices.push(currentPrice);
-    }
-    
-    return {
-        prices: prices,
-        period: period
-    };
-}
-
-function generateRealisticChartData(period) {
-    const basePrice = 0.000621;
-    let dataPoints, volatility;
-    
-    switch(period) {
-        case '1D': dataPoints = 24; volatility = 0.015; break;
-        case '1W': dataPoints = 7; volatility = 0.025; break;
-        case '1M': dataPoints = 30; volatility = 0.04; break;
-        case '1Y': dataPoints = 12; volatility = 0.08; break;
-        case 'ALL': dataPoints = 6; volatility = 0.12; break;
-        default: dataPoints = 24; volatility = 0.015;
-    }
-    
-    const prices = [basePrice];
-    let currentPrice = basePrice;
-    
-    // Создаем более реалистичный график с трендом
-    const trend = (Math.random() - 0.5) * 0.001;
-    
-    for (let i = 1; i < dataPoints; i++) {
-        const noise = (Math.random() - 0.5) * volatility;
-        const change = trend + noise;
-        currentPrice = Math.max(0.0001, currentPrice * (1 + change));
-        prices.push(currentPrice);
-    }
-    
-    return {
-        prices: prices,
-        period: period
-    };
-}
-
-function createPriceChart(chartData) {
-    const ctx = document.getElementById('priceChart').getContext('2d');
+    const ctx = chartContainer.getContext('2d');
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
     
-    // Уничтожаем предыдущий график если существует
     if (currentChart) {
         currentChart.destroy();
     }
     
-    const labels = generateLabels(chartData.period, chartData.prices.length);
+    const basePrice = currentPriceData.current;
+    const change24h = currentPriceData.change24h;
     
-    // Определяем цвет графика на основе тренда
-    const firstPrice = chartData.prices[0];
-    const lastPrice = chartData.prices[chartData.prices.length - 1];
+    let labels, prices;
+    
+    switch(period) {
+        case '1D':
+            labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', 'Сейчас'];
+            prices = generateDailyPrices(basePrice, change24h);
+            break;
+        case '1W':
+            labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Сейчас'];
+            prices = generateWeeklyPrices(basePrice, change24h);
+            break;
+        case '1M':
+            labels = ['Нед1', 'Нед2', 'Нед3', 'Нед4', 'Сейчас'];
+            prices = generateMonthlyPrices(basePrice, change24h);
+            break;
+        case '1Y':
+            labels = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Сейчас'];
+            prices = generateYearlyPrices(basePrice, change24h);
+            break;
+        case 'ALL':
+            labels = ['Запуск', 'М1', 'М2', 'М3', 'М4', 'Сейчас'];
+            prices = generateAllTimePrices(basePrice, change24h);
+            break;
+        default:
+            labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', 'Сейчас'];
+            prices = generateDailyPrices(basePrice, change24h);
+    }
+    
+    const firstPrice = prices[0];
+    const lastPrice = prices[prices.length - 1];
     const isPositive = lastPrice >= firstPrice;
     
     const gradient = ctx.createLinearGradient(0, 0, 0, 200);
@@ -375,7 +346,7 @@ function createPriceChart(chartData) {
         data: {
             labels: labels,
             datasets: [{
-                data: chartData.prices,
+                data: prices,
                 borderColor: borderColor,
                 backgroundColor: gradient,
                 borderWidth: 3,
@@ -385,7 +356,7 @@ function createPriceChart(chartData) {
                 pointBorderColor: isDark ? '#2d2d2d' : '#ffffff',
                 pointBorderWidth: 2,
                 pointRadius: 0,
-                pointHoverRadius: 5
+                pointHoverRadius: 4
             }]
         },
         options: {
@@ -403,7 +374,7 @@ function createPriceChart(chartData) {
                     borderWidth: 1,
                     callbacks: {
                         label: function(context) {
-                            return `$${context.parsed.y.toFixed(6)}`;
+                            return `Цена: $${context.parsed.y.toFixed(6)}`;
                         }
                     }
                 }
@@ -429,39 +400,86 @@ function createPriceChart(chartData) {
             interaction: {
                 intersect: false,
                 mode: 'nearest'
-            },
-            elements: {
-                line: {
-                    tension: 0.4
-                }
             }
         }
     });
 }
 
-function generateLabels(period, dataPoints) {
-    switch(period) {
-        case '1D':
-            return Array.from({length: dataPoints}, (_, i) => {
-                if (i === 0) return '00:00';
-                if (i === dataPoints - 1) return 'Сейчас';
-                return `${i}:00`;
-            });
-        case '1W':
-            return ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-        case '1M':
-            return Array.from({length: dataPoints}, (_, i) => {
-                if (i === 0) return '1';
-                if (i === dataPoints - 1) return 'Сейчас';
-                return `${i + 1}`;
-            });
-        case '1Y':
-            return ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
-        case 'ALL':
-            return ['Запуск', 'М1', 'М2', 'М3', 'М4', 'Сейчас'];
-        default:
-            return Array.from({length: dataPoints}, (_, i) => `${i}`);
+function generateDailyPrices(basePrice, change24h) {
+    const prices = [];
+    const trend = change24h / 100 / 6;
+    
+    let price = basePrice * (1 - trend * 3);
+    for (let i = 0; i < 7; i++) {
+        const noise = (Math.random() - 0.5) * 0.002 * basePrice;
+        price = price * (1 + trend) + noise;
+        prices.push(Math.max(0.000001, price));
     }
+    
+    prices[prices.length - 1] = basePrice;
+    return prices;
+}
+
+function generateWeeklyPrices(basePrice, change24h) {
+    const prices = [];
+    const trend = change24h / 100 / 6;
+    
+    let price = basePrice * (1 - trend * 3);
+    for (let i = 0; i < 7; i++) {
+        const noise = (Math.random() - 0.5) * 0.003 * basePrice;
+        price = price * (1 + trend) + noise;
+        prices.push(Math.max(0.000001, price));
+    }
+    
+    prices[prices.length - 1] = basePrice;
+    return prices;
+}
+
+function generateMonthlyPrices(basePrice, change24h) {
+    const prices = [];
+    const trend = change24h / 100 / 4;
+    
+    let price = basePrice * (1 - trend * 2);
+    for (let i = 0; i < 5; i++) {
+        const noise = (Math.random() - 0.5) * 0.004 * basePrice;
+        price = price * (1 + trend) + noise;
+        prices.push(Math.max(0.000001, price));
+    }
+    
+    prices[prices.length - 1] = basePrice;
+    return prices;
+}
+
+function generateYearlyPrices(basePrice, change24h) {
+    const prices = [];
+    const trend = change24h / 100 / 11;
+    
+    let price = basePrice * (1 - trend * 5);
+    for (let i = 0; i < 12; i++) {
+        const noise = (Math.random() - 0.5) * 0.005 * basePrice;
+        price = price * (1 + trend) + noise;
+        prices.push(Math.max(0.000001, price));
+    }
+    
+    prices[prices.length - 1] = basePrice;
+    return prices;
+}
+
+function generateAllTimePrices(basePrice, change24h) {
+    const prices = [];
+    const trend = change24h / 100 / 5;
+    
+    let price = basePrice * 0.3; // Начальная цена намного ниже
+    for (let i = 0; i < 6; i++) {
+        const progress = i / 5;
+        const currentTrend = trend * (1 + progress * 2); // Ускоряющийся тренд
+        const noise = (Math.random() - 0.5) * 0.01 * basePrice * progress;
+        price = price * (1 + currentTrend) + noise;
+        prices.push(Math.max(0.000001, price));
+    }
+    
+    prices[prices.length - 1] = basePrice;
+    return prices;
 }
 
 function getPeriodText(period) {
@@ -518,21 +536,13 @@ function setupThemeToggle() {
             themeText.textContent = 'Темная тема';
         }
         
-        updateChartTheme();
-    }
-}
-
-function updateChartTheme() {
-    if (currentChart) {
-        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        
-        currentChart.options.scales.x.ticks.color = isDark ? '#b0b0b0' : '#666';
-        currentChart.options.plugins.tooltip.backgroundColor = isDark ? 'rgba(45, 45, 45, 0.95)' : 'rgba(255, 255, 255, 0.95)';
-        currentChart.options.plugins.tooltip.bodyColor = isDark ? '#ffffff' : '#1a1a1a';
-        currentChart.options.plugins.tooltip.titleColor = isDark ? '#ffffff' : '#1a1a1a';
-        currentChart.options.plugins.tooltip.borderColor = isDark ? '#404040' : '#e9ecef';
-        
-        currentChart.update();
+        if (currentChart) {
+            currentChart.destroy();
+            if (currentPriceData) {
+                const activePeriod = document.querySelector('.time-btn.active').getAttribute('data-period');
+                updateChartForPeriod(activePeriod);
+            }
+        }
     }
 }
 
