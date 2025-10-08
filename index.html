@@ -108,14 +108,36 @@
                             </div>
                         </div>
                         <div class="current-price">
-                            <span class="price" id="hmstr-price">$0.00061234</span>
-                            <span class="change negative" id="hmstr-change">-4.92%</span>
+                            <span class="price" id="hmstr-price">$0.000621</span>
+                            <span class="change negative" id="hmstr-change">-4.13%</span>
+                            <span class="time-period" id="current-period">Сегодня</span>
                         </div>
+                    </div>
+                    
+                    <!-- Time Period Selector -->
+                    <div class="time-selector">
+                        <button class="time-btn active" data-period="1D">1Д</button>
+                        <button class="time-btn" data-period="1W">7Д</button>
+                        <button class="time-btn" data-period="1M">1М</button>
+                        <button class="time-btn" data-period="1Y">1Г</button>
+                        <button class="time-btn" data-period="ALL">Все</button>
                     </div>
                     
                     <!-- Price Chart -->
                     <div class="chart-container">
                         <canvas id="priceChart"></canvas>
+                    </div>
+
+                    <!-- Price Statistics -->
+                    <div class="price-stats">
+                        <div class="price-stat">
+                            <span class="stat-label">Макс</span>
+                            <span class="stat-value" id="price-high">$0.0006566</span>
+                        </div>
+                        <div class="price-stat">
+                            <span class="stat-label">Мин</span>
+                            <span class="stat-value" id="price-low">$0.0006176</span>
+                        </div>
                     </div>
                 </div>
 
