@@ -265,45 +265,44 @@ body {
 .price-header {
     display: flex;
     justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 10px;
+    align-items: center;
+    margin-bottom: 16px;
 }
 
 .coin-info {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 10px;
 }
 
 .coin-logo {
-    width: 44px;
-    height: 44px;
-    border-radius: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     overflow: hidden;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     background: var(--bg-secondary);
-    border: 1px solid var(--border-color);
 }
 
 .coin-avatar {
     width: 100%;
     height: 100%;
-    object-fit: cover;
-    border-radius: 12px;
+    object-fit: contain;
+    border-radius: 10px;
 }
 
 .coin-details h3 {
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
-    margin-bottom: 4px;
+    margin-bottom: 2px;
     color: var(--text-primary);
 }
 
 .coin-details p {
-    font-size: 13px;
+    font-size: 11px;
     color: var(--text-secondary);
 }
 
@@ -312,39 +311,93 @@ body {
 }
 
 .price {
-    font-size: 26px;
+    font-size: 20px;
     font-weight: 700;
     display: block;
     color: var(--text-primary);
-    font-family: 'Inter', monospace;
-    letter-spacing: -0.5px;
-    margin-bottom: 4px;
 }
 
 .change {
-    font-size: 15px;
+    font-size: 13px;
     font-weight: 600;
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 8px;
-    font-family: 'Inter', sans-serif;
 }
 
 .change.positive {
-    background: rgba(0, 200, 81, 0.1);
-    color: #00C851;
+    color: #00c851;
 }
 
 .change.negative {
-    background: rgba(255, 68, 68, 0.1);
-    color: #FF4444;
+    color: #ff4444;
+}
+
+.time-period {
+    font-size: 11px;
+    color: var(--text-secondary);
+    display: block;
+    margin-top: 2px;
+}
+
+/* Time Selector */
+.time-selector {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+    background: var(--bg-secondary);
+    padding: 4px;
+    border-radius: 12px;
+}
+
+.time-btn {
+    flex: 1;
+    padding: 8px 4px;
+    border: none;
+    background: transparent;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-secondary);
+}
+
+.time-btn.active {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 /* Chart */
 .chart-container {
-    height: 80px;
+    height: 200px;
     position: relative;
-    margin: 15px 0 5px 0;
+    margin: 8px 0;
+}
+
+/* Price Statistics */
+.price-stats {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+}
+
+.price-stat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stat-label {
+    font-size: 11px;
+    color: var(--text-secondary);
+    margin-bottom: 4px;
+}
+
+.stat-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
 }
 
 /* Exchanges Section */
@@ -861,28 +914,6 @@ body {
     .theme-toggle {
         padding: 8px 14px;
         font-size: 13px;
-    }
-    
-    .price {
-        font-size: 22px;
-    }
-    
-    .change {
-        font-size: 13px;
-        padding: 4px 8px;
-    }
-    
-    .coin-logo {
-        width: 40px;
-        height: 40px;
-    }
-    
-    .chart-container {
-        height: 70px;
-    }
-    
-    .coin-details h3 {
-        font-size: 16px;
     }
 }
 
