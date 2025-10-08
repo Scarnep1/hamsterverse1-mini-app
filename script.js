@@ -13,7 +13,7 @@ function initializeApp() {
     setupTimePeriodSelector();
 }
 
-// Навигация
+// Modern Navigation
 function setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.content-section');
@@ -23,10 +23,7 @@ function setupNavigation() {
             const targetSection = this.getAttribute('data-section');
             
             // Убираем активный класс у всех кнопок
-            navItems.forEach(nav => {
-                nav.classList.remove('active');
-                nav.style.background = 'transparent';
-            });
+            navItems.forEach(nav => nav.classList.remove('active'));
             
             // Добавляем активный класс текущей кнопке
             this.classList.add('active');
