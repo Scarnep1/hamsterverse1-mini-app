@@ -51,6 +51,33 @@ body {
     transition: background-color 0.3s ease;
 }
 
+/* Announcement Banner */
+.announcement-banner {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 14px;
+    font-weight: 500;
+    animation: slideDown 0.5s ease;
+}
+
+.close-announcement {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 20px;
+    cursor: pointer;
+    padding: 0;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 /* Header */
 .header {
     background: var(--header-bg);
@@ -81,32 +108,6 @@ body {
     opacity: 0.9;
     margin-top: 2px;
     font-weight: 400;
-}
-
-.header-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.icon-button {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
-    border-radius: 50%;
-    width: 36px;
-    height: 36px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    backdrop-filter: blur(10px);
-    font-size: 16px;
-}
-
-.icon-button:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: rotate(90deg);
 }
 
 .user-avatar {
@@ -186,8 +187,8 @@ body {
     font-weight: 500;
 }
 
-/* Статистические карточки */
-.stats-cards {
+/* Games Statistics */
+.games-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 12px;
@@ -204,16 +205,32 @@ body {
 }
 
 .stat-value {
-    display: block;
-    font-size: 18px;
+    font-size: 24px;
     font-weight: 700;
     color: var(--text-primary);
-    margin-bottom: 4px;
+    display: block;
 }
 
 .stat-label {
-    font-size: 11px;
+    font-size: 12px;
     color: var(--text-secondary);
+    margin-top: 4px;
+    display: block;
+}
+
+/* Token Statistics */
+.token-stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.token-stat {
+    background: var(--bg-secondary);
+    border-radius: 10px;
+    padding: 12px;
+    text-align: center;
 }
 
 /* Games Grid */
@@ -234,42 +251,12 @@ body {
     border: 1px solid var(--border-color);
     cursor: pointer;
     box-shadow: var(--shadow);
-    position: relative;
 }
 
 .game-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-hover);
     background: var(--bg-secondary);
-}
-
-.game-card.featured {
-    border: 2px solid var(--positive-color);
-}
-
-/* Бейджи для карточек */
-.game-badge {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    background: var(--negative-color);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-size: 10px;
-    font-weight: 600;
-}
-
-.news-badge {
-    position: absolute;
-    top: -6px;
-    right: 12px;
-    background: var(--positive-color);
-    color: white;
-    padding: 4px 8px;
-    border-radius: 8px;
-    font-size: 10px;
-    font-weight: 600;
 }
 
 .game-image {
@@ -325,21 +312,6 @@ body {
     font-size: 13px;
     color: var(--text-secondary);
     line-height: 1.3;
-}
-
-/* Статистика игр */
-.game-stats {
-    display: flex;
-    gap: 12px;
-    margin-top: 8px;
-}
-
-.game-stats .stat {
-    font-size: 11px;
-    color: var(--text-secondary);
-    background: var(--bg-secondary);
-    padding: 2px 6px;
-    border-radius: 6px;
 }
 
 /* Play Button */
@@ -446,43 +418,6 @@ body {
     color: var(--text-secondary);
     display: block;
     margin-top: 2px;
-}
-
-/* Loading Indicator */
-.loading-indicator {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 10px;
-    background: var(--bg-secondary);
-    border-radius: 8px;
-    margin-bottom: 12px;
-    border: 1px solid var(--border-color);
-}
-
-.loading-indicator span {
-    font-size: 12px;
-    color: var(--text-secondary);
-    font-weight: 500;
-}
-
-.loading-indicator.hidden {
-    display: none;
-}
-
-.loading-spinner {
-    width: 16px;
-    height: 16px;
-    border: 2px solid transparent;
-    border-top: 2px solid var(--text-secondary);
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-right: 8px;
-}
-
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
 }
 
 /* Time Selector */
@@ -680,44 +615,45 @@ body {
     line-height: 1.3;
 }
 
-/* Новостная секция */
-.news-section {
-    margin-top: 24px;
+/* News Section */
+.news-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-.news-section h3 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 12px;
-    color: var(--text-primary);
-}
-
-.news-card {
+.news-item {
     background: var(--bg-card);
     border-radius: 12px;
     padding: 16px;
     border: 1px solid var(--border-color);
-    position: relative;
     box-shadow: var(--shadow);
-    margin-bottom: 12px;
+    transition: all 0.3s ease;
 }
 
-.news-card h4 {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: var(--text-primary);
-}
-
-.news-card p {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-bottom: 8px;
+.news-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
 }
 
 .news-date {
-    font-size: 10px;
+    font-size: 11px;
     color: var(--text-muted);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.news-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.news-content {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
 }
 
 /* Profile Section */
@@ -760,171 +696,6 @@ body {
     margin-bottom: 6px;
 }
 
-.profile-stats {
-    display: flex;
-    gap: 16px;
-    margin-top: 8px;
-}
-
-.profile-stat {
-    text-align: center;
-}
-
-.profile-stat strong {
-    display: block;
-    font-size: 18px;
-    font-weight: 700;
-    color: var(--text-primary);
-}
-
-.profile-stat span {
-    font-size: 11px;
-    color: var(--text-secondary);
-}
-
-/* Кнопка приглашения */
-.invite-section {
-    background: var(--bg-card);
-    border-radius: 16px;
-    padding: 20px;
-    margin: 20px 0;
-    border: 1px solid var(--border-color);
-    text-align: center;
-    box-shadow: var(--shadow);
-}
-
-.invite-button {
-    background: var(--accent-gradient);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 12px 24px;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    margin-top: 12px;
-    width: 100%;
-}
-
-.invite-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-}
-
-/* Настройки */
-.settings-section {
-    background: var(--bg-card);
-    border-radius: 16px;
-    padding: 20px;
-    margin: 20px 0;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow);
-}
-
-.settings-section h3 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: var(--text-primary);
-}
-
-.setting-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.setting-item:last-child {
-    border-bottom: none;
-}
-
-.switch {
-    position: relative;
-    display: inline-block;
-    width: 44px;
-    height: 24px;
-}
-
-.switch input {
-    opacity: 0;
-    width: 0;
-    height: 0;
-}
-
-.slider {
-    position: absolute;
-    cursor: pointer;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: var(--border-color);
-    transition: .4s;
-    border-radius: 24px;
-}
-
-.slider:before {
-    position: absolute;
-    content: "";
-    height: 18px;
-    width: 18px;
-    left: 3px;
-    bottom: 3px;
-    background-color: white;
-    transition: .4s;
-    border-radius: 50%;
-}
-
-input:checked + .slider {
-    background-color: var(--positive-color);
-}
-
-input:checked + .slider:before {
-    transform: translateX(20px);
-}
-
-/* Информация о приложении */
-.app-info {
-    background: var(--bg-card);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow);
-}
-
-.app-info h3 {
-    font-size: 16px;
-    font-weight: 600;
-    margin-bottom: 16px;
-    color: var(--text-primary);
-}
-
-.info-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 8px 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.info-item:last-child {
-    border-bottom: none;
-}
-
-.info-item span:first-child {
-    color: var(--text-secondary);
-    font-size: 13px;
-}
-
-.info-item span:last-child {
-    color: var(--text-primary);
-    font-size: 13px;
-    font-weight: 500;
-}
-
 /* Bottom Navigation - Fixed */
 .bottom-nav {
     position: fixed;
@@ -937,9 +708,15 @@ input:checked + .slider:before {
     padding: 16px 0 20px;
     border-top: 1px solid var(--border-color);
     backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    background: rgba(255, 255, 255, 0.9);
     max-width: 400px;
     margin: 0 auto;
     z-index: 1000;
+}
+
+[data-theme="dark"] .bottom-nav {
+    background: rgba(30, 30, 30, 0.9);
 }
 
 .nav-item {
@@ -987,54 +764,10 @@ input:checked + .slider:before {
     color: var(--text-secondary);
 }
 
-/* Бейдж в навигации */
-.nav-badge {
-    position: absolute;
-    top: -2px;
-    right: 8px;
-    background: var(--negative-color);
-    color: white;
-    border-radius: 50%;
-    width: 16px;
-    height: 16px;
-    font-size: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
 /* Анимация при наведении */
 .nav-item:not(.active):hover {
     opacity: 0.9;
     transform: translateY(-1px);
-}
-
-/* Уведомления */
-.notification {
-    position: fixed;
-    top: 20px;
-    left: 50%;
-    transform: translateX(-50%) translateY(-100px);
-    background: var(--positive-color);
-    color: white;
-    padding: 12px 20px;
-    border-radius: 12px;
-    font-weight: 600;
-    z-index: 10000;
-    transition: transform 0.3s ease;
-    box-shadow: var(--shadow-hover);
-}
-
-.notification.show {
-    transform: translateX(-50%) translateY(0);
-}
-
-.notification.error {
-    background: var(--negative-color);
-}
-
-.notification.warning {
-    background: #ff9800;
 }
 
 /* Responsive */
@@ -1090,25 +823,6 @@ input:checked + .slider:before {
         padding: 8px 14px;
         font-size: 13px;
     }
-    
-    .stats-cards {
-        grid-template-columns: 1fr;
-    }
-}
-
-@media (max-width: 360px) {
-    .header-content {
-        flex-wrap: wrap;
-    }
-    
-    .game-card {
-        flex-direction: column;
-        text-align: center;
-    }
-    
-    .game-info {
-        margin: 12px 0;
-    }
 }
 
 /* Animations */
@@ -1134,8 +848,68 @@ input:checked + .slider:before {
     }
 }
 
+@keyframes slideDown {
+    from {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+@keyframes loadingBar {
+    0% { transform: translateX(-100%); }
+    50% { transform: translateX(0); }
+    100% { transform: translateX(100%); }
+}
+
+.loading-pulse {
+    animation: pulse 1.5s ease-in-out infinite;
+}
+
+.updating::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent-gradient);
+    animation: loadingBar 2s ease-in-out infinite;
+}
+
 .hidden {
     display: none !important;
+}
+
+/* Loading Indicator */
+.loading-indicator {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin-bottom: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.loading-indicator span {
+    font-size: 12px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.loading-indicator.hidden {
+    display: none;
 }
 
 /* Prevent image drag */
