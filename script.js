@@ -626,3 +626,51 @@ window.addEventListener('beforeunload', function() {
         clearInterval(priceUpdateInterval);
     }
 });
+
+// В начало файла script.js добавьте
+function getAdminAnnouncements() {
+    return JSON.parse(localStorage.getItem('admin_announcements') || '[]');
+}
+
+function getAdminNews() {
+    return JSON.parse(localStorage.getItem('admin_news') || '[]');
+}
+
+function getAdminGames() {
+    return JSON.parse(localStorage.getItem('admin_games') || '[]');
+}
+
+function getAdminTokenData() {
+    return JSON.parse(localStorage.getItem('admin_token_data'));
+}
+
+// Обновите функцию setupNewsSection
+async function setupNewsSection() {
+    let news = getAdminNews();
+    
+    if (news.length === 0) {
+        try {
+            news = await fetchNews();
+        } catch (error) {
+            news = [];
+        }
+    }
+    
+    displayNews(news);
+}
+
+// Обновите функцию setupPriceData
+async function setupPriceData() {
+    const adminData = getAdminTokenData();
+    
+    if (adminData && adminData.usdPrice) {
+        // Используем данные из админки
+        updatePriceDisplay(adminData.usdPrice, adminData.change24h, adminData.usdToRubRate);
+    } else {
+        // Получаем данные с API
+        const success = await fetchRealPriceData();
+        if (success) {
+            priceUpdateInterval = setInterval(fetchRealPriceData, 30000);
+        }
+    }
+}
