@@ -7,7 +7,6 @@
     <title>Hamster Verse</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -126,43 +125,48 @@
                     </div>
                 </div>
                 
-                <!-- Price Card -->
-                <div class="price-card">
-                    <div class="price-header">
-                        <div class="coin-info">
-                            <div class="coin-logo">
-                                <img src="images/hmstr-token.png" alt="HMSTR" class="coin-avatar">
-                            </div>
-                            <div class="coin-details">
+                <!-- Price Cards -->
+                <div class="price-cards-container">
+                    <!-- USD Price Card -->
+                    <div class="price-card">
+                        <div class="price-card-header">
+                            <div class="currency-flag">🇺🇸</div>
+                            <div class="currency-info">
                                 <h3>HMSTR / USDT</h3>
-                                <p>Хамстер Комбат</p>
+                                <p>Доллар США</p>
                             </div>
                         </div>
-                        <div class="current-price">
-                            <span class="price" id="hmstr-price">$0.000621</span>
-                            <span class="change negative" id="hmstr-change">-4.13%</span>
-                            <span class="time-period" id="current-period">Сегодня</span>
+                        <div class="price-card-content">
+                            <div class="price-main" id="hmstr-price-usd">$0.000621</div>
+                            <div class="price-change">
+                                <span class="change negative" id="hmstr-change-usd">-4.13%</span>
+                                <span class="change-time">за 24ч</span>
+                            </div>
                         </div>
                     </div>
-                    
-                    <!-- Loading Indicator -->
-                    <div class="loading-indicator hidden" id="price-loading">
-                        <span>Обновление данных...</span>
+
+                    <!-- RUB Price Card -->
+                    <div class="price-card">
+                        <div class="price-card-header">
+                            <div class="currency-flag">🇷🇺</div>
+                            <div class="currency-info">
+                                <h3>HMSTR / RUB</h3>
+                                <p>Российский рубль</p>
+                            </div>
+                        </div>
+                        <div class="price-card-content">
+                            <div class="price-main" id="hmstr-price-rub">0.056 ₽</div>
+                            <div class="price-change">
+                                <span class="change negative" id="hmstr-change-rub">-4.13%</span>
+                                <span class="change-time">за 24ч</span>
+                            </div>
+                        </div>
                     </div>
-                    
-                    <!-- Time Period Selector -->
-                    <div class="time-selector">
-                        <button class="time-btn active" data-period="1D">1Д</button>
-                        <button class="time-btn" data-period="1W">7Д</button>
-                        <button class="time-btn" data-period="1M">1М</button>
-                        <button class="time-btn" data-period="1Y">1Г</button>
-                        <button class="time-btn" data-period="ALL">Все</button>
-                    </div>
-                    
-                    <!-- Price Chart -->
-                    <div class="chart-container">
-                        <canvas id="priceChart"></canvas>
-                    </div>
+                </div>
+
+                <!-- Loading Indicator -->
+                <div class="loading-indicator hidden" id="price-loading">
+                    <span>Обновление данных...</span>
                 </div>
 
                 <!-- Exchanges List -->
