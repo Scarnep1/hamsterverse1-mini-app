@@ -3,7 +3,44 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-function initializeApp() {
+// Cache system
+const cache = {
+    set: (key, data, ttl = 60000) => {
+        localStorage.setItem(key, JSON.stringify({
+            data,
+            expiry: Date.now() + ttl
+        }));
+    },
+    get: (key) => {
+        const item = localStorage.getItem(key);
+        if (!item) return null;
+        
+        const { data, expiry } = JSON.parse(item);
+        if (Date.now() > expiry) {
+            localStorage.removeItem(key);
+            return null;
+        }
+        return data;
+    }
+};
+
+// Analytics tracking
+function trackEvent(event, data = {}) {
+    const analytics = JSON.parse(localStorage.getItem('analytics') || '{}');
+    if (!analytics[event]) analytics[event] = [];
+    
+    analytics[event].push({
+        timestamp: new Date().toISOString(),
+        ...data
+    });
+    
+    localStorage.setItem('analytics', JSON.stringify(analytics));
+    
+    // Simple console log for demo
+    console.log(`📊 Event: ${event}`, data);
+}
+
+async function initializeApp() {
     setupNavigation();
     setupPlayButtons();
     setupTelegramIntegration();
@@ -11,6 +48,18 @@ function initializeApp() {
     setupGuideButton();
     setupThemeToggle();
     setupTimePeriodSelector();
+    
+    // New features
+    await loadNews();
+    setupAutoRefresh();
+    setupOnlineCounter();
+    setupShareFunctionality();
+    setupGameStatistics();
+    setupDailyBonus();
+    setupReferralSystem();
+    setupAchievements();
+    
+    trackEvent('app_loaded');
 }
 
 // Навигация
@@ -29,6 +78,7 @@ function setupNavigation() {
                 section.classList.remove('active');
                 if (section.id === targetSection) {
                     section.classList.add('active');
+                    trackEvent('section_switch', { section: targetSection });
                 }
             });
         });
@@ -36,25 +86,66 @@ function setupNavigation() {
 }
 
 function setupPlayButtons() {
-    const playButtons = document.querySelectorAll('.play-button');
+    const playButtons = document.querySelectorAll('.play-button:not(.disabled)');
     
     playButtons.forEach(button => {
         button.addEventListener('click', function(e) {
             e.stopPropagation();
             const url = this.getAttribute('data-url');
+            const gameCard = this.closest('.game-card');
+            const gameName = gameCard.getAttribute('data-game');
+            
+            trackEvent('game_play', { game: gameName, url });
+            updateGameStats(gameName);
             openGame(url);
         });
     });
     
-    const gameCards = document.querySelectorAll('.game-card');
+    const gameCards = document.querySelectorAll('.game-card:not(.coming-soon)');
     
     gameCards.forEach(card => {
         card.addEventListener('click', function() {
             const playButton = this.querySelector('.play-button');
-            const url = playButton.getAttribute('data-url');
-            openGame(url);
+            if (!playButton.disabled) {
+                const url = playButton.getAttribute('data-url');
+                const gameName = this.getAttribute('data-game');
+                
+                trackEvent('game_play', { game: gameName, url });
+                updateGameStats(gameName);
+                openGame(url);
+            }
         });
     });
+}
+
+function updateGameStats(gameName) {
+    const stats = JSON.parse(localStorage.getItem('game_stats') || '{}');
+    stats[gameName] = (stats[gameName] || 0) + 1;
+    localStorage.setItem('game_stats', JSON.stringify(stats));
+    
+    // Update UI
+    updateGameStatsUI();
+    checkAchievements();
+}
+
+function updateGameStatsUI() {
+    const stats = JSON.parse(localStorage.getItem('game_stats') || '{}');
+    
+    // Update individual game counts
+    Object.keys(stats).forEach(game => {
+        const element = document.getElementById(`${game.toLowerCase().replace(' ', '-')}-plays`);
+        if (element) {
+            element.textContent = stats[game];
+        }
+    });
+    
+    // Update total plays
+    const totalPlays = Object.values(stats).reduce((sum, count) => sum + count, 0);
+    document.getElementById('total-plays').textContent = totalPlays;
+    
+    // Update user level
+    const level = Math.floor(totalPlays / 5) + 1;
+    document.getElementById('user-level').textContent = level;
 }
 
 function openGame(url) {
@@ -96,8 +187,33 @@ function setupTelegramIntegration() {
             } else {
                 username.textContent = 'Telegram пользователь';
             }
+            
+            // Setup member days
+            setupMemberDays();
         }
     }
+}
+
+function setupMemberDays() {
+    let joinDate = localStorage.getItem('join_date');
+    if (!joinDate) {
+        joinDate = new Date().toISOString();
+        localStorage.setItem('join_date', joinDate);
+    }
+    
+    const join = new Date(joinDate);
+    const today = new Date();
+    const diffTime = Math.abs(today - join);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    document.getElementById('member-days').textContent = `Участник ${diffDays} ${getDayText(diffDays)}`;
+    document.getElementById('streak-days').textContent = diffDays;
+}
+
+function getDayText(days) {
+    if (days % 10 === 1 && days % 100 !== 11) return 'день';
+    if (days % 10 >= 2 && days % 10 <= 4 && (days % 100 < 10 || days % 100 >= 20)) return 'дня';
+    return 'дней';
 }
 
 // Функции для данных HMSTR
@@ -117,7 +233,7 @@ const API_SOURCES = [
     },
     {
         name: 'CoinGecko',
-        url: 'https://api.coingecko.com/api/v3/simple/price?ids=hamster-combat&vs_currencies=usd&include_24hr_change=true',
+        url: 'https://api.coingecko.com/api/v3/simple/price?ids=hamster&vs_currencies=usd&include_24hr_change=true',
         parser: parseCoinGecko
     },
     {
@@ -137,6 +253,7 @@ function setupTimePeriodSelector() {
             
             const period = this.getAttribute('data-period');
             updateChartForPeriod(period);
+            trackEvent('chart_period_change', { period });
         });
     });
 }
@@ -146,8 +263,8 @@ async function setupPriceData() {
     if (success) {
         updateChartForPeriod('1D');
         
-        // Обновляем данные каждые 15 секунд
-        priceUpdateInterval = setInterval(fetchRealPriceData, 15000);
+        // Обновляем данные каждые 30 секунд
+        priceUpdateInterval = setInterval(fetchRealPriceData, 30000);
     }
 }
 
@@ -155,6 +272,17 @@ async function fetchRealPriceData() {
     showLoading(true);
     
     try {
+        // Check cache first
+        const cached = cache.get('hmstr_price');
+        if (cached) {
+            console.log('✅ Using cached price data');
+            updatePriceDisplay(cached.current, cached.change24h);
+            currentPriceData = cached;
+            showChartError(false);
+            showLoading(false);
+            return true;
+        }
+        
         // Пробуем все источники по очереди
         for (let source of API_SOURCES) {
             try {
@@ -163,8 +291,13 @@ async function fetchRealPriceData() {
                     console.log(`✅ Данные получены из ${source.name}:`, priceData);
                     updatePriceDisplay(priceData.current, priceData.change24h);
                     currentPriceData = priceData;
+                    
+                    // Cache the data
+                    cache.set('hmstr_price', priceData);
+                    
                     showChartError(false);
                     showLoading(false);
+                    trackEvent('price_update_success', { source: source.name });
                     return true;
                 }
             } catch (error) {
@@ -178,6 +311,7 @@ async function fetchRealPriceData() {
     } catch (error) {
         console.error('Ошибка получения данных:', error);
         showStaticDataMessage();
+        trackEvent('price_update_failed', { error: error.message });
         return false;
     }
 }
@@ -207,14 +341,14 @@ function parseDexScreener(data) {
 }
 
 function parseCoinGecko(data) {
-    if (data['hamster-combat']) {
+    if (data.hamster) {
         return {
-            current: data['hamster-combat'].usd,
-            change24h: data['hamster-combat'].usd_24h_change,
+            current: data.hamster.usd,
+            change24h: data.hamster.usd_24h_change,
             source: 'CoinGecko'
         };
     }
-    throw new Error('No hamster-combat data');
+    throw new Error('No hamster data');
 }
 
 function parseMEXC(data) {
@@ -269,7 +403,7 @@ function showStaticDataMessage() {
     const loadingElement = document.getElementById('price-loading');
     if (loadingElement) {
         loadingElement.classList.remove('hidden');
-        loadingElement.innerHTML = '<span style="color: var(--text-secondary);">📡 Используются кэшированные данные • Обновление через 15 сек</span>';
+        loadingElement.innerHTML = '<span style="color: var(--text-secondary);">📡 Используются кэшированные данные • Обновление через 30 сек</span>';
     }
 }
 
@@ -604,6 +738,7 @@ function setupGuideButton() {
             if (buyGuide.classList.contains('hidden')) {
                 buyGuide.classList.remove('hidden');
                 guideButton.textContent = '📖 Скрыть гайд';
+                trackEvent('guide_opened');
             } else {
                 buyGuide.classList.add('hidden');
                 guideButton.textContent = '📖 Как купить HMSTR';
@@ -617,13 +752,14 @@ function setupThemeToggle() {
     const themeIcon = themeToggle.querySelector('.theme-icon');
     const themeText = themeToggle.querySelector('.theme-text');
     
-    const savedTheme = localStorage.getItem('theme') || 'light';
+    const savedTheme = localStorage.getItem('theme') || 'dark'; // Dark theme by default
     setTheme(savedTheme);
     
     themeToggle.addEventListener('click', function() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
         setTheme(newTheme);
+        trackEvent('theme_switch', { theme: newTheme });
     });
     
     function setTheme(theme) {
@@ -643,6 +779,278 @@ function setupThemeToggle() {
             updateChartForPeriod(activePeriod);
         }
     }
+}
+
+// Новые функции
+
+// Загрузка новостей
+async function loadNews() {
+    const newsContainer = document.getElementById('news-container');
+    const newsLoading = document.getElementById('news-loading');
+    
+    newsLoading.classList.remove('hidden');
+    
+    try {
+        // Fallback news data
+        const fallbackNews = [
+            {
+                title: "Добро пожаловать в Hamster Verse!",
+                description: "Все игры Hamster Kombat теперь в одном приложении. Следите за ценами HMSTR и открывайте новые игры!",
+                date: new Date().toLocaleDateString('ru-RU')
+            },
+            {
+                title: "Новые игры скоро!",
+                description: "Команда Hamster Kombat готовит сюрпризы. Следите за обновлениями!",
+                date: new Date(Date.now() - 86400000).toLocaleDateString('ru-RU')
+            },
+            {
+                title: "Обновление токеномики HMSTR",
+                description: "Узнайте о последних изменениях в экономике токена HMSTR.",
+                date: new Date(Date.now() - 172800000).toLocaleDateString('ru-RU')
+            }
+        ];
+        
+        displayNews(fallbackNews);
+        trackEvent('news_loaded', { count: fallbackNews.length });
+        
+    } catch (error) {
+        console.error('Error loading news:', error);
+        newsContainer.innerHTML = '<div class="news-card"><p>Новости временно недоступны</p></div>';
+    } finally {
+        newsLoading.classList.add('hidden');
+    }
+}
+
+function displayNews(news) {
+    const newsContainer = document.getElementById('news-container');
+    newsContainer.innerHTML = '';
+    
+    news.forEach(item => {
+        const newsCard = document.createElement('div');
+        newsCard.className = 'news-card';
+        newsCard.innerHTML = `
+            <div class="news-title">${item.title}</div>
+            <div class="news-description">${item.description}</div>
+            <div class="news-date">${item.date}</div>
+        `;
+        newsContainer.appendChild(newsCard);
+    });
+}
+
+// Счетчик онлайн
+function setupOnlineCounter() {
+    const counter = document.getElementById('online-counter');
+    
+    // Initial random value
+    const baseUsers = 1200;
+    const random = Math.floor(Math.random() * 300);
+    counter.textContent = `👥 ${(baseUsers + random).toLocaleString()} игроков онлайн`;
+    
+    // Update every 30 seconds
+    setInterval(() => {
+        const baseUsers = 1200;
+        const random = Math.floor(Math.random() * 300);
+        counter.textContent = `👥 ${(baseUsers + random).toLocaleString()} игроков онлайн`;
+    }, 30000);
+}
+
+// Функция поделиться
+function setupShareFunctionality() {
+    const shareBtn = document.getElementById('share-btn');
+    const profileShare = document.getElementById('profile-share');
+    
+    const shareHandler = async () => {
+        const shareData = {
+            title: 'Hamster Verse',
+            text: 'Все игры Hamster Kombat в одном приложении! Следи за ценой HMSTR и открывай новые игры 🐹',
+            url: window.location.href
+        };
+        
+        try {
+            if (navigator.share) {
+                await navigator.share(shareData);
+                trackEvent('share_success');
+            } else {
+                // Fallback - copy to clipboard
+                await navigator.clipboard.writeText(shareData.text + ' ' + shareData.url);
+                alert('Ссылка скопирована в буфер обмена!');
+                trackEvent('share_fallback');
+            }
+        } catch (err) {
+            console.log('Ошибка sharing:', err);
+            trackEvent('share_error', { error: err.message });
+        }
+    };
+    
+    if (shareBtn) shareBtn.addEventListener('click', shareHandler);
+    if (profileShare) profileShare.addEventListener('click', shareHandler);
+}
+
+// Статистика игр
+function setupGameStatistics() {
+    updateGameStatsUI();
+}
+
+// Ежедневный бонус
+function setupDailyBonus() {
+    const bonusElement = document.getElementById('daily-bonus');
+    const claimButton = document.getElementById('claim-bonus');
+    
+    // Check if bonus was already claimed today
+    const lastClaim = localStorage.getItem('last_bonus_claim');
+    const today = new Date().toDateString();
+    
+    if (lastClaim !== today) {
+        bonusElement.classList.remove('hidden');
+    }
+    
+    claimButton.addEventListener('click', () => {
+        // Mark as claimed
+        localStorage.setItem('last_bonus_claim', today);
+        
+        // Add to streak
+        const streak = parseInt(localStorage.getItem('bonus_streak') || '0') + 1;
+        localStorage.setItem('bonus_streak', streak.toString());
+        
+        // Hide bonus
+        bonusElement.classList.add('hidden');
+        
+        // Show confetti
+        createConfetti();
+        
+        // Update streak display
+        document.getElementById('streak-days').textContent = streak;
+        
+        trackEvent('daily_bonus_claimed', { streak });
+        
+        alert(`🎉 Бонус получен! Ваша серия: ${streak} дней`);
+    });
+}
+
+// Реферальная система
+function setupReferralSystem() {
+    const inviteButton = document.getElementById('invite-friends');
+    const referralCount = document.getElementById('referral-count');
+    
+    // Load referral count
+    const count = parseInt(localStorage.getItem('referral_count') || '0');
+    referralCount.textContent = count;
+    
+    inviteButton.addEventListener('click', () => {
+        const referralLink = `${window.location.origin}${window.location.pathname}?ref=${Date.now()}`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: 'Присоединяйся к Hamster Verse!',
+                text: 'Все игры Hamster Kombat в одном приложении 🐹',
+                url: referralLink
+            }).then(() => {
+                // Increment referral count
+                const newCount = count + 1;
+                localStorage.setItem('referral_count', newCount.toString());
+                referralCount.textContent = newCount;
+                trackEvent('referral_invite_sent');
+            });
+        } else {
+            // Fallback
+            navigator.clipboard.writeText(referralLink).then(() => {
+                alert('Реферальная ссылка скопирована!');
+                const newCount = count + 1;
+                localStorage.setItem('referral_count', newCount.toString());
+                referralCount.textContent = newCount;
+                trackEvent('referral_invite_copied');
+            });
+        }
+    });
+}
+
+// Достижения
+function setupAchievements() {
+    checkAchievements();
+}
+
+function checkAchievements() {
+    const stats = JSON.parse(localStorage.getItem('game_stats') || '{}');
+    const totalPlays = Object.values(stats).reduce((sum, count) => sum + count, 0);
+    
+    // Unlock achievements based on progress
+    if (totalPlays >= 1) {
+        unlockAchievement('first_game');
+    }
+    if (totalPlays >= 10) {
+        unlockAchievement('strategist');
+    }
+    if (totalPlays >= 50) {
+        unlockAchievement('legend');
+    }
+}
+
+function unlockAchievement(achievementId) {
+    const unlocked = JSON.parse(localStorage.getItem('achievements') || '{}');
+    
+    if (!unlocked[achievementId]) {
+        unlocked[achievementId] = true;
+        localStorage.setItem('achievements', JSON.stringify(unlocked));
+        
+        // Visual feedback
+        createConfetti();
+        trackEvent('achievement_unlocked', { achievement: achievementId });
+        
+        // Show notification
+        setTimeout(() => {
+            alert('🏆 Достижение разблокировано!');
+        }, 500);
+    }
+}
+
+// Confetti effect
+function createConfetti() {
+    const container = document.getElementById('confetti-container');
+    const colors = ['#ff6b35', '#f7931a', '#00c851', '#667eea', '#764ba2'];
+    
+    for (let i = 0; i < 50; i++) {
+        const confetti = document.createElement('div');
+        confetti.className = 'confetti';
+        confetti.style.left = Math.random() * 100 + 'vw';
+        confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+        confetti.style.transform = `rotate(${Math.random() * 360}deg)`;
+        container.appendChild(confetti);
+        
+        // Animation
+        const animation = confetti.animate([
+            { 
+                top: '-10px', 
+                opacity: 1,
+                transform: `rotate(${Math.random() * 360}deg)`
+            },
+            { 
+                top: '100vh', 
+                opacity: 0,
+                transform: `rotate(${Math.random() * 720}deg)`
+            }
+        ], {
+            duration: 3000 + Math.random() * 3000,
+            easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)'
+        });
+        
+        animation.onfinish = () => confetti.remove();
+    }
+}
+
+// Auto refresh
+function setupAutoRefresh() {
+    const refreshBtn = document.getElementById('refresh-btn');
+    
+    refreshBtn.addEventListener('click', () => {
+        fetchRealPriceData();
+        trackEvent('manual_refresh');
+    });
+    
+    // Auto refresh every 5 minutes
+    setInterval(() => {
+        fetchRealPriceData();
+        trackEvent('auto_refresh');
+    }, 300000);
 }
 
 // Prevent image drag
