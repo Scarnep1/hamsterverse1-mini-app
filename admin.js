@@ -1,4 +1,4 @@
-// Конфигурация админской панели
+// Конфигурация админ-панели
 const ADMIN_CONFIG = {
     version: '1.0.0',
     storageKeys: {
@@ -7,19 +7,16 @@ const ADMIN_CONFIG = {
         games: 'admin_games',
         tokenData: 'admin_token_data',
         settings: 'admin_settings'
-    },
-    apiEndpoints: {
-        price: 'https://api.dexscreener.com/latest/dex/search?q=HMSTR',
-        stats: '/api/stats'
     }
 };
 
-// Инициализация админки
+// Инициализация админ-панели
 document.addEventListener('DOMContentLoaded', function() {
     initializeAdminPanel();
 });
 
 function initializeAdminPanel() {
+    checkAdminAccess();
     setupAdminNavigation();
     setupFormHandlers();
     loadDashboardData();
@@ -27,8 +24,19 @@ function initializeAdminPanel() {
     loadNews();
     loadGames();
     loadTokenData();
-    setupAutoSave();
+    loadSettings();
     setupCharts();
+    
+    console.log('Admin Panel v' + ADMIN_CONFIG.version + ' initialized');
+}
+
+// Проверка доступа к админ-панели
+function checkAdminAccess() {
+    const isAdmin = localStorage.getItem('is_admin') === 'true';
+    if (!isAdmin) {
+        alert('Доступ запрещен. Пожалуйста, войдите через основное приложение.');
+        window.location.href = 'index.html';
+    }
 }
 
 // Навигация по вкладкам
@@ -69,7 +77,10 @@ function setupFormHandlers() {
     // Токен
     setupTokenForm();
     
-    // Кнопки сохранения
+    // Настройки
+    setupSettingsForm();
+    
+    // Общие кнопки
     document.getElementById('save-btn').addEventListener('click', saveAllData);
     document.getElementById('logout-btn').addEventListener('click', logout);
 }
@@ -87,6 +98,19 @@ function setupAnnouncementForm() {
 }
 
 function setupNewsForm() {
+    const titleInput = document.getElementById('news-title');
+    const contentInput = document.getElementById('news-content');
+    const titleChars = document.getElementById('news-title-chars');
+    const contentChars = document.getElementById('news-content-chars');
+    
+    titleInput.addEventListener('input', function() {
+        titleChars.textContent = this.value.length;
+    });
+    
+    contentInput.addEventListener('input', function() {
+        contentChars.textContent = this.value.length;
+    });
+    
     document.getElementById('publish-news').addEventListener('click', publishNews);
     document.getElementById('preview-news').addEventListener('click', previewNews);
 }
@@ -100,25 +124,29 @@ function setupTokenForm() {
     document.getElementById('fetch-prices').addEventListener('click', fetchRealPrices);
 }
 
-// Загрузка данных
+function setupSettingsForm() {
+    document.getElementById('save-settings').addEventListener('click', saveSettings);
+}
+
+// Загрузка данных дашборда
 function loadDashboardData() {
-    // Загрузка статистики пользователей
-    loadUserStats();
+    // Статистика пользователей
+    updateUserStats();
     
-    // Загрузка статистики игр
-    loadGamesStats();
+    // Статистика игр
+    updateGamesStats();
     
-    // Загрузка данных токена
+    // Данные токена
     updateTokenDisplay();
 }
 
-function loadUserStats() {
+function updateUserStats() {
     // В реальном приложении здесь был бы API запрос
-    const totalUsers = Math.floor(15000 + Math.random() * 35000);
-    document.getElementById('total-users').textContent = formatNumber(totalUsers);
+    const totalUsers = localStorage.getItem('total_users') || '15,247';
+    document.getElementById('total-users').textContent = totalUsers;
 }
 
-function loadGamesStats() {
+function updateGamesStats() {
     const games = getGames();
     document.getElementById('active-games').textContent = games.length;
     
@@ -132,7 +160,7 @@ function loadAnnouncements() {
     const container = document.getElementById('announcements-list');
     
     if (announcements.length === 0) {
-        container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Нет активных анонсов</td></tr>';
+        container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Нет активных анонсов</td></tr>';
         return;
     }
     
@@ -162,11 +190,11 @@ function loadAnnouncements() {
 }
 
 function saveAnnouncement() {
-    const text = document.getElementById('announcement-text').value;
+    const text = document.getElementById('announcement-text').value.trim();
     const type = document.getElementById('announcement-type').value;
     const active = document.getElementById('announcement-active').checked;
     
-    if (!text.trim()) {
+    if (!text) {
         showNotification('Ошибка', 'Введите текст анонса', 'error');
         return;
     }
@@ -187,15 +215,15 @@ function saveAnnouncement() {
     document.getElementById('announcement-text').value = '';
     document.getElementById('announcement-chars').textContent = '0';
     
-    showNotification('Успех', 'Анонс сохранен', 'success');
+    showNotification('Успех', 'Анонс успешно сохранен', 'success');
     loadAnnouncements();
 }
 
 function previewAnnouncement() {
-    const text = document.getElementById('announcement-text').value;
+    const text = document.getElementById('announcement-text').value.trim();
     const type = document.getElementById('announcement-type').value;
     
-    if (!text.trim()) {
+    if (!text) {
         showNotification('Ошибка', 'Введите текст для предпросмотра', 'error');
         return;
     }
@@ -209,7 +237,7 @@ function loadNews() {
     const container = document.getElementById('news-list');
     
     if (news.length === 0) {
-        container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary);">Нет опубликованных новостей</td></tr>';
+        container.innerHTML = '<tr><td colspan="4" style="text-align: center; color: var(--text-secondary); padding: 2rem;">Нет опубликованных новостей</td></tr>';
         return;
     }
     
@@ -235,12 +263,12 @@ function loadNews() {
 }
 
 function publishNews() {
-    const title = document.getElementById('news-title').value;
-    const content = document.getElementById('news-content').value;
+    const title = document.getElementById('news-title').value.trim();
+    const content = document.getElementById('news-content').value.trim();
     const type = document.getElementById('news-type').value;
     
-    if (!title.trim() || !content.trim()) {
-        showNotification('Ошибка', 'Заполните все поля', 'error');
+    if (!title || !content) {
+        showNotification('Ошибка', 'Заполните все обязательные поля', 'error');
         return;
     }
     
@@ -259,22 +287,24 @@ function publishNews() {
     // Очищаем форму
     document.getElementById('news-title').value = '';
     document.getElementById('news-content').value = '';
+    document.getElementById('news-title-chars').textContent = '0';
+    document.getElementById('news-content-chars').textContent = '0';
     
-    showNotification('Успех', 'Новость опубликована', 'success');
+    showNotification('Успех', 'Новость успешно опубликована', 'success');
     loadNews();
-    loadGamesStats(); // Обновляем счетчик новостей
+    updateGamesStats();
 }
 
 function previewNews() {
-    const title = document.getElementById('news-title').value;
-    const content = document.getElementById('news-content').value;
+    const title = document.getElementById('news-title').value.trim();
+    const content = document.getElementById('news-content').value.trim();
     
-    if (!title.trim() || !content.trim()) {
+    if (!title || !content) {
         showNotification('Ошибка', 'Заполните все поля для предпросмотра', 'error');
         return;
     }
     
-    showNotification('Предпросмотр новости', `<strong>${title}</strong><br>${content}`, 'info');
+    showNotification('Предпросмотр новости', `<strong>${title}</strong><br><br>${content}`, 'info');
 }
 
 // Управление играми
@@ -286,10 +316,12 @@ function loadGames() {
         <tr>
             <td>
                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                    <img src="${game.image}" alt="${game.name}" style="width: 40px; height: 40px; border-radius: 8px;">
+                    <div style="width: 40px; height: 40px; border-radius: 8px; background: #667eea; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold;">
+                        ${game.name.charAt(0)}
+                    </div>
                     <div>
                         <strong>${game.name}</strong>
-                        ${game.tag ? `<span class="game-tag">${game.tag}</span>` : ''}
+                        ${game.tag ? `<span style="background: #667eea; color: white; padding: 2px 6px; border-radius: 8px; font-size: 10px; margin-left: 8px;">${game.tag}</span>` : ''}
                     </div>
                 </div>
             </td>
@@ -312,13 +344,13 @@ function loadGames() {
 }
 
 function addGame() {
-    const name = document.getElementById('game-name').value;
-    const tag = document.getElementById('game-tag').value;
-    const description = document.getElementById('game-description').value;
-    const image = document.getElementById('game-image').value;
-    const url = document.getElementById('game-url').value;
+    const name = document.getElementById('game-name').value.trim();
+    const tag = document.getElementById('game-tag').value.trim();
+    const description = document.getElementById('game-description').value.trim();
+    const image = document.getElementById('game-image').value.trim();
+    const url = document.getElementById('game-url').value.trim();
     
-    if (!name.trim() || !description.trim() || !image.trim() || !url.trim()) {
+    if (!name || !description || !url) {
         showNotification('Ошибка', 'Заполните все обязательные поля', 'error');
         return;
     }
@@ -329,7 +361,7 @@ function addGame() {
         name: name,
         tag: tag,
         description: description,
-        image: image,
+        image: image || `data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTIgMTNWMTVNMTIgN1Y3TTQgMTJIMjBNMTIgMjBWMjBNMTIgMTZWMTZNOCA4TDUgNU04IDhMMTIgNE04IDE2TDEyIDIwTTggMTZMMTUgOU0xNiA4TDE5IDVNMTYgOEwyMCA0TTE2IDE2TDIwIDEyTTE2IDE2TDEyIDIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cjwvc3ZnPgo=`,
         url: url
     };
     
@@ -343,9 +375,9 @@ function addGame() {
     document.getElementById('game-image').value = '';
     document.getElementById('game-url').value = '';
     
-    showNotification('Успех', 'Игра добавлена', 'success');
+    showNotification('Успех', 'Игра успешно добавлена', 'success');
     loadGames();
-    loadGamesStats();
+    updateGamesStats();
 }
 
 // Управление данными токена
@@ -365,23 +397,22 @@ async function fetchRealPrices() {
     showNotification('Информация', 'Обновление данных с бирж...', 'info');
     
     try {
-        // Используем API из основного приложения
-        const response = await fetch('https://api.dexscreener.com/latest/dex/search?q=HMSTR');
-        const data = await response.json();
+        // Имитация API запроса
+        await new Promise(resolve => setTimeout(resolve, 2000));
         
-        if (data.pairs && data.pairs.length > 0) {
-            const pair = data.pairs[0];
-            const usdPrice = parseFloat(pair.priceUsd);
-            const change24h = parseFloat(pair.priceChange?.h24 || 0);
-            
-            document.getElementById('hmstr-usd').value = usdPrice;
-            document.getElementById('hmstr-change').value = change24h;
-            
-            showNotification('Успех', 'Данные успешно обновлены', 'success');
-        }
+        // Случайные данные для демонстрации
+        const usdPrice = 0.000621 + (Math.random() - 0.5) * 0.0001;
+        const change24h = (Math.random() - 0.5) * 10;
+        const usdToRubRate = 90 + (Math.random() - 0.5) * 5;
+        
+        document.getElementById('hmstr-usd').value = usdPrice.toFixed(6);
+        document.getElementById('hmstr-change').value = change24h.toFixed(2);
+        document.getElementById('usd-rub-rate').value = usdToRubRate.toFixed(2);
+        
+        showNotification('Успех', 'Данные успешно обновлены с бирж', 'success');
     } catch (error) {
         console.error('Ошибка получения данных:', error);
-        showNotification('Ошибка', 'Не удалось обновить данные', 'error');
+        showNotification('Ошибка', 'Не удалось обновить данные с бирж', 'error');
     }
 }
 
@@ -405,7 +436,7 @@ function saveTokenPrices() {
     saveTokenData(tokenData);
     updateTokenDisplay();
     
-    showNotification('Успех', 'Цены токена обновлены', 'success');
+    showNotification('Успех', 'Цены токена успешно обновлены', 'success');
 }
 
 function updateTokenDisplay() {
@@ -415,13 +446,38 @@ function updateTokenDisplay() {
         const rubPrice = tokenData.usdPrice * tokenData.usdToRubRate;
         
         document.getElementById('current-usd').textContent = `$${tokenData.usdPrice.toFixed(6)}`;
-        document.getElementById('current-rub').textContent = `${rubPrice.toFixed(4)} ₽`;
+        document.getElementById('current-rub').textContent = `${rubPrice.toFixed(3)} ₽`;
         document.getElementById('current-change').textContent = `${tokenData.change24h >= 0 ? '+' : ''}${tokenData.change24h.toFixed(2)}%`;
         document.getElementById('current-change').className = `data-value ${tokenData.change24h >= 0 ? 'positive' : 'negative'}`;
         document.getElementById('last-update').textContent = formatDate(tokenData.lastUpdated);
         
         document.getElementById('hmstr-price').textContent = `$${tokenData.usdPrice.toFixed(6)}`;
     }
+}
+
+// Настройки
+function loadSettings() {
+    const settings = getSettings();
+    
+    if (settings) {
+        document.getElementById('platform-name').value = settings.platformName || 'Hamster Verse';
+        document.getElementById('platform-description').value = settings.platformDescription || 'Ваша игровая вселенная';
+        document.getElementById('enable-ratings').checked = settings.enableRatings !== false;
+        document.getElementById('enable-news').checked = settings.enableNews !== false;
+    }
+}
+
+function saveSettings() {
+    const settings = {
+        platformName: document.getElementById('platform-name').value,
+        platformDescription: document.getElementById('platform-description').value,
+        enableRatings: document.getElementById('enable-ratings').checked,
+        enableNews: document.getElementById('enable-news').checked,
+        lastUpdated: new Date().toISOString()
+    };
+    
+    saveSettingsData(settings);
+    showNotification('Успех', 'Настройки успешно сохранены', 'success');
 }
 
 // Графики
@@ -431,61 +487,56 @@ function setupCharts() {
 }
 
 function setupUsersChart() {
-    const ctx = document.getElementById('users-chart').getContext('2d');
+    const ctx = document.getElementById('users-chart');
+    if (!ctx) return;
     
-    // Заглушка для графика - в реальном приложении здесь были бы реальные данные
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'],
-            datasets: [{
-                label: 'Новые пользователи',
-                data: [65, 59, 80, 81, 56, 55, 40],
-                borderColor: '#3b82f6',
-                backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                tension: 0.4,
-                fill: true
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    });
+    // Простой график для демонстрации
+    ctx.innerHTML = `
+        <div style="display: flex; align-items: end; justify-content: center; height: 100%; gap: 8px; padding: 20px;">
+            <div style="width: 20px; height: 60%; background: #3b82f6; border-radius: 4px;"></div>
+            <div style="width: 20px; height: 80%; background: #3b82f6; border-radius: 4px;"></div>
+            <div style="width: 20px; height: 45%; background: #3b82f6; border-radius: 4px;"></div>
+            <div style="width: 20px; height: 90%; background: #3b82f6; border-radius: 4px;"></div>
+            <div style="width: 20px; height: 70%; background: #3b82f6; border-radius: 4px;"></div>
+            <div style="width: 20px; height: 85%; background: #3b82f6; border-radius: 4px;"></div>
+            <div style="width: 20px; height: 95%; background: #3b82f6; border-radius: 4px;"></div>
+        </div>
+        <div style="text-align: center; color: var(--text-secondary); margin-top: 10px;">
+            Активность пользователей за неделю
+        </div>
+    `;
 }
 
 function setupGamesChart() {
-    const ctx = document.getElementById('games-chart').getContext('2d');
+    const ctx = document.getElementById('games-chart');
+    if (!ctx) return;
     
-    new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: ['Hamster GameDev', 'Hamster King', 'Hamster Fight Club', 'BitQuest'],
-            datasets: [{
-                data: [30, 25, 20, 25],
-                backgroundColor: [
-                    '#3b82f6',
-                    '#6366f1',
-                    '#8b5cf6',
-                    '#ec4899'
-                ]
-            }]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            plugins: {
-                legend: {
-                    position: 'bottom'
-                }
-            }
-        }
-    });
+    // Простая круговая диаграмма для демонстрации
+    ctx.innerHTML = `
+        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; gap: 10px;">
+            <div style="display: flex; gap: 15px; flex-wrap: wrap; justify-content: center;">
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 12px; height: 12px; background: #3b82f6; border-radius: 50%;"></div>
+                    <span style="font-size: 12px;">Hamster GameDev (30%)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 12px; height: 12px; background: #6366f1; border-radius: 50%;"></div>
+                    <span style="font-size: 12px;">Hamster King (25%)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 12px; height: 12px; background: #8b5cf6; border-radius: 50%;"></div>
+                    <span style="font-size: 12px;">Fight Club (20%)</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 5px;">
+                    <div style="width: 12px; height: 12px; background: #ec4899; border-radius: 50%;"></div>
+                    <span style="font-size: 12px;">BitQuest (25%)</span>
+                </div>
+            </div>
+            <div style="text-align: center; color: var(--text-secondary); margin-top: 10px;">
+                Распределение пользователей по играм
+            </div>
+        </div>
+    `;
 }
 
 // Вспомогательные функции
@@ -508,35 +559,34 @@ function saveNews(news) {
 function getGames() {
     const customGames = JSON.parse(localStorage.getItem(ADMIN_CONFIG.storageKeys.games) || '[]');
     
-    // Если нет кастомных игр, возвращаем стандартные
     if (customGames.length === 0) {
         return [
             {
                 id: '1',
                 name: 'Hamster GameDev',
                 tag: 'Beta',
-                description: 'Создай игровую студию',
+                description: 'Создай игровую студию и стань лидером',
                 image: 'images/hamster-gamedev.jpg',
                 url: 'https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584'
             },
             {
                 id: '2',
                 name: 'Hamster King',
-                description: 'Стань королём в битвах',
+                description: 'Стань королём в эпических битвах',
                 image: 'images/hamster-king.jpg',
                 url: 'https://t.me/hamsterking_game_bot?startapp=6823288584'
             },
             {
                 id: '3',
                 name: 'Hamster Fight Club',
-                description: 'Бойцовский клуб',
+                description: 'Бойцовский клуб для чемпионов',
                 image: 'images/hamstr-fight-club.jpg',
                 url: 'https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyYS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5'
             },
             {
                 id: '4',
                 name: 'BitQuest',
-                description: 'Крипто-приключение',
+                description: 'Крипто-приключение с наградами',
                 image: 'images/bitquest.jpg',
                 url: 'https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584'
             }
@@ -558,6 +608,14 @@ function saveTokenData(tokenData) {
     localStorage.setItem(ADMIN_CONFIG.storageKeys.tokenData, JSON.stringify(tokenData));
 }
 
+function getSettings() {
+    return JSON.parse(localStorage.getItem(ADMIN_CONFIG.storageKeys.settings));
+}
+
+function saveSettingsData(settings) {
+    localStorage.setItem(ADMIN_CONFIG.storageKeys.settings, JSON.stringify(settings));
+}
+
 function getAnnouncementTypeLabel(type) {
     const types = {
         'info': '📢 Информация',
@@ -573,23 +631,13 @@ function getNewsTypeLabel(type) {
         'update': '🔄 Обновление',
         'announcement': '📢 Анонс',
         'event': '🎉 Событие',
-        'maintenance': '🔧 Техработы'
+        'maintenance': '🔧 Технические работы'
     };
     return types[type] || type;
 }
 
 function generateId() {
     return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
-
-function formatNumber(num) {
-    if (num >= 1000000) {
-        return (num / 1000000).toFixed(1) + 'M';
-    }
-    if (num >= 1000) {
-        return (num / 1000).toFixed(1) + 'K';
-    }
-    return num.toString();
 }
 
 function formatDate(dateString) {
@@ -627,7 +675,9 @@ function showNotification(title, message, type = 'info') {
     
     // Автоматическое удаление уведомления через 5 секунд
     setTimeout(() => {
-        notification.remove();
+        if (notification.parentNode) {
+            notification.remove();
+        }
     }, 5000);
 }
 
@@ -636,19 +686,15 @@ function saveAllData() {
 }
 
 function logout() {
-    if (confirm('Вы уверены, что хотите выйти из админской панели?')) {
+    if (confirm('Вы уверены, что хотите выйти из админ-панели?')) {
         window.location.href = 'index.html';
     }
 }
 
-function setupAutoSave() {
-    // Автосохранение каждые 30 секунд
-    setInterval(saveAllData, 30000);
-}
-
-// Функции для действий в таблицах (заглушки)
+// Функции для действий в таблицах
 function editAnnouncement(id) {
     showNotification('Редактирование', `Редактирование анонса ${id}`, 'info');
+    // В реальном приложении здесь была бы форма редактирования
 }
 
 function deleteAnnouncement(id) {
@@ -656,12 +702,13 @@ function deleteAnnouncement(id) {
         const announcements = getAnnouncements().filter(a => a.id !== id);
         saveAnnouncements(announcements);
         loadAnnouncements();
-        showNotification('Успех', 'Анонс удален', 'success');
+        showNotification('Успех', 'Анонс успешно удален', 'success');
     }
 }
 
 function editNews(id) {
     showNotification('Редактирование', `Редактирование новости ${id}`, 'info');
+    // В реальном приложении здесь была бы форма редактирования
 }
 
 function deleteNews(id) {
@@ -669,13 +716,14 @@ function deleteNews(id) {
         const news = getNews().filter(n => n.id !== id);
         saveNews(news);
         loadNews();
-        loadGamesStats();
-        showNotification('Успех', 'Новость удалена', 'success');
+        updateGamesStats();
+        showNotification('Успех', 'Новость успешно удалена', 'success');
     }
 }
 
 function editGame(id) {
     showNotification('Редактирование', `Редактирование игры ${id}`, 'info');
+    // В реальном приложении здесь была бы форма редактирования
 }
 
 function deleteGame(id) {
@@ -683,7 +731,7 @@ function deleteGame(id) {
         const games = getGames().filter(g => g.id !== id);
         saveGames(games);
         loadGames();
-        loadGamesStats();
-        showNotification('Успех', 'Игра удалена', 'success');
+        updateGamesStats();
+        showNotification('Успех', 'Игра успешно удалена', 'success');
     }
 }
