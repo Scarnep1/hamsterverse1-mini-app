@@ -1,8 +1,17 @@
 // Конфигурация приложения
 const APP_CONFIG = {
-    version: '2.1.0',
-    lastUpdate: new Date().toISOString(),
-    adminPassword: 'hamster2024'
+    version: '2.2.0',
+    features: {
+        ratings: true,
+        news: true,
+        priceUpdates: true
+    }
+};
+
+// Система рейтингов
+const RATINGS_SYSTEM = {
+    storageKey: 'game_ratings_v2',
+    maxRating: 5
 };
 
 // Инициализация приложения
@@ -15,12 +24,9 @@ function initializeApp() {
     setupPlayButtons();
     setupTelegramIntegration();
     setupPriceData();
-    setupGuideButton();
     setupThemeToggle();
     setupNewsSection();
     setupRatingSystem();
-    setupShareButton();
-    setupAdminButton();
     setupAutoRefresh();
     setupErrorHandling();
     
@@ -36,11 +42,9 @@ function setupNavigation() {
         item.addEventListener('click', function() {
             const targetSection = this.getAttribute('data-section');
             
-            // Обновляем активные элементы
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
             
-            // Показываем соответствующую секцию
             sections.forEach(section => {
                 section.classList.remove('active');
                 if (section.id === targetSection) {
@@ -48,11 +52,8 @@ function setupNavigation() {
                 }
             });
             
-            // Специальные действия при переключении секций
             if (targetSection === 'hmstr-section') {
                 refreshPriceData();
-            } else if (targetSection === 'news-section') {
-                loadNews();
             }
         });
     });
@@ -70,12 +71,11 @@ function setupPlayButtons() {
         });
     });
     
-    // Клик по карточке игры (кроме рейтинга)
     const gameCards = document.querySelectorAll('.game-card');
     
     gameCards.forEach(card => {
         card.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('star') && !e.target.closest('.stars')) {
+            if (!e.target.classList.contains('star') && !e.target.closest('.stars-rating')) {
                 const playButton = this.querySelector('.play-button');
                 const url = playButton.getAttribute('data-url');
                 openGame(url);
@@ -95,7 +95,6 @@ function openGame(url) {
 // Интеграция с Telegram
 function setupTelegramIntegration() {
     if (window.Telegram && window.Telegram.WebApp) {
-        // Расширяем на весь экран
         window.Telegram.WebApp.expand();
         
         const user = window.Telegram.WebApp.initDataUnsafe?.user;
@@ -103,15 +102,7 @@ function setupTelegramIntegration() {
         if (user) {
             updateUserProfile(user);
         }
-        
-        // Настройка основной кнопки
-        window.Telegram.WebApp.MainButton.setText('Открыть игры');
-        window.Telegram.WebApp.MainButton.show();
-        window.Telegram.WebApp.MainButton.onClick(function() {
-            switchToSection('games-section');
-        });
     } else {
-        // Заглушка для браузера
         simulateUserProfile();
     }
 }
@@ -154,6 +145,214 @@ function simulateUserProfile() {
     
     document.getElementById('tg-name').textContent = `${name} ${surname}`;
     document.getElementById('tg-username').textContent = `@${username}`;
+}
+
+// Система рейтингов
+function setupRatingSystem() {
+    initializeRatings();
+    loadAllRatings();
+    setupStarsInteractions();
+}
+
+function initializeRatings() {
+    if (!localStorage.getItem(RATINGS_SYSTEM.storageKey)) {
+        const initialRatings = {
+            games: {
+                '1': { total: 4.2, count: 128, ratings: [] },
+                '2': { total: 4.5, count: 256, ratings: [] },
+                '3': { total: 4.3, count: 189, ratings: [] },
+                '4': { total: 4.7, count: 312, ratings: [] }
+            },
+            userRatings: {}
+        };
+        saveRatings(initialRatings);
+    }
+}
+
+function loadAllRatings() {
+    const ratings = getRatings();
+    
+    Object.keys(ratings.games).forEach(gameId => {
+        updateRatingDisplay(gameId, ratings.games[gameId]);
+    });
+}
+
+function setupStarsInteractions() {
+    document.querySelectorAll('.stars-rating').forEach(ratingContainer => {
+        const gameId = ratingContainer.getAttribute('data-game-id');
+        const stars = ratingContainer.querySelectorAll('.star');
+        const userId = getUserId();
+        const ratings = getRatings();
+        
+        // Проверяем, оценивал ли уже пользователь эту игру
+        const userRating = ratings.userRatings[userId]?.[gameId];
+        
+        if (userRating) {
+            // Пользователь уже оценивал - блокируем и показываем его оценку
+            highlightUserRating(stars, userRating);
+            ratingContainer.classList.add('disabled');
+        } else {
+            // Пользователь еще не оценивал - настраиваем взаимодействие
+            stars.forEach(star => {
+                star.addEventListener('click', function() {
+                    const rating = parseInt(this.getAttribute('data-rating'));
+                    rateGame(gameId, rating);
+                });
+                
+                star.addEventListener('mouseover', function() {
+                    if (!ratingContainer.classList.contains('disabled')) {
+                        const rating = parseInt(this.getAttribute('data-rating'));
+                        highlightStars(stars, rating);
+                    }
+                });
+                
+                star.addEventListener('mouseout', function() {
+                    if (!ratingContainer.classList.contains('disabled')) {
+                        const userRating = ratings.userRatings[userId]?.[gameId];
+                        if (userRating) {
+                            highlightStars(stars, userRating);
+                        } else {
+                            resetStars(stars);
+                        }
+                    }
+                });
+            });
+        }
+    });
+}
+
+function rateGame(gameId, rating) {
+    const userId = getUserId();
+    const ratings = getRatings();
+    
+    // Проверяем, не оценивал ли уже пользователь эту игру
+    if (ratings.userRatings[userId]?.[gameId]) {
+        showNotification('Вы уже оценили эту игру!', 'info');
+        return;
+    }
+    
+    // Добавляем оценку пользователя
+    if (!ratings.userRatings[userId]) {
+        ratings.userRatings[userId] = {};
+    }
+    ratings.userRatings[userId][gameId] = rating;
+    
+    // Обновляем статистику игры
+    if (!ratings.games[gameId]) {
+        ratings.games[gameId] = { total: 0, count: 0, ratings: [] };
+    }
+    
+    const game = ratings.games[gameId];
+    game.ratings.push(rating);
+    game.count = game.ratings.length;
+    game.total = game.ratings.reduce((sum, r) => sum + r, 0) / game.count;
+    
+    // Сохраняем обновленные рейтинги
+    saveRatings(ratings);
+    
+    // Обновляем отображение
+    updateRatingDisplay(gameId, game);
+    
+    // Блокируем возможность повторной оценки
+    const ratingContainer = document.querySelector(`.stars-rating[data-game-id="${gameId}"]`);
+    const stars = ratingContainer.querySelectorAll('.star');
+    highlightUserRating(stars, rating);
+    ratingContainer.classList.add('disabled');
+    
+    // Анимация и уведомление
+    const clickedStar = ratingContainer.querySelector(`.star[data-rating="${rating}"]`);
+    clickedStar.classList.add('just-rated');
+    setTimeout(() => clickedStar.classList.remove('just-rated'), 500);
+    
+    showNotification(`Спасибо за оценку ${rating} ⭐!`, 'success');
+}
+
+function updateRatingDisplay(gameId, gameData) {
+    const gameCard = document.querySelector(`.game-card[data-game-id="${gameId}"]`);
+    if (!gameCard) return;
+    
+    const averageElement = gameCard.querySelector('.average-rating');
+    const countElement = gameCard.querySelector('.rating-count');
+    const staticStars = gameCard.querySelectorAll('.stars-static .star');
+    
+    if (averageElement) {
+        averageElement.textContent = gameData.total.toFixed(1);
+    }
+    
+    if (countElement) {
+        countElement.textContent = `(${gameData.count} оценок)`;
+    }
+    
+    // Обновляем статические звезды
+    const averageRating = Math.round(gameData.total * 2) / 2; // Округляем до 0.5
+    highlightStaticStars(staticStars, averageRating);
+}
+
+function highlightStaticStars(stars, rating) {
+    stars.forEach((star, index) => {
+        const starNumber = index + 1;
+        
+        if (rating >= starNumber) {
+            // Полная звезда
+            star.classList.add('active');
+        } else if (rating >= starNumber - 0.5) {
+            // Половина звезды (можно добавить CSS для половинчатой звезды)
+            star.classList.add('active');
+        } else {
+            // Пустая звезда
+            star.classList.remove('active');
+        }
+    });
+}
+
+function highlightUserRating(stars, rating) {
+    stars.forEach((star, index) => {
+        const starNumber = index + 1;
+        if (starNumber <= rating) {
+            star.classList.add('active', 'rated');
+        } else {
+            star.classList.remove('active', 'rated');
+        }
+    });
+}
+
+function highlightStars(stars, rating) {
+    stars.forEach((star, index) => {
+        const starNumber = index + 1;
+        if (starNumber <= rating) {
+            star.classList.add('active');
+        } else {
+            star.classList.remove('active');
+        }
+    });
+}
+
+function resetStars(stars) {
+    stars.forEach(star => {
+        star.classList.remove('active');
+    });
+}
+
+function getUserId() {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe?.user?.id) {
+        return `tg_${window.Telegram.WebApp.initDataUnsafe.user.id}`;
+    }
+    
+    // Генерируем уникальный ID для анонимного пользователя
+    let userId = localStorage.getItem('anonymous_user_id');
+    if (!userId) {
+        userId = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('anonymous_user_id', userId);
+    }
+    return userId;
+}
+
+function getRatings() {
+    return JSON.parse(localStorage.getItem(RATINGS_SYSTEM.storageKey)) || { games: {}, userRatings: {} };
+}
+
+function saveRatings(ratings) {
+    localStorage.setItem(RATINGS_SYSTEM.storageKey, JSON.stringify(ratings));
 }
 
 // Данные токена HMSTR
@@ -210,7 +409,6 @@ function refreshPriceData() {
     
     // Имитация обновления данных
     setTimeout(() => {
-        // Случайное изменение цены в пределах ±5%
         const randomChange = (Math.random() - 0.5) * 10;
         const changePercent = parseFloat(randomChange.toFixed(2));
         
@@ -234,33 +432,12 @@ function showPriceLoading(show) {
     }
 }
 
-// Гайд покупки HMSTR
-function setupGuideButton() {
-    const guideButton = document.getElementById('show-guide');
-    const buyGuide = document.getElementById('buy-guide');
-    
-    if (guideButton && buyGuide) {
-        guideButton.addEventListener('click', function() {
-            const isHidden = buyGuide.classList.contains('hidden');
-            
-            if (isHidden) {
-                buyGuide.classList.remove('hidden');
-                guideButton.textContent = '📖 Скрыть инструкцию';
-            } else {
-                buyGuide.classList.add('hidden');
-                guideButton.textContent = '📖 Как купить HMSTR';
-            }
-        });
-    }
-}
-
 // Переключение темы
 function setupThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = themeToggle.querySelector('.theme-icon');
     const themeText = themeToggle.querySelector('.theme-text');
     
-    // Загружаем сохраненную тему
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
     
@@ -281,95 +458,6 @@ function setupThemeToggle() {
             themeIcon.textContent = '🌙';
             themeText.textContent = 'Темная тема';
         }
-        
-        showNotification(`Тема изменена на ${theme === 'dark' ? 'тёмную' : 'светлую'}`, 'info');
-    }
-}
-
-// Система рейтинга
-function setupRatingSystem() {
-    const starsContainers = document.querySelectorAll('.stars');
-    
-    starsContainers.forEach(container => {
-        const stars = container.querySelectorAll('.star');
-        const gameId = container.getAttribute('data-game-id');
-        
-        // Загружаем сохраненные рейтинги
-        loadRating(gameId, container);
-        
-        stars.forEach(star => {
-            star.addEventListener('click', function() {
-                const rating = parseInt(this.getAttribute('data-rating'));
-                rateGame(gameId, rating, container);
-            });
-            
-            star.addEventListener('mouseover', function() {
-                const rating = parseInt(this.getAttribute('data-rating'));
-                highlightStars(stars, rating);
-            });
-            
-            star.addEventListener('mouseout', function() {
-                const savedRating = getSavedRating(gameId);
-                highlightStars(stars, savedRating);
-            });
-        });
-    });
-}
-
-function loadRating(gameId, container) {
-    const savedRating = getSavedRating(gameId);
-    const stars = container.querySelectorAll('.star');
-    
-    highlightStars(stars, savedRating);
-    updateRatingText(gameId, savedRating);
-}
-
-function getSavedRating(gameId) {
-    const ratings = JSON.parse(localStorage.getItem('game_ratings') || '{}');
-    return ratings[gameId] || 0;
-}
-
-function saveRating(gameId, rating) {
-    const ratings = JSON.parse(localStorage.getItem('game_ratings') || '{}');
-    ratings[gameId] = rating;
-    localStorage.setItem('game_ratings', JSON.stringify(ratings));
-}
-
-function rateGame(gameId, rating, container) {
-    saveRating(gameId, rating);
-    
-    const stars = container.querySelectorAll('.star');
-    highlightStars(stars, rating);
-    updateRatingText(gameId, rating);
-    
-    // Анимация
-    const clickedStar = container.querySelector(`.star[data-rating="${rating}"]`);
-    clickedStar.classList.add('just-rated');
-    setTimeout(() => clickedStar.classList.remove('just-rated'), 500);
-    
-    showNotification(`Оценка ${rating} ⭐ сохранена!`, 'success');
-}
-
-function highlightStars(stars, rating) {
-    stars.forEach(star => {
-        const starRating = parseInt(star.getAttribute('data-rating'));
-        star.classList.toggle('active', starRating <= rating);
-        star.classList.toggle('rated', starRating <= rating);
-    });
-}
-
-function updateRatingText(gameId, rating) {
-    const container = document.querySelector(`.stars[data-game-id="${gameId}"]`).closest('.game-rating');
-    const averageElement = container.querySelector('.average-rating');
-    const countElement = container.querySelector('.rating-count');
-    
-    if (averageElement && rating > 0) {
-        averageElement.textContent = rating.toFixed(1);
-    }
-    
-    if (countElement && rating > 0) {
-        const currentCount = parseInt(countElement.textContent) || 0;
-        countElement.textContent = currentCount + 1;
     }
 }
 
@@ -387,7 +475,7 @@ function loadNews() {
             <div class="news-item">
                 <span class="news-date">Сегодня</span>
                 <div class="news-title">Добро пожаловать в Hamster Verse!</div>
-                <div class="news-content">Здесь будут появляться последние новости и обновления проекта. Следите за обновлениями!</div>
+                <div class="news-content">Теперь вы можете оценивать игры! Ваши оценки помогают другим игрокам выбирать лучшие игры.</div>
             </div>
         `;
         return;
@@ -403,90 +491,22 @@ function loadNews() {
 }
 
 function getNewsData() {
-    const adminNews = JSON.parse(localStorage.getItem('admin_news') || '[]');
-    
-    if (adminNews.length > 0) {
-        return adminNews.slice(0, 5).map(item => ({
-            date: item.date,
-            title: item.title,
-            content: item.content || 'Новость от администрации'
-        }));
-    }
-    
-    // Заглушки по умолчанию
     return [
         {
             date: new Date().toISOString(),
-            title: "Запуск Hamster Verse",
-            content: "Мы рады представить вам новую игровую платформу с лучшими играми от Hamster!"
+            title: "Новая система рейтингов",
+            content: "Теперь вы можете оценивать игры! Ваша оценка помогает сообществу выбирать лучшие игры."
         },
         {
             date: new Date(Date.now() - 86400000).toISOString(),
-            title: "Обновление рейтинговой системы",
-            content: "Добавлена возможность оценивать игры и оставлять отзывы"
+            title: "Hamster Verse обновлен",
+            content: "Мы полностью обновили дизайн и добавили новые функции для вашего удобства!"
         }
     ];
 }
 
-// Кнопка поделиться
-function setupShareButton() {
-    const shareButton = document.getElementById('share-button');
-    
-    if (shareButton) {
-        shareButton.addEventListener('click', shareApp);
-    }
-}
-
-function shareApp() {
-    const shareText = "🎮 Открой для себя Hamster Verse - все лучшие игры в одном приложении! Присоединяйся сейчас!";
-    const shareUrl = window.location.href;
-    
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.shareUrl(shareUrl, shareText);
-    } else if (navigator.share) {
-        navigator.share({
-            title: 'Hamster Verse',
-            text: shareText,
-            url: shareUrl
-        });
-    } else {
-        // Fallback - копирование в буфер
-        navigator.clipboard.writeText(shareUrl).then(() => {
-            showNotification('Ссылка скопирована в буфер!', 'success');
-        }).catch(() => {
-            showNotification('Скопируйте ссылку вручную: ' + shareUrl, 'info');
-        });
-    }
-}
-
-// Кнопка админ-панели
-function setupAdminButton() {
-    const adminContainer = document.getElementById('admin-button-container');
-    
-   if (adminContainer) {
-    adminContainer.style.display = 'block'; // Всегда показывать
-}
-    
-    // Секретная комбинация для доступа к админке
-    let keySequence = '';
-    document.addEventListener('keydown', function(e) {
-        keySequence += e.key;
-        if (keySequence.length > 10) {
-            keySequence = keySequence.slice(-10);
-        }
-        
-        if (keySequence.includes('hamster2024')) {
-            localStorage.setItem('is_admin', 'true');
-            setupAdminButton();
-            showNotification('Режим администратора активирован!', 'success');
-            keySequence = '';
-        }
-    });
-}
-
 // Авто-обновление
 function setupAutoRefresh() {
-    // Обновляем курс каждые 2 минуты
     setInterval(() => {
         if (document.querySelector('#hmstr-section.active')) {
             refreshPriceData();
@@ -506,13 +526,6 @@ function setupErrorHandling() {
 }
 
 // Вспомогательные функции
-function switchToSection(sectionId) {
-    const navItem = document.querySelector(`.nav-item[data-section="${sectionId}"]`);
-    if (navItem) {
-        navItem.click();
-    }
-}
-
 function formatDate(dateString) {
     const date = new Date(dateString);
     const now = new Date();
@@ -532,7 +545,6 @@ function formatDate(dateString) {
 }
 
 function showNotification(message, type = 'info') {
-    // Создаем временное уведомление
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
@@ -612,16 +624,6 @@ style.textContent = `
             opacity: 0;
             transform: translateX(100%);
         }
-    }
-    
-    @keyframes starPulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.3); }
-        100% { transform: scale(1); }
-    }
-    
-    .star.just-rated {
-        animation: starPulse 0.5s ease;
     }
 `;
 document.head.appendChild(style);
