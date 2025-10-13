@@ -933,3 +933,279 @@ img {
     -o-user-drag: none;
     user-drag: none;
 }
+
+/* Рейтинг игр */
+.game-rating {
+    margin-top: 8px;
+}
+
+.stars-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.star {
+    font-size: 18px;
+    color: #ddd;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+}
+
+.star:hover {
+    transform: scale(1.2);
+}
+
+.star.active {
+    color: #ffc107;
+    text-shadow: 0 0 10px rgba(255, 193, 7, 0.5);
+}
+
+.star.rated {
+    color: #ffc107;
+}
+
+.rating-text {
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Кнопка комментариев */
+.game-comments-toggle {
+    margin-top: 10px;
+    width: 100%;
+}
+
+.comments-btn {
+    width: 100%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.comments-btn:hover {
+    background: var(--accent-gradient);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+/* Блок комментариев */
+.game-comments {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--border-color);
+    width: 100%;
+}
+
+.game-comments:not(.hidden) {
+    animation: slideDown 0.3s ease;
+}
+
+.comments-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+    padding-right: 4px;
+}
+
+.comments-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.comments-list::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 2px;
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+    background: var(--accent-primary);
+    border-radius: 2px;
+}
+
+.comment-item {
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border-color);
+    animation: fadeIn 0.3s ease;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.comment-author {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.comment-author-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: white;
+    font-weight: bold;
+}
+
+.comment-date {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.comment-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+/* Форма добавления комментария */
+.add-comment {
+    margin-top: 12px;
+}
+
+.comment-textarea {
+    width: 100%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    color: var(--text-primary);
+    resize: vertical;
+    min-height: 60px;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+}
+
+.comment-textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.comment-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.submit-comment {
+    width: 100%;
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 8px;
+}
+
+.submit-comment:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.submit-comment:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Анимации */
+@keyframes starPulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3); }
+    100% { transform: scale(1); }
+}
+
+.star.just-rated {
+    animation: starPulse 0.5s ease;
+}
+
+@keyframes slideOutRight {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+.no-comments {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+}
+
+.no-comments p {
+    margin-bottom: 5px;
+}
+
+.no-comments small {
+    font-size: 11px;
+    opacity: 0.7;
+}
+
+.has-comments {
+    background: var(--accent-gradient) !important;
+    color: white !important;
+}
+
+/* Адаптивность */
+@media (max-width: 480px) {
+    .stars-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .star {
+        font-size: 16px;
+    }
+    
+    .comment-item {
+        padding: 8px;
+    }
+    
+    .comments-list {
+        max-height: 150px;
+    }
+}
+
+/* Темная тема для комментариев */
+[data-theme="dark"] .comment-textarea {
+    background: var(--bg-primary);
+}
+
+[data-theme="dark"] .comment-item {
+    background: var(--bg-primary);
+}
