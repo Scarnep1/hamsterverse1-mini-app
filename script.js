@@ -463,12 +463,9 @@ function shareApp() {
 function setupAdminButton() {
     const adminContainer = document.getElementById('admin-button-container');
     
-    // Показываем кнопку админ-панели только если пользователь знает пароль
-    const isAdmin = localStorage.getItem('is_admin') === 'true';
-    
-    if (adminContainer) {
-        adminContainer.style.display = isAdmin ? 'block' : 'none';
-    }
+   if (adminContainer) {
+    adminContainer.style.display = 'block'; // Всегда показывать
+}
     
     // Секретная комбинация для доступа к админке
     let keySequence = '';
