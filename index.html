@@ -3,16 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="no-referrer">
-    <title>Hamster Verse - Игровая платформа</title>
+    <title>Hamster Verse</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
     <div class="app-container">
         <!-- Announcement Banner -->
         <div class="announcement-banner" id="announcement">
-            <span>🎉 Теперь можно оставлять комментарии и ставить лайки! Делитесь мнением об играх</span>
+            <span>🎮 Новые игры уже доступны!</span>
             <button class="close-announcement" onclick="closeAnnouncement()">×</button>
         </div>
 
@@ -20,92 +18,87 @@
         <header class="header">
             <div class="header-content">
                 <div class="header-titles">
-                    <h1 class="app-title">Hamster Verse</h1>
-                    <span class="app-subtitle">Ваша игровая вселенная</span>
+                    <div class="app-title">Hamster Verse</div>
+                    <div class="app-subtitle">Игры и развлечения</div>
                 </div>
-                <div class="user-avatar" id="user-avatar">👤</div>
+                <div class="user-avatar" id="user-avatar">U</div>
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
             <!-- Games Section -->
-            <section id="games-section" class="content-section active">
+            <section class="content-section active" id="games-section">
                 <div class="section-header">
                     <h2>Игры</h2>
-                    <span class="section-subtitle">Выберите игру для начала</span>
+                    <div class="section-subtitle">Выберите игру чтобы начать играть</div>
                 </div>
-                
-                <!-- Games Statistics -->
+
                 <div class="games-stats">
                     <div class="stat-card">
-                        <span class="stat-value" id="total-players">15.2K</span>
-                        <span class="stat-label">Всего игроков</span>
+                        <span class="stat-value">4.4</span>
+                        <span class="stat-label">Средний рейтинг</span>
                     </div>
                     <div class="stat-card">
-                        <span class="stat-value" id="active-today">2.3K</span>
-                        <span class="stat-label">Активных сегодня</span>
+                        <span class="stat-value" id="total-comments">0</span>
+                        <span class="stat-label">Комментариев</span>
                     </div>
                 </div>
-                
-                <div class="games-grid">
-                    <!-- Game Card 1 -->
-                    <div class="game-card" data-game-id="1">
-                        <div class="game-image">
-                            <img src="images/hamster-gamedev.jpg" alt="Hamster GameDev" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTIgMTNWMTVNMTIgN1Y3TTQgMTJIMjBNMTIgMjBWMjBNMTIgMTZWMTZNOCA4TDUgNU04IDhMMTIgNE04IDE2TDEyIDIwTTggMTZMMTUgOU0xNiA4TDE5IDVNMTYgOEwyMCA0TTE2IDE2TDIwIDEyTTE2IDE2TDEyIDIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cjwvc3ZnPgo='">
-                        </div>
-                        <div class="game-info">
-                            <div class="game-header">
-                                <h3>Hamster GameDev</h3>
-                                <span class="game-beta">Beta</span>
-                            </div>
-                            <p>Создай игровую студию и стань лидером</p>
-                            
-                            <div class="game-rating">
-                                <div class="rating-display">
-                                    <div class="stars-static">
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                    </div>
-                                    <span class="rating-text">
-                                        <span class="average-rating">4.2</span>
-                                        <span class="rating-count">(128 оценок)</span>
-                                    </span>
-                                </div>
-                                <div class="rating-interactive">
-                                    <span class="rate-label">Ваша оценка:</span>
-                                    <div class="stars-rating" data-game-id="1">
-                                        <span class="star" data-rating="1">★</span>
-                                        <span class="star" data-rating="2">★</span>
-                                        <span class="star" data-rating="3">★</span>
-                                        <span class="star" data-rating="4">★</span>
-                                        <span class="star" data-rating="5">★</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="play-button" data-url="https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584">
-                            Играть
-                        </button>
 
-                        <!-- Comments Section -->
+                <div class="games-grid">
+                    <!-- Game 1 -->
+                    <div class="game-card" data-game-id="1">
+                        <div class="game-content">
+                            <div class="game-image">
+                                <div class="game-avatar">🐹</div>
+                            </div>
+                            <div class="game-info">
+                                <div class="game-header">
+                                    <h3>Hamster Combat</h3>
+                                    <span class="game-beta">BETA</span>
+                                </div>
+                                <p>Боевой хомяк сражается с врагами</p>
+                                
+                                <div class="game-rating">
+                                    <div class="rating-display">
+                                        <div class="stars-static">
+                                            <span class="star">⭐</span>
+                                            <span class="star">⭐</span>
+                                            <span class="star">⭐</span>
+                                            <span class="star">⭐</span>
+                                            <span class="star">⭐</span>
+                                        </div>
+                                        <div class="rating-text">
+                                            <span class="average-rating">4.2</span>
+                                            <span class="rating-count">(128 оценок)</span>
+                                        </div>
+                                    </div>
+                                    <div class="rating-interactive">
+                                        <span class="rate-label">Ваша оценка:</span>
+                                        <div class="stars-rating" data-game-id="1">
+                                            <span class="star" data-rating="1">⭐</span>
+                                            <span class="star" data-rating="2">⭐</span>
+                                            <span class="star" data-rating="3">⭐</span>
+                                            <span class="star" data-rating="4">⭐</span>
+                                            <span class="star" data-rating="5">⭐</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <button class="play-button" data-url="https://t.me/hamster_combat_bot/game">Играть</button>
+                        </div>
+
                         <div class="game-comments-section">
                             <button class="comments-toggle-btn" data-game-id="1">
                                 <span class="comments-icon">💬</span>
-                                <span class="comments-count">12</span> комментариев
+                                Комментарии <span class="comments-count">2</span>
                                 <span class="toggle-arrow">▼</span>
                             </button>
                             
                             <div class="comments-container hidden" data-game-id="1">
-                                <div class="comments-list" id="comments-1">
-                                    <!-- Комментарии загружаются динамически -->
-                                </div>
-                                
+                                <div class="comments-list" id="comments-1"></div>
                                 <div class="add-comment-form">
-                                    <textarea class="comment-textarea" placeholder="Напишите ваш комментарий..." maxlength="500"></textarea>
+                                    <textarea class="comment-textarea" placeholder="Оставьте комментарий..." maxlength="500"></textarea>
                                     <div class="comment-actions">
                                         <span class="char-count">0/500</span>
                                         <button class="submit-comment-btn" data-game-id="1">Отправить</button>
@@ -115,60 +108,59 @@
                         </div>
                     </div>
 
-                    <!-- Game Card 2 -->
+                    <!-- Game 2 -->
                     <div class="game-card" data-game-id="2">
-                        <div class="game-image">
-                            <img src="images/hamster-king.jpg" alt="Hamster King" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiNmNTk5MGIiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTIgMkw0IDdMMTIgMTJMMjAgN0wxMiAyWk00IDE3TDEyIDIyTDIwIDE3TTQgMTJMMTIgMTdMMjAgMTIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4KPC9zdmc+Cg=='">
-                        </div>
-                        <div class="game-info">
-                            <h3>Hamster King</h3>
-                            <p>Стань королём в эпических битвах</p>
-                            
-                            <div class="game-rating">
-                                <div class="rating-display">
-                                    <div class="stars-static">
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                    </div>
-                                    <span class="rating-text">
-                                        <span class="average-rating">4.5</span>
-                                        <span class="rating-count">(256 оценок)</span>
-                                    </span>
+                        <div class="game-content">
+                            <div class="game-image">
+                                <div class="game-avatar">🏆</div>
+                            </div>
+                            <div class="game-info">
+                                <div class="game-header">
+                                    <h3>Hamster Karts</h3>
+                                    <span class="game-beta">NEW</span>
                                 </div>
-                                <div class="rating-interactive">
-                                    <span class="rate-label">Ваша оценка:</span>
-                                    <div class="stars-rating" data-game-id="2">
-                                        <span class="star" data-rating="1">★</span>
-                                        <span class="star" data-rating="2">★</span>
-                                        <span class="star" data-rating="3">★</span>
-                                        <span class="star" data-rating="4">★</span>
-                                        <span class="star" data-rating="5">★</span>
+                                <p>Гонки на хомяках по захватывающим трассам</p>
+                                
+                                <div class="game-rating">
+                                    <div class="rating-display">
+                                        <div class="stars-static">
+                                            <span class="star">⭐</span>
+                                            <span class="star">⭐</span>
+                                            <span class="star">⭐</span>
+                                            <span class="star">⭐</span>
+                                            <span class="star">⭐</span>
+                                        </div>
+                                        <div class="rating-text">
+                                            <span class="average-rating">4.5</span>
+                                            <span class="rating-count">(256 оценок)</span>
+                                        </div>
+                                    </div>
+                                    <div class="rating-interactive">
+                                        <span class="rate-label">Ваша оценка:</span>
+                                        <div class="stars-rating" data-game-id="2">
+                                            <span class="star" data-rating="1">⭐</span>
+                                            <span class="star" data-rating="2">⭐</span>
+                                            <span class="star" data-rating="3">⭐</span>
+                                            <span class="star" data-rating="4">⭐</span>
+                                            <span class="star" data-rating="5">⭐</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                            <button class="play-button" data-url="https://t.me/hamster_karts_bot/game">Играть</button>
                         </div>
-                        <button class="play-button" data-url="https://t.me/hamsterking_game_bot?startapp=6823288584">
-                            Играть
-                        </button>
 
-                        <!-- Comments Section -->
                         <div class="game-comments-section">
                             <button class="comments-toggle-btn" data-game-id="2">
                                 <span class="comments-icon">💬</span>
-                                <span class="comments-count">8</span> комментариев
+                                Комментарии <span class="comments-count">1</span>
                                 <span class="toggle-arrow">▼</span>
                             </button>
                             
                             <div class="comments-container hidden" data-game-id="2">
-                                <div class="comments-list" id="comments-2">
-                                    <!-- Комментарии загружаются динамически -->
-                                </div>
-                                
+                                <div class="comments-list" id="comments-2"></div>
                                 <div class="add-comment-form">
-                                    <textarea class="comment-textarea" placeholder="Напишите ваш комментарий..." maxlength="500"></textarea>
+                                    <textarea class="comment-textarea" placeholder="Оставьте комментарий..." maxlength="500"></textarea>
                                     <div class="comment-actions">
                                         <span class="char-count">0/500</span>
                                         <button class="submit-comment-btn" data-game-id="2">Отправить</button>
@@ -178,149 +170,23 @@
                         </div>
                     </div>
 
-                    <!-- Game Card 3 -->
-                    <div class="game-card" data-game-id="3">
-                        <div class="game-image">
-                            <img src="images/hamstr-fight-club.jpg" alt="Hamster Fight Club" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiNlZjQ0NDQiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTUgN0wyMCAxMk0yMCA3TDE1IDEyTTkgOUExIDEgMCAxIDAgMTEgOUExIDEgMCAwIDAgOSA5Wk0xNSA5QTEgMSAwIDEgMCAxNyA5QTEgMSAwIDAgMCAxNSA5Wk05IDE1QTEgMSAwIDEgMCAxMSAxNUExIDEgMCAwIDAgOSAxNVpNMTUgMTVBMSAxIDAgMSAwIDE3IDE1QTEgMSAwIDAgMCAxNSAxNVoiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4KPC9zdmc+Cg=='">
-                        </div>
-                        <div class="game-info">
-                            <h3>Hamster Fight Club</h3>
-                            <p>Бойцовский клуб для чемпионов</p>
-                            
-                            <div class="game-rating">
-                                <div class="rating-display">
-                                    <div class="stars-static">
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                    </div>
-                                    <span class="rating-text">
-                                        <span class="average-rating">4.3</span>
-                                        <span class="rating-count">(189 оценок)</span>
-                                    </span>
-                                </div>
-                                <div class="rating-interactive">
-                                    <span class="rate-label">Ваша оценка:</span>
-                                    <div class="stars-rating" data-game-id="3">
-                                        <span class="star" data-rating="1">★</span>
-                                        <span class="star" data-rating="2">★</span>
-                                        <span class="star" data-rating="3">★</span>
-                                        <span class="star" data-rating="4">★</span>
-                                        <span class="star" data-rating="5">★</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="play-button" data-url="https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyYS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5">
-                            Играть
-                        </button>
-
-                        <!-- Comments Section -->
-                        <div class="game-comments-section">
-                            <button class="comments-toggle-btn" data-game-id="3">
-                                <span class="comments-icon">💬</span>
-                                <span class="comments-count">15</span> комментариев
-                                <span class="toggle-arrow">▼</span>
-                            </button>
-                            
-                            <div class="comments-container hidden" data-game-id="3">
-                                <div class="comments-list" id="comments-3">
-                                    <!-- Комментарии загружаются динамически -->
-                                </div>
-                                
-                                <div class="add-comment-form">
-                                    <textarea class="comment-textarea" placeholder="Напишите ваш комментарий..." maxlength="500"></textarea>
-                                    <div class="comment-actions">
-                                        <span class="char-count">0/500</span>
-                                        <button class="submit-comment-btn" data-game-id="3">Отправить</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Game Card 4 -->
-                    <div class="game-card" data-game-id="4">
-                        <div class="game-image">
-                            <img src="images/bitquest.jpg" alt="BitQuest" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiMxMGI5ODEiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTIgMkwxMyAyOEwxOCAyMEgyMkwxMyAzOEwxMiA0MkwxMSAzOEwyIDIwSDZMMTEgMjhMMTIgMloiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4KPC9zdmc+Cg=='">
-                        </div>
-                        <div class="game-info">
-                            <h3>BitQuest</h3>
-                            <p>Крипто-приключение с наградами</p>
-                            
-                            <div class="game-rating">
-                                <div class="rating-display">
-                                    <div class="stars-static">
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                        <span class="star">★</span>
-                                    </div>
-                                    <span class="rating-text">
-                                        <span class="average-rating">4.7</span>
-                                        <span class="rating-count">(312 оценок)</span>
-                                    </span>
-                                </div>
-                                <div class="rating-interactive">
-                                    <span class="rate-label">Ваша оценка:</span>
-                                    <div class="stars-rating" data-game-id="4">
-                                        <span class="star" data-rating="1">★</span>
-                                        <span class="star" data-rating="2">★</span>
-                                        <span class="star" data-rating="3">★</span>
-                                        <span class="star" data-rating="4">★</span>
-                                        <span class="star" data-rating="5">★</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                        <button class="play-button" data-url="https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584">
-                            Играть
-                        </button>
-
-                        <!-- Comments Section -->
-                        <div class="game-comments-section">
-                            <button class="comments-toggle-btn" data-game-id="4">
-                                <span class="comments-icon">💬</span>
-                                <span class="comments-count">23</span> комментариев
-                                <span class="toggle-arrow">▼</span>
-                            </button>
-                            
-                            <div class="comments-container hidden" data-game-id="4">
-                                <div class="comments-list" id="comments-4">
-                                    <!-- Комментарии загружаются динамически -->
-                                </div>
-                                
-                                <div class="add-comment-form">
-                                    <textarea class="comment-textarea" placeholder="Напишите ваш комментарий..." maxlength="500"></textarea>
-                                    <div class="comment-actions">
-                                        <span class="char-count">0/500</span>
-                                        <button class="submit-comment-btn" data-game-id="4">Отправить</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <!-- Добавьте остальные игры по аналогии -->
                 </div>
             </section>
 
             <!-- HMSTR Section -->
-            <section id="hmstr-section" class="content-section">
+            <section class="content-section" id="hmstr-section">
                 <div class="section-header">
                     <h2>Токен HMSTR</h2>
-                    <span class="section-subtitle">Курс и торговые пары</span>
+                    <div class="section-subtitle">Актуальный курс и торговые площадки</div>
                 </div>
-                
-                <!-- Price Cards -->
+
                 <div class="price-cards-container">
-                    <!-- USD Price Card -->
                     <div class="price-card">
                         <div class="price-card-header">
-                            <div class="currency-flag">🇺🇸</div>
+                            <div class="currency-flag">💵</div>
                             <div class="currency-info">
-                                <h3>HMSTR / USDT</h3>
+                                <h3>USD Цена</h3>
                                 <p>Доллар США</p>
                             </div>
                         </div>
@@ -328,17 +194,16 @@
                             <div class="price-main" id="hmstr-price-usd">$0.000621</div>
                             <div class="price-change">
                                 <span class="change positive" id="hmstr-change-usd">+2.34%</span>
-                                <span class="change-time">за 24ч</span>
+                                <span class="change-time">сегодня</span>
                             </div>
                         </div>
                     </div>
 
-                    <!-- RUB Price Card -->
                     <div class="price-card">
                         <div class="price-card-header">
-                            <div class="currency-flag">🇷🇺</div>
+                            <div class="currency-flag">₽</div>
                             <div class="currency-info">
-                                <h3>HMSTR / RUB</h3>
+                                <h3>RUB Цена</h3>
                                 <p>Российский рубль</p>
                             </div>
                         </div>
@@ -346,39 +211,37 @@
                             <div class="price-main" id="hmstr-price-rub">0.056 ₽</div>
                             <div class="price-change">
                                 <span class="change positive" id="hmstr-change-rub">+2.34%</span>
-                                <span class="change-time">за 24ч</span>
+                                <span class="change-time">сегодня</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Loading Indicator -->
                 <div class="loading-indicator hidden" id="price-loading">
-                    <span>🔄 Обновление данных...</span>
+                    <span>Обновление курса...</span>
                 </div>
 
-                <!-- Exchanges List -->
                 <div class="exchanges-section">
                     <h3>Торговые площадки</h3>
                     <div class="exchanges-list">
-                        <a href="https://www.binance.com/ru/trade/HMSTR_USDT" class="exchange-card" target="_blank" rel="noopener">
+                        <a href="https://example.com" class="exchange-card" target="_blank">
                             <div class="exchange-logo">
-                                <div class="exchange-avatar">B</div>
+                                <div class="exchange-avatar">CEX</div>
                             </div>
                             <div class="exchange-info">
-                                <h3>Binance</h3>
-                                <p>Крупнейшая биржа</p>
+                                <h3>Central Exchange</h3>
+                                <p>Криптовалютная биржа</p>
                             </div>
                             <div class="exchange-arrow">→</div>
                         </a>
-
-                        <a href="https://www.bybit.com/trade/spot/HMSTR/USDT" class="exchange-card" target="_blank" rel="noopener">
+                        
+                        <a href="https://example.com" class="exchange-card" target="_blank">
                             <div class="exchange-logo">
-                                <div class="exchange-avatar">B</div>
+                                <div class="exchange-avatar">DEX</div>
                             </div>
                             <div class="exchange-info">
-                                <h3>Bybit</h3>
-                                <p>Фьючерсы и спот</p>
+                                <h3>Decentral Exchange</h3>
+                                <p>Децентрализованная биржа</p>
                             </div>
                             <div class="exchange-arrow">→</div>
                         </a>
@@ -387,32 +250,33 @@
             </section>
 
             <!-- News Section -->
-            <section id="news-section" class="content-section">
+            <section class="content-section" id="news-section">
                 <div class="section-header">
                     <h2>Новости</h2>
-                    <span class="section-subtitle">Последние обновления проекта</span>
+                    <div class="section-subtitle">Последние обновления и анонсы</div>
                 </div>
+
                 <div class="news-list" id="news-container">
-                    <!-- Новости загружаются динамически -->
+                    <!-- News will be loaded here -->
                 </div>
             </section>
 
             <!-- Profile Section -->
-            <section id="profile-section" class="content-section">
+            <section class="content-section" id="profile-section">
                 <div class="section-header">
                     <h2>Профиль</h2>
-                    <span class="section-subtitle">Управление настройками</span>
+                    <div class="section-subtitle">Ваши данные и настройки</div>
                 </div>
 
                 <div class="profile-header">
-                    <div class="profile-avatar" id="tg-avatar">👤</div>
+                    <div class="profile-avatar" id="tg-avatar">U</div>
                     <div class="profile-info">
                         <h2 id="tg-name">Пользователь</h2>
                         <p id="tg-username">@username</p>
+                        <p>Участник Hamster Verse</p>
                     </div>
                 </div>
 
-                <!-- Theme Toggle -->
                 <div class="theme-toggle-container">
                     <button class="theme-toggle" id="theme-toggle">
                         <span class="theme-icon">🌙</span>
@@ -442,6 +306,28 @@
             </button>
         </nav>
     </div>
+
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+    
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrhWxxEABGnjItCycKK2mss2ZJyGddRak",
+            authDomain: "hamster-verse.firebaseapp.com",
+            projectId: "hamster-verse",
+            storageBucket: "hamster-verse.firebasestorage.app",
+            messagingSenderId: "11005080381",
+            appId: "1:11005080381:web:ad3721b7c21add583d8b54",
+            measurementId: "G-LGVT5GPTTC"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        console.log("✅ Firebase подключен!");
+    </script>
 
     <script src="script.js"></script>
 </body>
