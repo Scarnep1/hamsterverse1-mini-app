@@ -1,8 +1,9 @@
 // Конфигурация приложения
 const APP_CONFIG = {
-    version: '2.2.0',
+    version: '2.3.0',
     features: {
         ratings: true,
+        comments: true,
         news: true,
         priceUpdates: true
     }
@@ -12,6 +13,12 @@ const APP_CONFIG = {
 const RATINGS_SYSTEM = {
     storageKey: 'game_ratings_v2',
     maxRating: 5
+};
+
+// Система комментариев
+const COMMENTS_SYSTEM = {
+    storageKey: 'game_comments_v1',
+    maxCommentLength: 500
 };
 
 // Инициализация приложения
@@ -27,6 +34,7 @@ function initializeApp() {
     setupThemeToggle();
     setupNewsSection();
     setupRatingSystem();
+    setupCommentsSystem();
     setupAutoRefresh();
     setupErrorHandling();
     
@@ -75,7 +83,12 @@ function setupPlayButtons() {
     
     gameCards.forEach(card => {
         card.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('star') && !e.target.closest('.stars-rating')) {
+            if (!e.target.classList.contains('star') && 
+                !e.target.closest('.stars-rating') &&
+                !e.target.closest('.comments-toggle-btn') &&
+                !e.target.closest('.comment-textarea') &&
+                !e.target.closest('.submit-comment-btn') &&
+                !e.target.closest('.like-btn')) {
                 const playButton = this.querySelector('.play-button');
                 const url = playButton.getAttribute('data-url');
                 openGame(url);
@@ -347,12 +360,342 @@ function getUserId() {
     return userId;
 }
 
+function getUserInfo() {
+    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe?.user) {
+        const user = window.Telegram.WebApp.initDataUnsafe.user;
+        return {
+            id: user.id,
+            name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Аноним',
+            avatar: user.photo_url || null
+        };
+    }
+    
+    return {
+        id: getUserId(),
+        name: 'Анонимный Хомяк',
+        avatar: null
+    };
+}
+
 function getRatings() {
     return JSON.parse(localStorage.getItem(RATINGS_SYSTEM.storageKey)) || { games: {}, userRatings: {} };
 }
 
 function saveRatings(ratings) {
     localStorage.setItem(RATINGS_SYSTEM.storageKey, JSON.stringify(ratings));
+}
+
+// Система комментариев
+function setupCommentsSystem() {
+    initializeComments();
+    setupCommentsToggle();
+    setupCommentForm();
+    loadAllCommentsCount();
+}
+
+function initializeComments() {
+    if (!localStorage.getItem(COMMENTS_SYSTEM.storageKey)) {
+        const initialComments = {
+            games: {
+                '1': [
+                    {
+                        id: generateCommentId(),
+                        author: 'Хомяк Профи',
+                        text: 'Отличная игра! Уже несколько недель играю, очень затягивает.',
+                        likes: 8,
+                        likedBy: [],
+                        timestamp: new Date(Date.now() - 86400000).toISOString()
+                    },
+                    {
+                        id: generateCommentId(),
+                        author: 'Геймер2024',
+                        text: 'Интересная механика, но нужно больше контента.',
+                        likes: 3,
+                        likedBy: [],
+                        timestamp: new Date(Date.now() - 172800000).toISOString()
+                    }
+                ],
+                '2': [
+                    {
+                        id: generateCommentId(),
+                        author: 'Король Хомяков',
+                        text: 'Лучшая игра в серии! Графика просто супер.',
+                        likes: 12,
+                        likedBy: [],
+                        timestamp: new Date(Date.now() - 259200000).toISOString()
+                    }
+                ],
+                '3': [
+                    {
+                        id: generateCommentId(),
+                        author: 'Боец Хомяк',
+                        text: 'Жду новых обновлений! Уже прошел все уровни.',
+                        likes: 5,
+                        likedBy: [],
+                        timestamp: new Date(Date.now() - 345600000).toISOString()
+                    }
+                ],
+                '4': [
+                    {
+                        id: generateCommentId(),
+                        author: 'Крипто Хомяк',
+                        text: 'Отличная крипто-игра! Награды реально выплачивают.',
+                        likes: 15,
+                        likedBy: [],
+                        timestamp: new Date(Date.now() - 432000000).toISOString()
+                    }
+                ]
+            }
+        };
+        saveComments(initialComments);
+    }
+}
+
+function setupCommentsToggle() {
+    document.querySelectorAll('.comments-toggle-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const gameId = this.getAttribute('data-game-id');
+            const commentsContainer = document.querySelector(`.comments-container[data-game-id="${gameId}"]`);
+            
+            if (commentsContainer.classList.contains('hidden')) {
+                // Показываем комментарии
+                commentsContainer.classList.remove('hidden');
+                this.classList.add('active');
+                loadComments(gameId);
+            } else {
+                // Скрываем комментарии
+                commentsContainer.classList.add('hidden');
+                this.classList.remove('active');
+            }
+        });
+    });
+}
+
+function setupCommentForm() {
+    // Обработка ввода текста
+    document.querySelectorAll('.comment-textarea').forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            const charCount = this.nextElementSibling.querySelector('.char-count');
+            charCount.textContent = `${this.value.length}/500`;
+            
+            // Блокируем кнопку если текст пустой
+            const submitBtn = this.nextElementSibling.querySelector('.submit-comment-btn');
+            submitBtn.disabled = this.value.trim().length === 0;
+        });
+        
+        // Отправка по Ctrl+Enter
+        textarea.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const gameId = this.nextElementSibling.querySelector('.submit-comment-btn').getAttribute('data-game-id');
+                addComment(gameId, this.value.trim());
+                this.value = '';
+                this.dispatchEvent(new Event('input')); // Обновляем счетчик символов
+            }
+        });
+    });
+    
+    // Обработка кнопок отправки
+    document.querySelectorAll('.submit-comment-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const gameId = this.getAttribute('data-game-id');
+            const textarea = this.closest('.add-comment-form').querySelector('.comment-textarea');
+            const commentText = textarea.value.trim();
+            
+            if (commentText) {
+                addComment(gameId, commentText);
+                textarea.value = '';
+                textarea.dispatchEvent(new Event('input')); // Обновляем счетчик символов
+            }
+        });
+    });
+}
+
+function loadComments(gameId) {
+    const comments = getComments();
+    const gameComments = comments.games[gameId] || [];
+    const commentsList = document.getElementById(`comments-${gameId}`);
+    
+    if (gameComments.length === 0) {
+        commentsList.innerHTML = `
+            <div class="no-comments">
+                <p>Пока нет комментариев</p>
+                <small>Будьте первым, кто оставит отзыв!</small>
+            </div>
+        `;
+        return;
+    }
+    
+    // Сортируем комментарии по количеству лайков (сверху самые популярные)
+    const sortedComments = gameComments.sort((a, b) => b.likes - a.likes);
+    
+    commentsList.innerHTML = sortedComments.map(comment => `
+        <div class="comment-item" data-comment-id="${comment.id}">
+            <div class="comment-header">
+                <div class="comment-author">
+                    <span class="comment-author-avatar">${comment.author.charAt(0)}</span>
+                    ${comment.author}
+                </div>
+                <span class="comment-date">${formatCommentDate(comment.timestamp)}</span>
+            </div>
+            <div class="comment-text">${escapeHtml(comment.text)}</div>
+            <div class="comment-actions">
+                <button class="like-btn ${isCommentLiked(gameId, comment.id) ? 'liked' : ''}" 
+                        data-game-id="${gameId}" 
+                        data-comment-id="${comment.id}">
+                    <span class="like-icon">❤️</span>
+                    <span class="likes-count">${comment.likes}</span>
+                </button>
+            </div>
+        </div>
+    `).join('');
+    
+    // Настраиваем обработчики лайков
+    setupLikeButtons();
+}
+
+function setupLikeButtons() {
+    document.querySelectorAll('.like-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const gameId = this.getAttribute('data-game-id');
+            const commentId = this.getAttribute('data-comment-id');
+            toggleLike(gameId, commentId);
+        });
+    });
+}
+
+function toggleLike(gameId, commentId) {
+    const comments = getComments();
+    const gameComments = comments.games[gameId];
+    if (!gameComments) return;
+    
+    const comment = gameComments.find(c => c.id === commentId);
+    if (!comment) return;
+    
+    const userId = getUserId();
+    const userLiked = comment.likedBy.includes(userId);
+    
+    if (userLiked) {
+        // Убираем лайк
+        comment.likes--;
+        comment.likedBy = comment.likedBy.filter(id => id !== userId);
+    } else {
+        // Добавляем лайк
+        comment.likes++;
+        comment.likedBy.push(userId);
+    }
+    
+    // Сохраняем изменения
+    saveComments(comments);
+    
+    // Обновляем отображение
+    loadComments(gameId);
+    
+    // Анимация
+    const likeBtn = document.querySelector(`.like-btn[data-comment-id="${commentId}"]`);
+    if (!userLiked) {
+        likeBtn.classList.add('liked');
+    }
+    
+    showNotification(userLiked ? 'Лайк удален' : 'Лайк добавлен!', 'info');
+}
+
+function isCommentLiked(gameId, commentId) {
+    const comments = getComments();
+    const gameComments = comments.games[gameId];
+    if (!gameComments) return false;
+    
+    const comment = gameComments.find(c => c.id === commentId);
+    if (!comment) return false;
+    
+    return comment.likedBy.includes(getUserId());
+}
+
+function addComment(gameId, text) {
+    if (text.length > COMMENTS_SYSTEM.maxCommentLength) {
+        showNotification(`Комментарий слишком длинный. Максимум ${COMMENTS_SYSTEM.maxCommentLength} символов.`, 'error');
+        return;
+    }
+    
+    const comments = getComments();
+    if (!comments.games[gameId]) {
+        comments.games[gameId] = [];
+    }
+    
+    const userInfo = getUserInfo();
+    
+    const newComment = {
+        id: generateCommentId(),
+        author: userInfo.name,
+        text: text,
+        likes: 0,
+        likedBy: [],
+        timestamp: new Date().toISOString()
+    };
+    
+    comments.games[gameId].unshift(newComment);
+    saveComments(comments);
+    
+    // Обновляем отображение
+    loadComments(gameId);
+    updateCommentsCount(gameId);
+    
+    showNotification('Комментарий добавлен!', 'success');
+}
+
+function loadAllCommentsCount() {
+    const comments = getComments();
+    
+    Object.keys(comments.games).forEach(gameId => {
+        updateCommentsCount(gameId);
+    });
+}
+
+function updateCommentsCount(gameId) {
+    const comments = getComments();
+    const gameComments = comments.games[gameId] || [];
+    const countElement = document.querySelector(`.comments-toggle-btn[data-game-id="${gameId}"] .comments-count`);
+    
+    if (countElement) {
+        countElement.textContent = gameComments.length;
+    }
+}
+
+function getComments() {
+    return JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
+}
+
+function saveComments(comments) {
+    localStorage.setItem(COMMENTS_SYSTEM.storageKey, JSON.stringify(comments));
+}
+
+function generateCommentId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+function formatCommentDate(timestamp) {
+    const date = new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) {
+        return 'только что';
+    } else if (diff < 3600000) {
+        const minutes = Math.floor(diff / 60000);
+        return `${minutes} мин. назад`;
+    } else if (diff < 86400000) {
+        const hours = Math.floor(diff / 3600000);
+        return `${hours} ч. назад`;
+    } else {
+        return date.toLocaleDateString('ru-RU');
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Данные токена HMSTR
@@ -475,7 +818,7 @@ function loadNews() {
             <div class="news-item">
                 <span class="news-date">Сегодня</span>
                 <div class="news-title">Добро пожаловать в Hamster Verse!</div>
-                <div class="news-content">Теперь вы можете оценивать игры! Ваши оценки помогают другим игрокам выбирать лучшие игры.</div>
+                <div class="news-content">Теперь вы можете оставлять комментарии и ставить лайки! Делитесь мнением об играх с сообществом.</div>
             </div>
         `;
         return;
@@ -494,13 +837,13 @@ function getNewsData() {
     return [
         {
             date: new Date().toISOString(),
-            title: "Новая система рейтингов",
-            content: "Теперь вы можете оценивать игры! Ваша оценка помогает сообществу выбирать лучшие игры."
+            title: "Добавлена система комментариев",
+            content: "Теперь вы можете оставлять комментарии к играм и ставить лайки! Самые популярные комментарии будут отображаться первыми."
         },
         {
             date: new Date(Date.now() - 86400000).toISOString(),
-            title: "Hamster Verse обновлен",
-            content: "Мы полностью обновили дизайн и добавили новые функции для вашего удобства!"
+            title: "Новая система рейтингов",
+            content: "Теперь вы можете оценивать игры! Ваша оценка помогает сообществу выбирать лучшие игры."
         }
     ];
 }
