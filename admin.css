@@ -494,6 +494,10 @@ body {
     color: var(--success-color);
 }
 
+.data-value.positive {
+    color: var(--success-color);
+}
+
 .data-value.negative {
     color: var(--error-color);
 }
@@ -626,5 +630,13 @@ body {
     
     .token-data {
         grid-template-columns: 1fr;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .admin-btn {
+        width: 100%;
     }
 }
