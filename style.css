@@ -22,6 +22,8 @@
     --rub-color: #4169E1;
     --star-color: #ffc107;
     --star-inactive: #ddd;
+    --like-color: #ff4444;
+    --comment-bg: #f8f9fa;
 }
 
 [data-theme="dark"] {
@@ -38,6 +40,7 @@
     --usd-color: #2ecc71;
     --rub-color: #3498db;
     --star-inactive: #555;
+    --comment-bg: #2a2a2a;
 }
 
 body {
@@ -306,26 +309,31 @@ body {
 .games-grid {
     display: grid;
     grid-template-columns: 1fr;
-    gap: 12px;
+    gap: 16px;
 }
 
 .game-card {
     background: var(--bg-card);
     border-radius: 16px;
     padding: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    transition: all 0.3s ease;
     border: 1px solid var(--border-color);
-    cursor: pointer;
     box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    cursor: pointer;
+    position: relative;
 }
 
 .game-card:hover {
     transform: translateY(-2px);
     box-shadow: var(--shadow-hover);
     background: var(--bg-secondary);
+}
+
+.game-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
 }
 
 .game-image {
@@ -487,6 +495,250 @@ body {
 .play-button:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+/* Comments Section */
+.game-comments-section {
+    margin-top: 12px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 12px;
+}
+
+.comments-toggle-btn {
+    width: 100%;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 10px 12px;
+    font-size: 12px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: space-between;
+}
+
+.comments-toggle-btn:hover {
+    background: var(--accent-gradient);
+    color: white;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.comments-toggle-btn.active .toggle-arrow {
+    transform: rotate(180deg);
+}
+
+.comments-icon {
+    font-size: 14px;
+}
+
+.toggle-arrow {
+    transition: transform 0.3s ease;
+    font-size: 10px;
+}
+
+.comments-container {
+    margin-top: 12px;
+    animation: slideDown 0.3s ease;
+}
+
+.comments-list {
+    max-height: 300px;
+    overflow-y: auto;
+    margin-bottom: 12px;
+    padding-right: 4px;
+}
+
+.comments-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.comments-list::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 2px;
+}
+
+.comments-list::-webkit-scrollbar-thumb {
+    background: var(--accent-primary);
+    border-radius: 2px;
+}
+
+/* Comment Item */
+.comment-item {
+    background: var(--comment-bg);
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 8px;
+    border: 1px solid var(--border-color);
+    animation: fadeIn 0.3s ease;
+}
+
+.comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+.comment-author {
+    font-weight: 600;
+    font-size: 12px;
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.comment-author-avatar {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--accent-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 10px;
+    color: white;
+    font-weight: bold;
+}
+
+.comment-date {
+    font-size: 10px;
+    color: var(--text-muted);
+}
+
+.comment-text {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+    word-break: break-word;
+    margin-bottom: 8px;
+}
+
+.comment-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.like-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    color: var(--text-muted);
+    transition: all 0.2s ease;
+    padding: 4px 8px;
+    border-radius: 12px;
+}
+
+.like-btn:hover {
+    background: rgba(255, 68, 68, 0.1);
+    color: var(--like-color);
+}
+
+.like-btn.liked {
+    color: var(--like-color);
+}
+
+.like-btn.liked .like-icon {
+    animation: heartBeat 0.5s ease;
+}
+
+.like-icon {
+    font-size: 12px;
+}
+
+.likes-count {
+    font-weight: 600;
+}
+
+/* Add Comment Form */
+.add-comment-form {
+    background: var(--comment-bg);
+    border-radius: 8px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.comment-textarea {
+    width: 100%;
+    background: var(--bg-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 10px;
+    font-size: 12px;
+    color: var(--text-primary);
+    resize: vertical;
+    min-height: 60px;
+    transition: all 0.3s ease;
+    font-family: 'Inter', sans-serif;
+    margin-bottom: 8px;
+}
+
+.comment-textarea:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.1);
+}
+
+.comment-textarea::placeholder {
+    color: var(--text-muted);
+}
+
+.comment-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.char-count {
+    font-size: 11px;
+    color: var(--text-muted);
+}
+
+.submit-comment-btn {
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.submit-comment-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.submit-comment-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.no-comments {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-secondary);
+}
+
+.no-comments p {
+    margin-bottom: 5px;
+}
+
+.no-comments small {
+    font-size: 11px;
+    opacity: 0.7;
 }
 
 /* Exchanges Section */
@@ -831,6 +1083,14 @@ body {
     100% { transform: scale(1); }
 }
 
+@keyframes heartBeat {
+    0% { transform: scale(1); }
+    25% { transform: scale(1.2); }
+    50% { transform: scale(1); }
+    75% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
 .star.just-rated {
     animation: starPulse 0.5s ease;
 }
@@ -872,7 +1132,7 @@ body {
     }
     
     .games-grid {
-        gap: 10px;
+        gap: 12px;
     }
     
     .game-card {
@@ -922,6 +1182,10 @@ body {
     
     .rate-label {
         font-size: 10px;
+    }
+    
+    .comments-list {
+        max-height: 200px;
     }
 }
 
