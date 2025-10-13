@@ -21,20 +21,24 @@ const COMMENTS_SYSTEM = {
     maxCommentLength: 500
 };
 
+// Коллекции Firestore
+const COMMENTS_COLLECTION = "comments";
+const RATINGS_COLLECTION = "ratings";
+
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-function initializeApp() {
+async function initializeApp() {
     setupNavigation();
     setupPlayButtons();
     setupTelegramIntegration();
     setupPriceData();
     setupThemeToggle();
     setupNewsSection();
-    setupRatingSystem();
-    setupCommentsSystem();
+    await setupRatingSystem();
+    await setupCommentsSystem();
     setupAutoRefresh();
     setupErrorHandling();
     
@@ -160,124 +164,387 @@ function simulateUserProfile() {
     document.getElementById('tg-username').textContent = `@${username}`;
 }
 
-// Система рейтингов
-function setupRatingSystem() {
-    initializeRatings();
-    loadAllRatings();
+// ==================== FIREBASE ФУНКЦИИ ====================
+
+// Система рейтингов с Firebase
+async function setupRatingSystem() {
     setupStarsInteractions();
+    await loadAllRatings();
 }
 
-function initializeRatings() {
-    if (!localStorage.getItem(RATINGS_SYSTEM.storageKey)) {
-        const initialRatings = {
-            games: {
-                '1': { total: 4.2, count: 128, ratings: [] },
-                '2': { total: 4.5, count: 256, ratings: [] },
-                '3': { total: 4.3, count: 189, ratings: [] },
-                '4': { total: 4.7, count: 312, ratings: [] }
-            },
-            userRatings: {}
-        };
-        saveRatings(initialRatings);
+async function loadAllRatings() {
+    const gameIds = ['1', '2']; // Добавьте остальные ID игр
+    for (const gameId of gameIds) {
+        await loadRatings(gameId);
     }
 }
 
-function loadAllRatings() {
-    const ratings = getRatings();
+async function loadRatings(gameId) {
+    try {
+        const querySnapshot = await db.collection(RATINGS_COLLECTION)
+            .where("gameId", "==", gameId)
+            .get();
+        
+        const ratings = [];
+        querySnapshot.forEach((doc) => {
+            ratings.push(doc.data().rating);
+        });
+        
+        const average = ratings.length > 0 
+            ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length 
+            : 0;
+        
+        const ratingData = {
+            total: average,
+            count: ratings.length,
+            ratings: ratings
+        };
+        
+        updateRatingDisplay(gameId, ratingData);
+        await checkUserRating(gameId);
+        
+    } catch (error) {
+        console.error("Error loading ratings:", error);
+        loadRatingsFromLocalStorage(gameId);
+    }
+}
+
+async function rateGame(gameId, rating) {
+    const userId = getUserId();
+    const userInfo = getUserInfo();
     
-    Object.keys(ratings.games).forEach(gameId => {
-        updateRatingDisplay(gameId, ratings.games[gameId]);
+    try {
+        // Проверяем, не оценивал ли уже пользователь
+        const existingRatingQuery = await db.collection(RATINGS_COLLECTION)
+            .where("gameId", "==", gameId)
+            .where("userId", "==", userId)
+            .get();
+        
+        if (!existingRatingQuery.empty) {
+            showNotification('Вы уже оценили эту игру!', 'info');
+            return;
+        }
+        
+        // Добавляем оценку в Firebase
+        await db.collection(RATINGS_COLLECTION).add({
+            gameId: gameId,
+            userId: userId,
+            rating: rating,
+            author: userInfo.name,
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        
+        // Обновляем отображение
+        await loadRatings(gameId);
+        
+        // Блокируем возможность повторной оценки
+        const ratingContainer = document.querySelector(`.stars-rating[data-game-id="${gameId}"]`);
+        const stars = ratingContainer.querySelectorAll('.star');
+        highlightUserRating(stars, rating);
+        ratingContainer.classList.add('disabled');
+        
+        showNotification(`Спасибо за оценку ${rating} ⭐!`, 'success');
+        
+    } catch (error) {
+        console.error("Error rating game:", error);
+        showNotification('Ошибка при сохранении оценки', 'error');
+        rateGameInLocalStorage(gameId, rating);
+    }
+}
+
+async function checkUserRating(gameId) {
+    const userId = getUserId();
+    
+    try {
+        const querySnapshot = await db.collection(RATINGS_COLLECTION)
+            .where("gameId", "==", gameId)
+            .where("userId", "==", userId)
+            .get();
+        
+        if (!querySnapshot.empty) {
+            const userRating = querySnapshot.docs[0].data().rating;
+            const ratingContainer = document.querySelector(`.stars-rating[data-game-id="${gameId}"]`);
+            const stars = ratingContainer.querySelectorAll('.star');
+            highlightUserRating(stars, userRating);
+            ratingContainer.classList.add('disabled');
+        }
+    } catch (error) {
+        console.error("Error checking user rating:", error);
+        checkUserRatingInLocalStorage(gameId);
+    }
+}
+
+// Система комментариев с Firebase
+async function setupCommentsSystem() {
+    setupCommentsToggle();
+    setupCommentForm();
+    await loadAllCommentsCount();
+}
+
+async function loadAllCommentsCount() {
+    const gameIds = ['1', '2']; // Добавьте остальные ID игр
+    let totalComments = 0;
+    
+    for (const gameId of gameIds) {
+        const count = await updateCommentsCount(gameId);
+        totalComments += count;
+    }
+    
+    document.getElementById('total-comments').textContent = totalComments;
+}
+
+async function updateCommentsCount(gameId) {
+    try {
+        const querySnapshot = await db.collection(COMMENTS_COLLECTION)
+            .where("gameId", "==", gameId)
+            .get();
+        
+        const count = querySnapshot.size;
+        const countElement = document.querySelector(`.comments-toggle-btn[data-game-id="${gameId}"] .comments-count`);
+        
+        if (countElement) {
+            countElement.textContent = count;
+        }
+        
+        return count;
+    } catch (error) {
+        console.error("Error updating comments count:", error);
+        updateCommentsCountFromLocalStorage(gameId);
+        return 0;
+    }
+}
+
+function setupCommentsToggle() {
+    document.querySelectorAll('.comments-toggle-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const gameId = this.getAttribute('data-game-id');
+            const commentsContainer = document.querySelector(`.comments-container[data-game-id="${gameId}"]`);
+            
+            if (commentsContainer.classList.contains('hidden')) {
+                commentsContainer.classList.remove('hidden');
+                this.classList.add('active');
+                loadComments(gameId);
+            } else {
+                commentsContainer.classList.add('hidden');
+                this.classList.remove('active');
+            }
+        });
     });
 }
+
+function setupCommentForm() {
+    document.querySelectorAll('.comment-textarea').forEach(textarea => {
+        textarea.addEventListener('input', function() {
+            const charCount = this.nextElementSibling.querySelector('.char-count');
+            charCount.textContent = `${this.value.length}/500`;
+            
+            const submitBtn = this.nextElementSibling.querySelector('.submit-comment-btn');
+            submitBtn.disabled = this.value.trim().length === 0;
+        });
+        
+        textarea.addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                const gameId = this.nextElementSibling.querySelector('.submit-comment-btn').getAttribute('data-game-id');
+                addComment(gameId, this.value.trim());
+                this.value = '';
+                this.dispatchEvent(new Event('input'));
+            }
+        });
+    });
+    
+    document.querySelectorAll('.submit-comment-btn').forEach(button => {
+        button.addEventListener('click', function() {
+            const gameId = this.getAttribute('data-game-id');
+            const textarea = this.closest('.add-comment-form').querySelector('.comment-textarea');
+            const commentText = textarea.value.trim();
+            
+            if (commentText) {
+                addComment(gameId, commentText);
+                textarea.value = '';
+                textarea.dispatchEvent(new Event('input'));
+            }
+        });
+    });
+}
+
+async function loadComments(gameId) {
+    try {
+        const commentsList = document.getElementById(`comments-${gameId}`);
+        commentsList.innerHTML = '<div class="loading-indicator"><span>Загрузка комментариев...</span></div>';
+        
+        const querySnapshot = await db.collection(COMMENTS_COLLECTION)
+            .where("gameId", "==", gameId)
+            .orderBy("timestamp", "desc")
+            .get();
+        
+        const comments = [];
+        querySnapshot.forEach((doc) => {
+            comments.push({ id: doc.id, ...doc.data() });
+        });
+        
+        if (comments.length === 0) {
+            commentsList.innerHTML = `
+                <div class="no-comments">
+                    <p>Пока нет комментариев</p>
+                    <small>Будьте первым, кто оставит отзыв!</small>
+                </div>
+            `;
+            return;
+        }
+        
+        const sortedComments = comments.sort((a, b) => b.likes - a.likes);
+        
+        commentsList.innerHTML = sortedComments.map(comment => `
+            <div class="comment-item" data-comment-id="${comment.id}">
+                <div class="comment-header">
+                    <div class="comment-author">
+                        <span class="comment-author-avatar">${comment.author.charAt(0)}</span>
+                        ${comment.author}
+                    </div>
+                    <span class="comment-date">${formatCommentDate(comment.timestamp)}</span>
+                </div>
+                <div class="comment-text">${escapeHtml(comment.text)}</div>
+                <div class="comment-actions">
+                    <button class="like-btn ${isCommentLiked(comment.id, comment.likedBy) ? 'liked' : ''}" 
+                            data-comment-id="${comment.id}"
+                            data-game-id="${gameId}">
+                        <span class="like-icon">❤️</span>
+                        <span class="likes-count">${comment.likes}</span>
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        
+        setupLikeButtons();
+        
+    } catch (error) {
+        console.error("Error loading comments:", error);
+        showNotification('Ошибка загрузки комментариев', 'error');
+        loadCommentsFromLocalStorage(gameId);
+    }
+}
+
+async function addComment(gameId, text) {
+    if (text.length > COMMENTS_SYSTEM.maxCommentLength) {
+        showNotification(`Комментарий слишком длинный. Максимум ${COMMENTS_SYSTEM.maxCommentLength} символов.`, 'error');
+        return;
+    }
+    
+    const userInfo = getUserInfo();
+    
+    try {
+        const commentData = {
+            gameId: gameId,
+            userId: userInfo.id,
+            author: userInfo.name,
+            text: text,
+            likes: 0,
+            likedBy: [],
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        const docRef = await db.collection(COMMENTS_COLLECTION).add(commentData);
+        
+        // Сохраняем в localStorage как резервную копию
+        saveCommentToLocalStorage({ id: docRef.id, ...commentData });
+        
+        // Обновляем отображение
+        loadComments(gameId);
+        updateCommentsCount(gameId);
+        
+        showNotification('Комментарий добавлен!', 'success');
+        
+    } catch (error) {
+        console.error("Error adding comment:", error);
+        showNotification('Ошибка при добавлении комментария', 'error');
+        addCommentToLocalStorage(gameId, text);
+    }
+}
+
+async function toggleLike(gameId, commentId) {
+    const userId = getUserId();
+    
+    try {
+        const commentRef = db.collection(COMMENTS_COLLECTION).doc(commentId);
+        const commentDoc = await commentRef.get();
+        
+        if (!commentDoc.exists) {
+            throw new Error("Comment not found");
+        }
+        
+        const comment = commentDoc.data();
+        const userLiked = comment.likedBy.includes(userId);
+        
+        if (userLiked) {
+            // Убираем лайк
+            await commentRef.update({
+                likes: firebase.firestore.FieldValue.increment(-1),
+                likedBy: firebase.firestore.FieldValue.arrayRemove(userId)
+            });
+        } else {
+            // Добавляем лайк
+            await commentRef.update({
+                likes: firebase.firestore.FieldValue.increment(1),
+                likedBy: firebase.firestore.FieldValue.arrayUnion(userId)
+            });
+        }
+        
+        // Обновляем отображение
+        loadComments(gameId);
+        
+        // Анимация
+        const likeBtn = document.querySelector(`.like-btn[data-comment-id="${commentId}"]`);
+        if (!userLiked) {
+            likeBtn.classList.add('liked');
+        }
+        
+        showNotification(userLiked ? 'Лайк удален' : 'Лайк добавлен!', 'info');
+        
+    } catch (error) {
+        console.error("Error toggling like:", error);
+        toggleLikeInLocalStorage(gameId, commentId);
+    }
+}
+
+function setupLikeButtons() {
+    document.querySelectorAll('.like-btn').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const gameId = this.getAttribute('data-game-id');
+            const commentId = this.getAttribute('data-comment-id');
+            toggleLike(gameId, commentId);
+        });
+    });
+}
+
+// ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
 
 function setupStarsInteractions() {
     document.querySelectorAll('.stars-rating').forEach(ratingContainer => {
         const gameId = ratingContainer.getAttribute('data-game-id');
         const stars = ratingContainer.querySelectorAll('.star');
-        const userId = getUserId();
-        const ratings = getRatings();
         
-        // Проверяем, оценивал ли уже пользователь эту игру
-        const userRating = ratings.userRatings[userId]?.[gameId];
-        
-        if (userRating) {
-            // Пользователь уже оценивал - блокируем и показываем его оценку
-            highlightUserRating(stars, userRating);
-            ratingContainer.classList.add('disabled');
-        } else {
-            // Пользователь еще не оценивал - настраиваем взаимодействие
-            stars.forEach(star => {
-                star.addEventListener('click', function() {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    rateGame(gameId, rating);
-                });
-                
-                star.addEventListener('mouseover', function() {
-                    if (!ratingContainer.classList.contains('disabled')) {
-                        const rating = parseInt(this.getAttribute('data-rating'));
-                        highlightStars(stars, rating);
-                    }
-                });
-                
-                star.addEventListener('mouseout', function() {
-                    if (!ratingContainer.classList.contains('disabled')) {
-                        const userRating = ratings.userRatings[userId]?.[gameId];
-                        if (userRating) {
-                            highlightStars(stars, userRating);
-                        } else {
-                            resetStars(stars);
-                        }
-                    }
-                });
+        stars.forEach(star => {
+            star.addEventListener('click', function() {
+                const rating = parseInt(this.getAttribute('data-rating'));
+                rateGame(gameId, rating);
             });
-        }
+            
+            star.addEventListener('mouseover', function() {
+                if (!ratingContainer.classList.contains('disabled')) {
+                    const rating = parseInt(this.getAttribute('data-rating'));
+                    highlightStars(stars, rating);
+                }
+            });
+            
+            star.addEventListener('mouseout', function() {
+                if (!ratingContainer.classList.contains('disabled')) {
+                    resetStars(stars);
+                }
+            });
+        });
     });
-}
-
-function rateGame(gameId, rating) {
-    const userId = getUserId();
-    const ratings = getRatings();
-    
-    // Проверяем, не оценивал ли уже пользователь эту игру
-    if (ratings.userRatings[userId]?.[gameId]) {
-        showNotification('Вы уже оценили эту игру!', 'info');
-        return;
-    }
-    
-    // Добавляем оценку пользователя
-    if (!ratings.userRatings[userId]) {
-        ratings.userRatings[userId] = {};
-    }
-    ratings.userRatings[userId][gameId] = rating;
-    
-    // Обновляем статистику игры
-    if (!ratings.games[gameId]) {
-        ratings.games[gameId] = { total: 0, count: 0, ratings: [] };
-    }
-    
-    const game = ratings.games[gameId];
-    game.ratings.push(rating);
-    game.count = game.ratings.length;
-    game.total = game.ratings.reduce((sum, r) => sum + r, 0) / game.count;
-    
-    // Сохраняем обновленные рейтинги
-    saveRatings(ratings);
-    
-    // Обновляем отображение
-    updateRatingDisplay(gameId, game);
-    
-    // Блокируем возможность повторной оценки
-    const ratingContainer = document.querySelector(`.stars-rating[data-game-id="${gameId}"]`);
-    const stars = ratingContainer.querySelectorAll('.star');
-    highlightUserRating(stars, rating);
-    ratingContainer.classList.add('disabled');
-    
-    // Анимация и уведомление
-    const clickedStar = ratingContainer.querySelector(`.star[data-rating="${rating}"]`);
-    clickedStar.classList.add('just-rated');
-    setTimeout(() => clickedStar.classList.remove('just-rated'), 500);
-    
-    showNotification(`Спасибо за оценку ${rating} ⭐!`, 'success');
 }
 
 function updateRatingDisplay(gameId, gameData) {
@@ -296,8 +563,7 @@ function updateRatingDisplay(gameId, gameData) {
         countElement.textContent = `(${gameData.count} оценок)`;
     }
     
-    // Обновляем статические звезды
-    const averageRating = Math.round(gameData.total * 2) / 2; // Округляем до 0.5
+    const averageRating = Math.round(gameData.total * 2) / 2;
     highlightStaticStars(staticStars, averageRating);
 }
 
@@ -306,13 +572,10 @@ function highlightStaticStars(stars, rating) {
         const starNumber = index + 1;
         
         if (rating >= starNumber) {
-            // Полная звезда
             star.classList.add('active');
         } else if (rating >= starNumber - 0.5) {
-            // Половина звезды (можно добавить CSS для половинчатой звезды)
             star.classList.add('active');
         } else {
-            // Пустая звезда
             star.classList.remove('active');
         }
     });
@@ -351,11 +614,18 @@ function getUserId() {
         return `tg_${window.Telegram.WebApp.initDataUnsafe.user.id}`;
     }
     
-    // Генерируем уникальный ID для анонимного пользователя
-    let userId = localStorage.getItem('anonymous_user_id');
+    let userId = localStorage.getItem('hamster_user_id');
     if (!userId) {
-        userId = `anon_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('anonymous_user_id', userId);
+        userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        localStorage.setItem('hamster_user_id', userId);
+        
+        const userInfo = {
+            id: userId,
+            created: new Date().toISOString(),
+            name: 'Анонимный Хомяк',
+            type: 'anonymous'
+        };
+        localStorage.setItem('hamster_user_info', JSON.stringify(userInfo));
     }
     return userId;
 }
@@ -364,156 +634,36 @@ function getUserInfo() {
     if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe?.user) {
         const user = window.Telegram.WebApp.initDataUnsafe.user;
         return {
-            id: user.id,
-            name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Аноним',
-            avatar: user.photo_url || null
+            id: `tg_${user.id}`,
+            name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Telegram User',
+            avatar: user.photo_url || null,
+            type: 'telegram'
         };
+    }
+    
+    const storedInfo = localStorage.getItem('hamster_user_info');
+    if (storedInfo) {
+        return JSON.parse(storedInfo);
     }
     
     return {
         id: getUserId(),
         name: 'Анонимный Хомяк',
-        avatar: null
+        avatar: null,
+        type: 'anonymous'
     };
 }
 
-function getRatings() {
-    return JSON.parse(localStorage.getItem(RATINGS_SYSTEM.storageKey)) || { games: {}, userRatings: {} };
+function isCommentLiked(commentId, likedBy = []) {
+    return likedBy.includes(getUserId());
 }
 
-function saveRatings(ratings) {
-    localStorage.setItem(RATINGS_SYSTEM.storageKey, JSON.stringify(ratings));
-}
+// ==================== FALLBACK ФУНКЦИИ (localStorage) ====================
 
-// Система комментариев
-function setupCommentsSystem() {
-    initializeComments();
-    setupCommentsToggle();
-    setupCommentForm();
-    loadAllCommentsCount();
-}
-
-function initializeComments() {
-    if (!localStorage.getItem(COMMENTS_SYSTEM.storageKey)) {
-        const initialComments = {
-            games: {
-                '1': [
-                    {
-                        id: generateCommentId(),
-                        author: 'Хомяк Профи',
-                        text: 'Отличная игра! Уже несколько недель играю, очень затягивает.',
-                        likes: 8,
-                        likedBy: [],
-                        timestamp: new Date(Date.now() - 86400000).toISOString()
-                    },
-                    {
-                        id: generateCommentId(),
-                        author: 'Геймер2024',
-                        text: 'Интересная механика, но нужно больше контента.',
-                        likes: 3,
-                        likedBy: [],
-                        timestamp: new Date(Date.now() - 172800000).toISOString()
-                    }
-                ],
-                '2': [
-                    {
-                        id: generateCommentId(),
-                        author: 'Король Хомяков',
-                        text: 'Лучшая игра в серии! Графика просто супер.',
-                        likes: 12,
-                        likedBy: [],
-                        timestamp: new Date(Date.now() - 259200000).toISOString()
-                    }
-                ],
-                '3': [
-                    {
-                        id: generateCommentId(),
-                        author: 'Боец Хомяк',
-                        text: 'Жду новых обновлений! Уже прошел все уровни.',
-                        likes: 5,
-                        likedBy: [],
-                        timestamp: new Date(Date.now() - 345600000).toISOString()
-                    }
-                ],
-                '4': [
-                    {
-                        id: generateCommentId(),
-                        author: 'Крипто Хомяк',
-                        text: 'Отличная крипто-игра! Награды реально выплачивают.',
-                        likes: 15,
-                        likedBy: [],
-                        timestamp: new Date(Date.now() - 432000000).toISOString()
-                    }
-                ]
-            }
-        };
-        saveComments(initialComments);
-    }
-}
-
-function setupCommentsToggle() {
-    document.querySelectorAll('.comments-toggle-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const gameId = this.getAttribute('data-game-id');
-            const commentsContainer = document.querySelector(`.comments-container[data-game-id="${gameId}"]`);
-            
-            if (commentsContainer.classList.contains('hidden')) {
-                // Показываем комментарии
-                commentsContainer.classList.remove('hidden');
-                this.classList.add('active');
-                loadComments(gameId);
-            } else {
-                // Скрываем комментарии
-                commentsContainer.classList.add('hidden');
-                this.classList.remove('active');
-            }
-        });
-    });
-}
-
-function setupCommentForm() {
-    // Обработка ввода текста
-    document.querySelectorAll('.comment-textarea').forEach(textarea => {
-        textarea.addEventListener('input', function() {
-            const charCount = this.nextElementSibling.querySelector('.char-count');
-            charCount.textContent = `${this.value.length}/500`;
-            
-            // Блокируем кнопку если текст пустой
-            const submitBtn = this.nextElementSibling.querySelector('.submit-comment-btn');
-            submitBtn.disabled = this.value.trim().length === 0;
-        });
-        
-        // Отправка по Ctrl+Enter
-        textarea.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                const gameId = this.nextElementSibling.querySelector('.submit-comment-btn').getAttribute('data-game-id');
-                addComment(gameId, this.value.trim());
-                this.value = '';
-                this.dispatchEvent(new Event('input')); // Обновляем счетчик символов
-            }
-        });
-    });
-    
-    // Обработка кнопок отправки
-    document.querySelectorAll('.submit-comment-btn').forEach(button => {
-        button.addEventListener('click', function() {
-            const gameId = this.getAttribute('data-game-id');
-            const textarea = this.closest('.add-comment-form').querySelector('.comment-textarea');
-            const commentText = textarea.value.trim();
-            
-            if (commentText) {
-                addComment(gameId, commentText);
-                textarea.value = '';
-                textarea.dispatchEvent(new Event('input')); // Обновляем счетчик символов
-            }
-        });
-    });
-}
-
-function loadComments(gameId) {
-    const comments = getComments();
+function loadCommentsFromLocalStorage(gameId) {
+    const comments = JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
     const gameComments = comments.games[gameId] || [];
+    
     const commentsList = document.getElementById(`comments-${gameId}`);
     
     if (gameComments.length === 0) {
@@ -526,7 +676,6 @@ function loadComments(gameId) {
         return;
     }
     
-    // Сортируем комментарии по количеству лайков (сверху самые популярные)
     const sortedComments = gameComments.sort((a, b) => b.likes - a.likes);
     
     commentsList.innerHTML = sortedComments.map(comment => `
@@ -540,7 +689,7 @@ function loadComments(gameId) {
             </div>
             <div class="comment-text">${escapeHtml(comment.text)}</div>
             <div class="comment-actions">
-                <button class="like-btn ${isCommentLiked(gameId, comment.id) ? 'liked' : ''}" 
+                <button class="like-btn ${isCommentLiked(comment.id, comment.likedBy) ? 'liked' : ''}" 
                         data-game-id="${gameId}" 
                         data-comment-id="${comment.id}">
                     <span class="like-icon">❤️</span>
@@ -550,23 +699,57 @@ function loadComments(gameId) {
         </div>
     `).join('');
     
-    // Настраиваем обработчики лайков
     setupLikeButtons();
 }
 
-function setupLikeButtons() {
-    document.querySelectorAll('.like-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const gameId = this.getAttribute('data-game-id');
-            const commentId = this.getAttribute('data-comment-id');
-            toggleLike(gameId, commentId);
-        });
-    });
+function addCommentToLocalStorage(gameId, text) {
+    const comments = JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
+    const userInfo = getUserInfo();
+    
+    if (!comments.games[gameId]) {
+        comments.games[gameId] = [];
+    }
+    
+    const newComment = {
+        id: generateCommentId(),
+        author: userInfo.name,
+        text: text,
+        likes: 0,
+        likedBy: [],
+        timestamp: new Date().toISOString(),
+        userId: userInfo.id
+    };
+    
+    comments.games[gameId].unshift(newComment);
+    localStorage.setItem(COMMENTS_SYSTEM.storageKey, JSON.stringify(comments));
+    
+    loadCommentsFromLocalStorage(gameId);
+    updateCommentsCountFromLocalStorage(gameId);
+    
+    showNotification('Комментарий добавлен!', 'success');
 }
 
-function toggleLike(gameId, commentId) {
-    const comments = getComments();
+function saveCommentToLocalStorage(comment) {
+    const comments = JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
+    if (!comments.games[comment.gameId]) {
+        comments.games[comment.gameId] = [];
+    }
+    comments.games[comment.gameId].push(comment);
+    localStorage.setItem(COMMENTS_SYSTEM.storageKey, JSON.stringify(comments));
+}
+
+function updateCommentsCountFromLocalStorage(gameId) {
+    const comments = JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
+    const gameComments = comments.games[gameId] || [];
+    const countElement = document.querySelector(`.comments-toggle-btn[data-game-id="${gameId}"] .comments-count`);
+    
+    if (countElement) {
+        countElement.textContent = gameComments.length;
+    }
+}
+
+function toggleLikeInLocalStorage(gameId, commentId) {
+    const comments = JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
     const gameComments = comments.games[gameId];
     if (!gameComments) return;
     
@@ -577,22 +760,16 @@ function toggleLike(gameId, commentId) {
     const userLiked = comment.likedBy.includes(userId);
     
     if (userLiked) {
-        // Убираем лайк
         comment.likes--;
         comment.likedBy = comment.likedBy.filter(id => id !== userId);
     } else {
-        // Добавляем лайк
         comment.likes++;
         comment.likedBy.push(userId);
     }
     
-    // Сохраняем изменения
-    saveComments(comments);
+    localStorage.setItem(COMMENTS_SYSTEM.storageKey, JSON.stringify(comments));
+    loadCommentsFromLocalStorage(gameId);
     
-    // Обновляем отображение
-    loadComments(gameId);
-    
-    // Анимация
     const likeBtn = document.querySelector(`.like-btn[data-comment-id="${commentId}"]`);
     if (!userLiked) {
         likeBtn.classList.add('liked');
@@ -601,102 +778,60 @@ function toggleLike(gameId, commentId) {
     showNotification(userLiked ? 'Лайк удален' : 'Лайк добавлен!', 'info');
 }
 
-function isCommentLiked(gameId, commentId) {
-    const comments = getComments();
-    const gameComments = comments.games[gameId];
-    if (!gameComments) return false;
-    
-    const comment = gameComments.find(c => c.id === commentId);
-    if (!comment) return false;
-    
-    return comment.likedBy.includes(getUserId());
+function loadRatingsFromLocalStorage(gameId) {
+    const ratings = JSON.parse(localStorage.getItem(RATINGS_SYSTEM.storageKey)) || { games: {}, userRatings: {} };
+    const gameData = ratings.games[gameId] || { total: 0, count: 0, ratings: [] };
+    updateRatingDisplay(gameId, gameData);
 }
 
-function addComment(gameId, text) {
-    if (text.length > COMMENTS_SYSTEM.maxCommentLength) {
-        showNotification(`Комментарий слишком длинный. Максимум ${COMMENTS_SYSTEM.maxCommentLength} символов.`, 'error');
+function rateGameInLocalStorage(gameId, rating) {
+    const userId = getUserId();
+    const ratings = JSON.parse(localStorage.getItem(RATINGS_SYSTEM.storageKey)) || { games: {}, userRatings: {} };
+    
+    if (ratings.userRatings[userId]?.[gameId]) {
+        showNotification('Вы уже оценили эту игру!', 'info');
         return;
     }
     
-    const comments = getComments();
-    if (!comments.games[gameId]) {
-        comments.games[gameId] = [];
+    if (!ratings.userRatings[userId]) {
+        ratings.userRatings[userId] = {};
+    }
+    ratings.userRatings[userId][gameId] = rating;
+    
+    if (!ratings.games[gameId]) {
+        ratings.games[gameId] = { total: 0, count: 0, ratings: [] };
     }
     
-    const userInfo = getUserInfo();
+    const game = ratings.games[gameId];
+    game.ratings.push(rating);
+    game.count = game.ratings.length;
+    game.total = game.ratings.reduce((sum, r) => sum + r, 0) / game.count;
     
-    const newComment = {
-        id: generateCommentId(),
-        author: userInfo.name,
-        text: text,
-        likes: 0,
-        likedBy: [],
-        timestamp: new Date().toISOString()
-    };
+    localStorage.setItem(RATINGS_SYSTEM.storageKey, JSON.stringify(ratings));
+    updateRatingDisplay(gameId, game);
     
-    comments.games[gameId].unshift(newComment);
-    saveComments(comments);
+    const ratingContainer = document.querySelector(`.stars-rating[data-game-id="${gameId}"]`);
+    const stars = ratingContainer.querySelectorAll('.star');
+    highlightUserRating(stars, rating);
+    ratingContainer.classList.add('disabled');
     
-    // Обновляем отображение
-    loadComments(gameId);
-    updateCommentsCount(gameId);
-    
-    showNotification('Комментарий добавлен!', 'success');
+    showNotification(`Спасибо за оценку ${rating} ⭐!`, 'success');
 }
 
-function loadAllCommentsCount() {
-    const comments = getComments();
+function checkUserRatingInLocalStorage(gameId) {
+    const userId = getUserId();
+    const ratings = JSON.parse(localStorage.getItem(RATINGS_SYSTEM.storageKey)) || { games: {}, userRatings: {} };
+    const userRating = ratings.userRatings[userId]?.[gameId];
     
-    Object.keys(comments.games).forEach(gameId => {
-        updateCommentsCount(gameId);
-    });
-}
-
-function updateCommentsCount(gameId) {
-    const comments = getComments();
-    const gameComments = comments.games[gameId] || [];
-    const countElement = document.querySelector(`.comments-toggle-btn[data-game-id="${gameId}"] .comments-count`);
-    
-    if (countElement) {
-        countElement.textContent = gameComments.length;
+    if (userRating) {
+        const ratingContainer = document.querySelector(`.stars-rating[data-game-id="${gameId}"]`);
+        const stars = ratingContainer.querySelectorAll('.star');
+        highlightUserRating(stars, userRating);
+        ratingContainer.classList.add('disabled');
     }
 }
 
-function getComments() {
-    return JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
-}
-
-function saveComments(comments) {
-    localStorage.setItem(COMMENTS_SYSTEM.storageKey, JSON.stringify(comments));
-}
-
-function generateCommentId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
-
-function formatCommentDate(timestamp) {
-    const date = new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
-    
-    if (diff < 60000) {
-        return 'только что';
-    } else if (diff < 3600000) {
-        const minutes = Math.floor(diff / 60000);
-        return `${minutes} мин. назад`;
-    } else if (diff < 86400000) {
-        const hours = Math.floor(diff / 3600000);
-        return `${hours} ч. назад`;
-    } else {
-        return date.toLocaleDateString('ru-RU');
-    }
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+// ==================== ОСТАЛЬНЫЕ ФУНКЦИИ ====================
 
 // Данные токена HMSTR
 let currentPriceData = {
@@ -750,7 +885,6 @@ function updatePriceDisplay() {
 function refreshPriceData() {
     showPriceLoading(true);
     
-    // Имитация обновления данных
     setTimeout(() => {
         const randomChange = (Math.random() - 0.5) * 10;
         const changePercent = parseFloat(randomChange.toFixed(2));
@@ -887,6 +1021,26 @@ function formatDate(dateString) {
     }
 }
 
+function formatCommentDate(timestamp) {
+    if (!timestamp) return 'недавно';
+    
+    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
+    const now = new Date();
+    const diff = now - date;
+    
+    if (diff < 60000) {
+        return 'только что';
+    } else if (diff < 3600000) {
+        const minutes = Math.floor(diff / 60000);
+        return `${minutes} мин. назад`;
+    } else if (diff < 86400000) {
+        const hours = Math.floor(diff / 3600000);
+        return `${hours} ч. назад`;
+    } else {
+        return date.toLocaleDateString('ru-RU');
+    }
+}
+
 function showNotification(message, type = 'info') {
     const notification = document.createElement('div');
     notification.style.cssText = `
@@ -912,6 +1066,16 @@ function showNotification(message, type = 'info') {
         notification.style.animation = 'slideOutRight 0.3s ease';
         setTimeout(() => notification.remove(), 300);
     }, 3000);
+}
+
+function generateCommentId() {
+    return Date.now().toString(36) + Math.random().toString(36).substr(2);
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // Закрытие анонса
