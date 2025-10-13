@@ -12,7 +12,7 @@
     <div class="app-container">
         <!-- Announcement Banner -->
         <div class="announcement-banner" id="announcement">
-            <span>🎉 Добро пожаловать в Hamster Verse! Оценивайте игры и делитесь мнением</span>
+            <span>🎉 Теперь можно оставлять комментарии и ставить лайки! Делитесь мнением об играх</span>
             <button class="close-announcement" onclick="closeAnnouncement()">×</button>
         </div>
 
@@ -49,6 +49,7 @@
                 </div>
                 
                 <div class="games-grid">
+                    <!-- Game Card 1 -->
                     <div class="game-card" data-game-id="1">
                         <div class="game-image">
                             <img src="images/hamster-gamedev.jpg" alt="Hamster GameDev" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTIgMTNWMTVNMTIgN1Y3TTQgMTJIMjBNMTIgMjBWMjBNMTIgMTZWMTZNOCA4TDUgNU04IDhMMTIgNE04IDE2TDEyIDIwTTggMTZMMTUgOU0xNiA4TDE5IDVNMTYgOEwyMCA0TTE2IDE2TDIwIDEyTTE2IDE2TDEyIDIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cjwvc3ZnPgo='">
@@ -89,9 +90,32 @@
                         <button class="play-button" data-url="https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584">
                             Играть
                         </button>
+
+                        <!-- Comments Section -->
+                        <div class="game-comments-section">
+                            <button class="comments-toggle-btn" data-game-id="1">
+                                <span class="comments-icon">💬</span>
+                                <span class="comments-count">12</span> комментариев
+                                <span class="toggle-arrow">▼</span>
+                            </button>
+                            
+                            <div class="comments-container hidden" data-game-id="1">
+                                <div class="comments-list" id="comments-1">
+                                    <!-- Комментарии загружаются динамически -->
+                                </div>
+                                
+                                <div class="add-comment-form">
+                                    <textarea class="comment-textarea" placeholder="Напишите ваш комментарий..." maxlength="500"></textarea>
+                                    <div class="comment-actions">
+                                        <span class="char-count">0/500</span>
+                                        <button class="submit-comment-btn" data-game-id="1">Отправить</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Аналогично для других игр с data-game-id="2", "3", "4" -->
+                    <!-- Game Card 2 -->
                     <div class="game-card" data-game-id="2">
                         <div class="game-image">
                             <img src="images/hamster-king.jpg" alt="Hamster King" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiNmNTk5MGIiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTIgMkw0IDdMMTIgMTJMMjAgN0wxMiAyWk00IDE3TDEyIDIyTDIwIDE3TTQgMTJMMTIgMTdMMjAgMTIiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4KPC9zdmc+Cg=='">
@@ -129,8 +153,32 @@
                         <button class="play-button" data-url="https://t.me/hamsterking_game_bot?startapp=6823288584">
                             Играть
                         </button>
+
+                        <!-- Comments Section -->
+                        <div class="game-comments-section">
+                            <button class="comments-toggle-btn" data-game-id="2">
+                                <span class="comments-icon">💬</span>
+                                <span class="comments-count">8</span> комментариев
+                                <span class="toggle-arrow">▼</span>
+                            </button>
+                            
+                            <div class="comments-container hidden" data-game-id="2">
+                                <div class="comments-list" id="comments-2">
+                                    <!-- Комментарии загружаются динамически -->
+                                </div>
+                                
+                                <div class="add-comment-form">
+                                    <textarea class="comment-textarea" placeholder="Напишите ваш комментарий..." maxlength="500"></textarea>
+                                    <div class="comment-actions">
+                                        <span class="char-count">0/500</span>
+                                        <button class="submit-comment-btn" data-game-id="2">Отправить</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Game Card 3 -->
                     <div class="game-card" data-game-id="3">
                         <div class="game-image">
                             <img src="images/hamstr-fight-club.jpg" alt="Hamster Fight Club" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiNlZjQ0NDQiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTUgN0wyMCAxMk0yMCA3TDE1IDEyTTkgOUExIDEgMCAxIDAgMTEgOUExIDEgMCAwIDAgOSA5Wk0xNSA5QTEgMSAwIDEgMCAxNyA5QTEgMSAwIDAgMCAxNSA5Wk05IDE1QTEgMSAwIDEgMCAxMSAxNUExIDEgMCAwIDAgOSAxNVpNMTUgMTVBMSAxIDAgMSAwIDE3IDE1QTEgMSAwIDAgMCAxNSAxNVoiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4KPC9zdmc+Cg=='">
@@ -168,8 +216,32 @@
                         <button class="play-button" data-url="https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyYS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5">
                             Играть
                         </button>
+
+                        <!-- Comments Section -->
+                        <div class="game-comments-section">
+                            <button class="comments-toggle-btn" data-game-id="3">
+                                <span class="comments-icon">💬</span>
+                                <span class="comments-count">15</span> комментариев
+                                <span class="toggle-arrow">▼</span>
+                            </button>
+                            
+                            <div class="comments-container hidden" data-game-id="3">
+                                <div class="comments-list" id="comments-3">
+                                    <!-- Комментарии загружаются динамически -->
+                                </div>
+                                
+                                <div class="add-comment-form">
+                                    <textarea class="comment-textarea" placeholder="Напишите ваш комментарий..." maxlength="500"></textarea>
+                                    <div class="comment-actions">
+                                        <span class="char-count">0/500</span>
+                                        <button class="submit-comment-btn" data-game-id="3">Отправить</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
+                    <!-- Game Card 4 -->
                     <div class="game-card" data-game-id="4">
                         <div class="game-image">
                             <img src="images/bitquest.jpg" alt="BitQuest" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiMxMGI5ODEiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTIgMkwxMyAyOEwxOCAyMEgyMkwxMyAzOEwxMiA0MkwxMSAzOEwyIDIwSDZMMTEgMjhMMTIgMloiIHN0cm9rZS1saW5lY2FwPSJyb3VuZCIvPgo8L3N2Zz4KPC9zdmc+Cg=='">
@@ -207,6 +279,29 @@
                         <button class="play-button" data-url="https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584">
                             Играть
                         </button>
+
+                        <!-- Comments Section -->
+                        <div class="game-comments-section">
+                            <button class="comments-toggle-btn" data-game-id="4">
+                                <span class="comments-icon">💬</span>
+                                <span class="comments-count">23</span> комментариев
+                                <span class="toggle-arrow">▼</span>
+                            </button>
+                            
+                            <div class="comments-container hidden" data-game-id="4">
+                                <div class="comments-list" id="comments-4">
+                                    <!-- Комментарии загружаются динамически -->
+                                </div>
+                                
+                                <div class="add-comment-form">
+                                    <textarea class="comment-textarea" placeholder="Напишите ваш комментарий..." maxlength="500"></textarea>
+                                    <div class="comment-actions">
+                                        <span class="char-count">0/500</span>
+                                        <button class="submit-comment-btn" data-game-id="4">Отправить</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
