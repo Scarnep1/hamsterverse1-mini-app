@@ -156,37 +156,6 @@ body {
     font-weight: 500;
 }
 
-/* Games Statistics */
-.games-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.stat-card {
-    background: var(--bg-card);
-    border-radius: 12px;
-    padding: 16px;
-    text-align: center;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow);
-}
-
-.stat-value {
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text-primary);
-    display: block;
-}
-
-.stat-label {
-    font-size: 12px;
-    color: var(--text-secondary);
-    margin-top: 4px;
-    display: block;
-}
-
 /* Token Statistics */
 .token-stats-grid {
     display: grid;
@@ -214,9 +183,6 @@ body {
 
 /* Price Cards */
 .price-cards-container {
-    display: grid;
-    grid-template-columns: 1fr;
-    gap: 16px;
     margin-bottom: 16px;
 }
 
@@ -243,15 +209,7 @@ body {
     left: 0;
     right: 0;
     height: 4px;
-    background: var(--accent-gradient);
-}
-
-.price-card:first-child::before {
     background: var(--usd-color);
-}
-
-.price-card:last-child::before {
-    background: var(--rub-color);
 }
 
 .price-card-header {
