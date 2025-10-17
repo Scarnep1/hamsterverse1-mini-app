@@ -159,7 +159,6 @@ function simulateUserProfile() {
 // Данные токена HMSTR
 let currentPriceData = {
     usd: 0.000621,
-    rub: 0.056,
     change: 2.34,
     lastUpdated: new Date().toISOString()
 };
@@ -183,8 +182,6 @@ function savePriceData() {
 function updatePriceDisplay() {
     const usdPriceElement = document.getElementById('hmstr-price-usd');
     const usdChangeElement = document.getElementById('hmstr-change-usd');
-    const rubPriceElement = document.getElementById('hmstr-price-rub');
-    const rubChangeElement = document.getElementById('hmstr-change-rub');
     
     if (usdPriceElement) {
         usdPriceElement.textContent = `$${currentPriceData.usd.toFixed(6)}`;
@@ -193,15 +190,6 @@ function updatePriceDisplay() {
     if (usdChangeElement) {
         usdChangeElement.textContent = `${currentPriceData.change >= 0 ? '+' : ''}${currentPriceData.change.toFixed(2)}%`;
         usdChangeElement.className = `change ${currentPriceData.change >= 0 ? 'positive' : 'negative'}`;
-    }
-    
-    if (rubPriceElement) {
-        rubPriceElement.textContent = `${currentPriceData.rub.toFixed(3)} ₽`;
-    }
-    
-    if (rubChangeElement) {
-        rubChangeElement.textContent = `${currentPriceData.change >= 0 ? '+' : ''}${currentPriceData.change.toFixed(2)}%`;
-        rubChangeElement.className = `change ${currentPriceData.change >= 0 ? 'positive' : 'negative'}`;
     }
 }
 
@@ -215,7 +203,6 @@ function refreshPriceData() {
         const changePercent = parseFloat(randomChange.toFixed(2));
         
         currentPriceData.usd = parseFloat((currentPriceData.usd * (1 + changePercent / 100)).toFixed(6));
-        currentPriceData.rub = parseFloat((currentPriceData.rub * (1 + changePercent / 100)).toFixed(3));
         currentPriceData.change = changePercent;
         currentPriceData.lastUpdated = new Date().toISOString();
         
