@@ -1,56 +1,26 @@
-// Конфигурация приложения
-const APP_CONFIG = {
-    version: '2.4.0',
-    features: {
-        ratings: true,
-        comments: true,
-        news: true,
-        priceUpdates: true
-    }
-};
-
-// Система рейтингов
-const RATINGS_SYSTEM = {
-    storageKey: 'game_ratings_v3',
-    maxRating: 5
-};
-
-// Система комментариев
-const COMMENTS_SYSTEM = {
-    storageKey: 'game_comments_v2',
-    maxCommentLength: 500
-};
-
-// Коллекции Firestore
-const COMMENTS_COLLECTION = "comments";
-const RATINGS_COLLECTION = "ratings";
-
-// Данные токена HMSTR
-let currentPriceData = {
-    usd: 0.000687,
-    rub: 0.062,
-    change: 2.42,
-    lastUpdated: new Date().toISOString()
-};
-
-// Инициализация приложения
+// Initialize the app
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-async function initializeApp() {
+function initializeApp() {
     setupNavigation();
     setupPlayButtons();
     setupTelegramIntegration();
     setupPriceData();
+    setupGuideToggle();
     setupThemeToggle();
-    setupNewsSection();
-    await setupRatingSystem();
-    await setupCommentsSystem();
-    setupAutoRefresh();
-    setupErrorHandling();
+    setupTimePeriodSelector();
+    setupRefreshButton();
+    setupShareApp();
+    setupUserStats();
+    setupOnlineCounter();
+    setupAppMetrics();
     
-    console.log('Hamster Verse v' + APP_CONFIG.version + ' initialized');
+    // Показать welcome notification
+    setTimeout(() => {
+        showNotification('Добро пожаловать в Hamster Verse! 🐹', 'success');
+    }, 1000);
 }
 
 // Навигация
@@ -62,6 +32,9 @@ function setupNavigation() {
         item.addEventListener('click', function() {
             const targetSection = this.getAttribute('data-section');
             
+            // Track section change
+            trackSectionChange(targetSection);
+            
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
             
@@ -71,15 +44,10 @@ function setupNavigation() {
                     section.classList.add('active');
                 }
             });
-            
-            if (targetSection === 'hmstr-section') {
-                refreshPriceData();
-            }
         });
     });
 }
 
-// Кнопки запуска игр
 function setupPlayButtons() {
     const playButtons = document.querySelectorAll('.play-button');
     
@@ -87,6 +55,7 @@ function setupPlayButtons() {
         button.addEventListener('click', function(e) {
             e.stopPropagation();
             const url = this.getAttribute('data-url');
+            trackGameClick(this.closest('.game-card').querySelector('h3').textContent);
             openGame(url);
         });
     });
@@ -95,14 +64,10 @@ function setupPlayButtons() {
     
     gameCards.forEach(card => {
         card.addEventListener('click', function(e) {
-            if (!e.target.classList.contains('star') && 
-                !e.target.closest('.stars-rating') &&
-                !e.target.closest('.comments-toggle-btn') &&
-                !e.target.closest('.comment-textarea') &&
-                !e.target.closest('.submit-comment-btn') &&
-                !e.target.closest('.like-btn')) {
+            if (!e.target.classList.contains('play-button')) {
                 const playButton = this.querySelector('.play-button');
                 const url = playButton.getAttribute('data-url');
+                trackGameClick(this.querySelector('h3').textContent);
                 openGame(url);
             }
         });
@@ -110,14 +75,15 @@ function setupPlayButtons() {
 }
 
 function openGame(url) {
+    showNotification('Запуск игры... 🎮', 'info');
+    
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.openLink(url);
     } else {
-        window.open(url, '_blank', 'noopener,noreferrer');
+        window.open(url, '_blank');
     }
 }
 
-// Интеграция с Telegram
 function setupTelegramIntegration() {
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.expand();
@@ -127,8 +93,18 @@ function setupTelegramIntegration() {
         if (user) {
             updateUserProfile(user);
         }
+        
+        // Setup theme from Telegram
+        if (window.Telegram.WebApp.colorScheme === 'dark') {
+            setTheme('dark');
+        }
     } else {
-        simulateUserProfile();
+        // Demo data for non-Telegram environment
+        updateUserProfile({
+            first_name: 'Хомяк',
+            last_name: 'Игрок',
+            username: 'hamster_fan'
+        });
     }
 }
 
@@ -142,7 +118,7 @@ function updateUserProfile(user) {
         avatar.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%;">`;
         headerAvatar.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%;">`;
     } else {
-        const initial = user.first_name?.[0] || 'U';
+        const initial = user.first_name?.[0] || 'H';
         avatar.textContent = initial;
         headerAvatar.textContent = initial;
     }
@@ -158,732 +134,445 @@ function updateUserProfile(user) {
     }
 }
 
-function simulateUserProfile() {
-    const names = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Сергей'];
-    const surnames = ['Иванов', 'Петрова', 'Сидоров', 'Кузнецова', 'Попов'];
-    const usernames = ['alexey', 'maria', 'dmitry', 'anna', 'sergey'];
-    
-    const randomIndex = Math.floor(Math.random() * names.length);
-    const name = names[randomIndex];
-    const surname = surnames[randomIndex];
-    const username = usernames[randomIndex];
-    
-    document.getElementById('tg-name').textContent = `${name} ${surname}`;
-    document.getElementById('tg-username').textContent = `@${username}`;
-}
+// Функции для данных HMSTR
+let currentChart = null;
+let priceUpdateInterval = null;
+let currentPriceData = {
+    current: 0.000621,
+    change24h: -4.13,
+    volume: 2100000,
+    marketCap: 18500000,
+    liquidity: 5200000
+};
 
-// ==================== FIREBASE ФУНКЦИИ ====================
-
-// Система рейтингов с Firebase
-async function setupRatingSystem() {
-    setupStarsInteractions();
-    await loadAllRatings();
-}
-
-async function loadAllRatings() {
-    const gameIds = ['1', '2', '3', '4'];
-    for (const gameId of gameIds) {
-        await loadRatings(gameId);
+const API_SOURCES = [
+    {
+        name: 'DexScreener',
+        url: 'https://api.dexscreener.com/latest/dex/search?q=HMSTR',
+        parser: parseDexScreener
+    },
+    {
+        name: 'CoinGecko',
+        url: 'https://api.coingecko.com/api/v3/simple/price?ids=hamster-combat&vs_currencies=usd&include_24hr_change=true',
+        parser: parseCoinGecko
     }
-}
+];
 
-async function loadRatings(gameId) {
-    try {
-        const querySnapshot = await db.collection(RATINGS_COLLECTION)
-            .where("gameId", "==", gameId)
-            .get();
-        
-        const ratings = [];
-        querySnapshot.forEach((doc) => {
-            ratings.push(doc.data().rating);
-        });
-        
-        const average = ratings.length > 0 
-            ? ratings.reduce((sum, r) => sum + r, 0) / ratings.length 
-            : 0;
-        
-        const ratingData = {
-            total: average,
-            count: ratings.length,
-            ratings: ratings
-        };
-        
-        updateRatingDisplay(gameId, ratingData);
-        await checkUserRating(gameId);
-        
-    } catch (error) {
-        console.error("Error loading ratings:", error);
-        loadRatingsFromLocalStorage(gameId);
-    }
-}
-
-async function rateGame(gameId, rating) {
-    const userId = getUserId();
-    const userInfo = getUserInfo();
+function setupTimePeriodSelector() {
+    const timeButtons = document.querySelectorAll('.time-btn');
     
-    try {
-        // Проверяем, не оценивал ли уже пользователь
-        const existingRatingQuery = await db.collection(RATINGS_COLLECTION)
-            .where("gameId", "==", gameId)
-            .where("userId", "==", userId)
-            .get();
-        
-        if (!existingRatingQuery.empty) {
-            showNotification('Вы уже оценили эту игру!', 'info');
-            return;
-        }
-        
-        // Добавляем оценку в Firebase
-        await db.collection(RATINGS_COLLECTION).add({
-            gameId: gameId,
-            userId: userId,
-            rating: rating,
-            author: userInfo.name,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        });
-        
-        // Обновляем отображение
-        await loadRatings(gameId);
-        
-        // Блокируем возможность повторной оценки
-        const ratingContainer = document.querySelector(`.stars-rating[data-game-id="${gameId}"]`);
-        const stars = ratingContainer.querySelectorAll('.star');
-        highlightUserRating(stars, rating);
-        ratingContainer.classList.add('disabled');
-        
-        showNotification(`Спасибо за оценку ${rating} ⭐!`, 'success');
-        
-    } catch (error) {
-        console.error("Error rating game:", error);
-        showNotification('Ошибка при сохранении оценки', 'error');
-        rateGameInLocalStorage(gameId, rating);
-    }
-}
-
-async function checkUserRating(gameId) {
-    const userId = getUserId();
-    
-    try {
-        const querySnapshot = await db.collection(RATINGS_COLLECTION)
-            .where("gameId", "==", gameId)
-            .where("userId", "==", userId)
-            .get();
-        
-        if (!querySnapshot.empty) {
-            const userRating = querySnapshot.docs[0].data().rating;
-            const ratingContainer = document.querySelector(`.stars-rating[data-game-id="${gameId}"]`);
-            const stars = ratingContainer.querySelectorAll('.star');
-            highlightUserRating(stars, userRating);
-            ratingContainer.classList.add('disabled');
-        }
-    } catch (error) {
-        console.error("Error checking user rating:", error);
-        checkUserRatingInLocalStorage(gameId);
-    }
-}
-
-// Система комментариев с Firebase
-async function setupCommentsSystem() {
-    setupCommentsToggle();
-    setupCommentForm();
-    await loadAllCommentsCount();
-}
-
-async function loadAllCommentsCount() {
-    const gameIds = ['1', '2', '3', '4'];
-    let totalComments = 0;
-    
-    for (const gameId of gameIds) {
-        const count = await updateCommentsCount(gameId);
-        totalComments += count;
-    }
-    
-    document.getElementById('total-comments').textContent = totalComments;
-}
-
-async function updateCommentsCount(gameId) {
-    try {
-        const querySnapshot = await db.collection(COMMENTS_COLLECTION)
-            .where("gameId", "==", gameId)
-            .get();
-        
-        const count = querySnapshot.size;
-        const countElement = document.querySelector(`.comments-toggle-btn[data-game-id="${gameId}"] .comments-count`);
-        
-        if (countElement) {
-            countElement.textContent = count;
-        }
-        
-        return count;
-    } catch (error) {
-        console.error("Error updating comments count:", error);
-        updateCommentsCountFromLocalStorage(gameId);
-        return 0;
-    }
-}
-
-function setupCommentsToggle() {
-    document.querySelectorAll('.comments-toggle-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const gameId = this.getAttribute('data-game-id');
-            const commentsContainer = document.querySelector(`.comments-container[data-game-id="${gameId}"]`);
-            
-            if (commentsContainer.classList.contains('hidden')) {
-                commentsContainer.classList.remove('hidden');
-                this.classList.add('active');
-                loadComments(gameId);
-            } else {
-                commentsContainer.classList.add('hidden');
-                this.classList.remove('active');
-            }
-        });
-    });
-}
-
-function setupCommentForm() {
-    document.querySelectorAll('.comment-textarea').forEach(textarea => {
-        textarea.addEventListener('input', function() {
-            const charCount = this.nextElementSibling.querySelector('.char-count');
-            charCount.textContent = `${this.value.length}/500`;
-            
-            const submitBtn = this.nextElementSibling.querySelector('.submit-comment-btn');
-            submitBtn.disabled = this.value.trim().length === 0;
-        });
-        
-        textarea.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 'Enter') {
-                const gameId = this.nextElementSibling.querySelector('.submit-comment-btn').getAttribute('data-game-id');
-                addComment(gameId, this.value.trim());
-                this.value = '';
-                this.dispatchEvent(new Event('input'));
-            }
-        });
-    });
-    
-    document.querySelectorAll('.submit-comment-btn').forEach(button => {
+    timeButtons.forEach(button => {
         button.addEventListener('click', function() {
-            const gameId = this.getAttribute('data-game-id');
-            const textarea = this.closest('.add-comment-form').querySelector('.comment-textarea');
-            const commentText = textarea.value.trim();
+            timeButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
             
-            if (commentText) {
-                addComment(gameId, commentText);
-                textarea.value = '';
-                textarea.dispatchEvent(new Event('input'));
+            const period = this.getAttribute('data-period');
+            updateChartForPeriod(period);
+        });
+    });
+}
+
+async function setupPriceData() {
+    const success = await fetchRealPriceData();
+    if (success) {
+        updateChartForPeriod('1D');
+        priceUpdateInterval = setInterval(fetchRealPriceData, 15000);
+    }
+}
+
+async function fetchRealPriceData() {
+    showLoading(true);
+    
+    try {
+        for (let source of API_SOURCES) {
+            try {
+                const priceData = await fetchFromSource(source);
+                if (priceData && priceData.current) {
+                    console.log(`✅ Данные получены из ${source.name}:`, priceData);
+                    updatePriceDisplay(priceData);
+                    currentPriceData = { ...currentPriceData, ...priceData };
+                    showChartError(false);
+                    showLoading(false);
+                    
+                    // Show success notification on first load
+                    if (!window.priceDataLoaded) {
+                        showNotification('Данные HMSTR обновлены ✅', 'success');
+                        window.priceDataLoaded = true;
+                    }
+                    
+                    return true;
+                }
+            } catch (error) {
+                console.log(`❌ Ошибка ${source.name}:`, error.message);
+                continue;
             }
-        });
-    });
-}
-
-async function loadComments(gameId) {
-    try {
-        const commentsList = document.getElementById(`comments-${gameId}`);
-        commentsList.innerHTML = '<div class="loading-indicator"><span>Загрузка комментариев...</span></div>';
-        
-        const querySnapshot = await db.collection(COMMENTS_COLLECTION)
-            .where("gameId", "==", gameId)
-            .orderBy("timestamp", "desc")
-            .get();
-        
-        const comments = [];
-        querySnapshot.forEach((doc) => {
-            comments.push({ id: doc.id, ...doc.data() });
-        });
-        
-        if (comments.length === 0) {
-            commentsList.innerHTML = `
-                <div class="no-comments">
-                    <p>Пока нет комментариев</p>
-                    <small>Будьте первым, кто оставит отзыв!</small>
-                </div>
-            `;
-            return;
         }
         
-        commentsList.innerHTML = comments.map(comment => `
-            <div class="comment-item" data-comment-id="${comment.id}">
-                <div class="comment-header">
-                    <div class="comment-author">
-                        <span class="comment-author-avatar">${comment.author.charAt(0)}</span>
-                        ${comment.author}
-                    </div>
-                    <span class="comment-date">${formatCommentDate(comment.timestamp)}</span>
-                </div>
-                <div class="comment-text">${escapeHtml(comment.text)}</div>
-                <div class="comment-actions">
-                    <button class="like-btn ${isCommentLiked(comment.id, comment.likedBy) ? 'liked' : ''}" 
-                            data-comment-id="${comment.id}"
-                            data-game-id="${gameId}">
-                        <span class="like-icon">❤️</span>
-                        <span class="likes-count">${comment.likes}</span>
-                    </button>
-                </div>
-            </div>
-        `).join('');
-        
-        setupLikeButtons();
+        throw new Error('Все источники данных недоступны');
         
     } catch (error) {
-        console.error("Error loading comments:", error);
-        showNotification('Ошибка загрузки комментариев', 'error');
-        loadCommentsFromLocalStorage(gameId);
+        console.error('Ошибка получения данных:', error);
+        showStaticDataMessage();
+        return false;
     }
 }
 
-async function addComment(gameId, text) {
-    if (text.length > COMMENTS_SYSTEM.maxCommentLength) {
-        showNotification(`Комментарий слишком длинный. Максимум ${COMMENTS_SYSTEM.maxCommentLength} символов.`, 'error');
-        return;
-    }
-    
-    const userInfo = getUserInfo();
-    
-    try {
-        const commentData = {
-            gameId: gameId,
-            userId: userInfo.id,
-            author: userInfo.name,
-            text: text,
-            likes: 0,
-            likedBy: [],
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        
-        const docRef = await db.collection(COMMENTS_COLLECTION).add(commentData);
-        
-        // Сохраняем в localStorage как резервную копию
-        saveCommentToLocalStorage({ id: docRef.id, ...commentData });
-        
-        // Обновляем отображение
-        loadComments(gameId);
-        updateCommentsCount(gameId);
-        
-        showNotification('Комментарий добавлен!', 'success');
-        
-    } catch (error) {
-        console.error("Error adding comment:", error);
-        showNotification('Ошибка при добавлении комментария', 'error');
-        addCommentToLocalStorage(gameId, text);
-    }
+async function fetchFromSource(source) {
+    const data = await fetchWithCache(source.url, `price_${source.name}`, 15000);
+    return source.parser(data);
 }
 
-async function toggleLike(gameId, commentId) {
-    const userId = getUserId();
-    
-    try {
-        const commentRef = db.collection(COMMENTS_COLLECTION).doc(commentId);
-        const commentDoc = await commentRef.get();
+function parseDexScreener(data) {
+    if (data.pairs && data.pairs.length > 0) {
+        const pair = data.pairs.find(p => 
+            p.baseToken && p.baseToken.symbol.toUpperCase() === 'HMSTR'
+        ) || data.pairs[0];
         
-        if (!commentDoc.exists) {
-            throw new Error("Comment not found");
-        }
-        
-        const comment = commentDoc.data();
-        const userLiked = comment.likedBy.includes(userId);
-        
-        if (userLiked) {
-            // Убираем лайк
-            await commentRef.update({
-                likes: firebase.firestore.FieldValue.increment(-1),
-                likedBy: firebase.firestore.FieldValue.arrayRemove(userId)
-            });
-        } else {
-            // Добавляем лайк
-            await commentRef.update({
-                likes: firebase.firestore.FieldValue.increment(1),
-                likedBy: firebase.firestore.FieldValue.arrayUnion(userId)
-            });
-        }
-        
-        // Обновляем отображение
-        loadComments(gameId);
-        
-        showNotification(userLiked ? 'Лайк удален' : 'Лайк добавлен!', 'info');
-        
-    } catch (error) {
-        console.error("Error toggling like:", error);
-        toggleLikeInLocalStorage(gameId, commentId);
-    }
-}
-
-function setupLikeButtons() {
-    document.querySelectorAll('.like-btn').forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const gameId = this.getAttribute('data-game-id');
-            const commentId = this.getAttribute('data-comment-id');
-            toggleLike(gameId, commentId);
-        });
-    });
-}
-
-// ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
-
-function setupStarsInteractions() {
-    document.querySelectorAll('.stars-rating').forEach(ratingContainer => {
-        const gameId = ratingContainer.getAttribute('data-game-id');
-        const stars = ratingContainer.querySelectorAll('.star');
-        
-        stars.forEach(star => {
-            star.addEventListener('click', function() {
-                if (!ratingContainer.classList.contains('disabled')) {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    rateGame(gameId, rating);
-                }
-            });
-            
-            star.addEventListener('mouseover', function() {
-                if (!ratingContainer.classList.contains('disabled')) {
-                    const rating = parseInt(this.getAttribute('data-rating'));
-                    highlightStars(stars, rating);
-                }
-            });
-            
-            star.addEventListener('mouseout', function() {
-                if (!ratingContainer.classList.contains('disabled')) {
-                    resetStars(stars);
-                }
-            });
-        });
-    });
-}
-
-function updateRatingDisplay(gameId, gameData) {
-    const gameCard = document.querySelector(`.game-card[data-game-id="${gameId}"]`);
-    if (!gameCard) return;
-    
-    const averageElement = gameCard.querySelector('.average-rating');
-    const countElement = gameCard.querySelector('.rating-count');
-    const staticStars = gameCard.querySelectorAll('.stars-static .star');
-    
-    if (averageElement) {
-        averageElement.textContent = gameData.total > 0 ? gameData.total.toFixed(1) : '0.0';
-    }
-    
-    if (countElement) {
-        countElement.textContent = `(${gameData.count} оценок)`;
-    }
-    
-    const averageRating = Math.round(gameData.total * 2) / 2;
-    highlightStaticStars(staticStars, averageRating);
-}
-
-function highlightStaticStars(stars, rating) {
-    stars.forEach((star, index) => {
-        const starNumber = index + 1;
-        
-        if (rating >= starNumber) {
-            star.classList.add('active');
-        } else if (rating >= starNumber - 0.5) {
-            star.classList.add('active');
-        } else {
-            star.classList.remove('active');
-        }
-    });
-}
-
-function highlightUserRating(stars, rating) {
-    stars.forEach((star, index) => {
-        const starNumber = index + 1;
-        if (starNumber <= rating) {
-            star.classList.add('active', 'rated');
-        } else {
-            star.classList.remove('active', 'rated');
-        }
-    });
-}
-
-function highlightStars(stars, rating) {
-    stars.forEach((star, index) => {
-        const starNumber = index + 1;
-        if (starNumber <= rating) {
-            star.classList.add('active');
-        } else {
-            star.classList.remove('active');
-        }
-    });
-}
-
-function resetStars(stars) {
-    stars.forEach(star => {
-        star.classList.remove('active');
-    });
-}
-
-function getUserId() {
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe?.user?.id) {
-        return `tg_${window.Telegram.WebApp.initDataUnsafe.user.id}`;
-    }
-    
-    let userId = localStorage.getItem('hamster_user_id');
-    if (!userId) {
-        userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        localStorage.setItem('hamster_user_id', userId);
-    }
-    return userId;
-}
-
-function getUserInfo() {
-    if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initDataUnsafe?.user) {
-        const user = window.Telegram.WebApp.initDataUnsafe.user;
         return {
-            id: `tg_${user.id}`,
-            name: `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'Telegram User',
-            avatar: user.photo_url || null,
-            type: 'telegram'
+            current: parseFloat(pair.priceUsd),
+            change24h: parseFloat(pair.priceChange?.h24 || 0),
+            volume: parseFloat(pair.volume?.h24 || 0),
+            liquidity: parseFloat(pair.liquidity?.usd || 0),
+            source: 'DexScreener'
         };
     }
-    
-    return {
-        id: getUserId(),
-        name: 'Анонимный Хомяк',
-        avatar: null,
-        type: 'anonymous'
-    };
+    throw new Error('No pairs found');
 }
 
-function isCommentLiked(commentId, likedBy = []) {
-    return likedBy.includes(getUserId());
-}
-
-// ==================== FALLBACK ФУНКЦИИ (localStorage) ====================
-
-function loadCommentsFromLocalStorage(gameId) {
-    const comments = JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
-    const gameComments = comments.games[gameId] || [];
-    
-    const commentsList = document.getElementById(`comments-${gameId}`);
-    
-    if (gameComments.length === 0) {
-        commentsList.innerHTML = `
-            <div class="no-comments">
-                <p>Пока нет комментариев</p>
-                <small>Будьте первым, кто оставит отзыв!</small>
-            </div>
-        `;
-        return;
+function parseCoinGecko(data) {
+    if (data['hamster-combat']) {
+        return {
+            current: data['hamster-combat'].usd,
+            change24h: data['hamster-combat'].usd_24h_change,
+            source: 'CoinGecko'
+        };
     }
-    
-    commentsList.innerHTML = gameComments.map(comment => `
-        <div class="comment-item" data-comment-id="${comment.id}">
-            <div class="comment-header">
-                <div class="comment-author">
-                    <span class="comment-author-avatar">${comment.author.charAt(0)}</span>
-                    ${comment.author}
-                </div>
-                <span class="comment-date">${formatCommentDate(comment.timestamp)}</span>
-            </div>
-            <div class="comment-text">${escapeHtml(comment.text)}</div>
-            <div class="comment-actions">
-                <button class="like-btn ${isCommentLiked(comment.id, comment.likedBy) ? 'liked' : ''}" 
-                        data-game-id="${gameId}" 
-                        data-comment-id="${comment.id}">
-                    <span class="like-icon">❤️</span>
-                    <span class="likes-count">${comment.likes}</span>
-                </button>
-            </div>
-        </div>
-    `).join('');
-    
-    setupLikeButtons();
+    throw new Error('No hamster-combat data');
 }
 
-function addCommentToLocalStorage(gameId, text) {
-    const comments = JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
-    const userInfo = getUserInfo();
+function updatePriceDisplay(priceData) {
+    const priceElement = document.getElementById('hmstr-price');
+    const changeElement = document.getElementById('hmstr-change');
+    const volumeElement = document.getElementById('volume-24h');
+    const marketCapElement = document.getElementById('market-cap');
+    const liquidityElement = document.getElementById('liquidity');
     
-    if (!comments.games[gameId]) {
-        comments.games[gameId] = [];
-    }
-    
-    const newComment = {
-        id: generateCommentId(),
-        author: userInfo.name,
-        text: text,
-        likes: 0,
-        likedBy: [],
-        timestamp: new Date().toISOString(),
-        userId: userInfo.id
-    };
-    
-    comments.games[gameId].unshift(newComment);
-    localStorage.setItem(COMMENTS_SYSTEM.storageKey, JSON.stringify(comments));
-    
-    loadCommentsFromLocalStorage(gameId);
-    updateCommentsCountFromLocalStorage(gameId);
-    
-    showNotification('Комментарий добавлен!', 'success');
-}
-
-function saveCommentToLocalStorage(comment) {
-    const comments = JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
-    if (!comments.games[comment.gameId]) {
-        comments.games[comment.gameId] = [];
-    }
-    comments.games[comment.gameId].push(comment);
-    localStorage.setItem(COMMENTS_SYSTEM.storageKey, JSON.stringify(comments));
-}
-
-function updateCommentsCountFromLocalStorage(gameId) {
-    const comments = JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
-    const gameComments = comments.games[gameId] || [];
-    const countElement = document.querySelector(`.comments-toggle-btn[data-game-id="${gameId}"] .comments-count`);
-    
-    if (countElement) {
-        countElement.textContent = gameComments.length;
-    }
-}
-
-function toggleLikeInLocalStorage(gameId, commentId) {
-    const comments = JSON.parse(localStorage.getItem(COMMENTS_SYSTEM.storageKey)) || { games: {} };
-    const gameComments = comments.games[gameId];
-    if (!gameComments) return;
-    
-    const comment = gameComments.find(c => c.id === commentId);
-    if (!comment) return;
-    
-    const userId = getUserId();
-    const userLiked = comment.likedBy.includes(userId);
-    
-    if (userLiked) {
-        comment.likes--;
-        comment.likedBy = comment.likedBy.filter(id => id !== userId);
+    // Format price
+    let formattedPrice;
+    if (priceData.current >= 1) {
+        formattedPrice = `$${priceData.current.toFixed(4)}`;
+    } else if (priceData.current >= 0.001) {
+        formattedPrice = `$${priceData.current.toFixed(6)}`;
     } else {
-        comment.likes++;
-        comment.likedBy.push(userId);
+        formattedPrice = `$${priceData.current.toFixed(8)}`;
     }
     
-    localStorage.setItem(COMMENTS_SYSTEM.storageKey, JSON.stringify(comments));
-    loadCommentsFromLocalStorage(gameId);
+    priceElement.textContent = formattedPrice;
+    changeElement.textContent = `${priceData.change24h >= 0 ? '+' : ''}${priceData.change24h.toFixed(2)}%`;
     
-    showNotification(userLiked ? 'Лайк удален' : 'Лайк добавлен!', 'info');
-}
-
-function loadRatingsFromLocalStorage(gameId) {
-    const ratings = JSON.parse(localStorage.getItem(RATINGS_SYSTEM.storageKey)) || { games: {}, userRatings: {} };
-    const gameData = ratings.games[gameId] || { total: 0, count: 0, ratings: [] };
-    updateRatingDisplay(gameId, gameData);
-}
-
-function rateGameInLocalStorage(gameId, rating) {
-    const userId = getUserId();
-    const ratings = JSON.parse(localStorage.getItem(RATINGS_SYSTEM.storageKey)) || { games: {}, userRatings: {} };
-    
-    if (ratings.userRatings[userId]?.[gameId]) {
-        showNotification('Вы уже оценили эту игру!', 'info');
-        return;
+    if (priceData.change24h >= 0) {
+        changeElement.className = 'change positive';
+    } else {
+        changeElement.className = 'change negative';
     }
     
-    if (!ratings.userRatings[userId]) {
-        ratings.userRatings[userId] = {};
-    }
-    ratings.userRatings[userId][gameId] = rating;
-    
-    if (!ratings.games[gameId]) {
-        ratings.games[gameId] = { total: 0, count: 0, ratings: [] };
+    // Update additional stats
+    if (priceData.volume) {
+        volumeElement.textContent = `$${(priceData.volume / 1000000).toFixed(1)}M`;
     }
     
-    const game = ratings.games[gameId];
-    game.ratings.push(rating);
-    game.count = game.ratings.length;
-    game.total = game.ratings.reduce((sum, r) => sum + r, 0) / game.count;
+    if (priceData.marketCap) {
+        marketCapElement.textContent = `$${(priceData.marketCap / 1000000).toFixed(1)}M`;
+    }
     
-    localStorage.setItem(RATINGS_SYSTEM.storageKey, JSON.stringify(ratings));
-    updateRatingDisplay(gameId, game);
-    
-    const ratingContainer = document.querySelector(`.stars-rating[data-game-id="${gameId}"]`);
-    const stars = ratingContainer.querySelectorAll('.star');
-    highlightUserRating(stars, rating);
-    ratingContainer.classList.add('disabled');
-    
-    showNotification(`Спасибо за оценку ${rating} ⭐!`, 'success');
-}
-
-function checkUserRatingInLocalStorage(gameId) {
-    const userId = getUserId();
-    const ratings = JSON.parse(localStorage.getItem(RATINGS_SYSTEM.storageKey)) || { games: {}, userRatings: {} };
-    const userRating = ratings.userRatings[userId]?.[gameId];
-    
-    if (userRating) {
-        const ratingContainer = document.querySelector(`.stars-rating[data-game-id="${gameId}"]`);
-        const stars = ratingContainer.querySelectorAll('.star');
-        highlightUserRating(stars, userRating);
-        ratingContainer.classList.add('disabled');
+    if (priceData.liquidity) {
+        liquidityElement.textContent = `$${(priceData.liquidity / 1000000).toFixed(1)}M`;
     }
 }
 
-// ==================== ОСТАЛЬНЫЕ ФУНКЦИИ ====================
-
-function setupPriceData() {
-    loadPriceData();
-    updatePriceDisplay();
-}
-
-function loadPriceData() {
-    const savedData = localStorage.getItem('hmstr_price_data');
-    if (savedData) {
-        currentPriceData = JSON.parse(savedData);
-    }
-}
-
-function savePriceData() {
-    localStorage.setItem('hmstr_price_data', JSON.stringify(currentPriceData));
-}
-
-function updatePriceDisplay() {
-    const usdPriceElement = document.getElementById('hmstr-price-usd');
-    const usdChangeElement = document.getElementById('hmstr-change-usd');
-    const rubPriceElement = document.getElementById('hmstr-price-rub');
-    const rubChangeElement = document.getElementById('hmstr-change-rub');
-    
-    if (usdPriceElement) {
-        usdPriceElement.textContent = `$${currentPriceData.usd.toFixed(6)}`;
-    }
-    
-    if (usdChangeElement) {
-        usdChangeElement.textContent = `${currentPriceData.change >= 0 ? '+' : ''}${currentPriceData.change.toFixed(2)}%`;
-        usdChangeElement.className = `change ${currentPriceData.change >= 0 ? 'positive' : 'negative'}`;
-    }
-    
-    if (rubPriceElement) {
-        rubPriceElement.textContent = `${currentPriceData.rub.toFixed(3)} ₽`;
-    }
-    
-    if (rubChangeElement) {
-        rubChangeElement.textContent = `${currentPriceData.change >= 0 ? '+' : ''}${currentPriceData.change.toFixed(2)}%`;
-        rubChangeElement.className = `change ${currentPriceData.change >= 0 ? 'positive' : 'negative'}`;
-    }
-}
-
-function refreshPriceData() {
-    showPriceLoading(true);
-    
-    setTimeout(() => {
-        const randomChange = (Math.random() - 0.5) * 10;
-        const changePercent = parseFloat(randomChange.toFixed(2));
-        
-        currentPriceData.usd = parseFloat((currentPriceData.usd * (1 + changePercent / 100)).toFixed(6));
-        currentPriceData.rub = parseFloat((currentPriceData.rub * (1 + changePercent / 100)).toFixed(3));
-        currentPriceData.change = changePercent;
-        currentPriceData.lastUpdated = new Date().toISOString();
-        
-        savePriceData();
-        updatePriceDisplay();
-        showPriceLoading(false);
-        
-        showNotification('Курс обновлен', 'success');
-    }, 1500);
-}
-
-function showPriceLoading(show) {
+function showLoading(show) {
     const loadingElement = document.getElementById('price-loading');
     if (loadingElement) {
-        loadingElement.classList.toggle('hidden', !show);
+        if (show) {
+            loadingElement.classList.remove('hidden');
+            loadingElement.innerHTML = '<span>🔄 Поиск актуальных данных HMSTR...</span>';
+        } else {
+            loadingElement.classList.add('hidden');
+        }
     }
 }
 
-// Переключение темы
+function showStaticDataMessage() {
+    const loadingElement = document.getElementById('price-loading');
+    if (loadingElement) {
+        loadingElement.classList.remove('hidden');
+        loadingElement.innerHTML = '<span style="color: var(--text-secondary);">📡 Используются кэшированные данные • Обновление через 15 сек</span>';
+    }
+}
+
+function showChartError(show) {
+    const chartContainer = document.querySelector('.chart-container');
+    if (!chartContainer) return;
+    
+    if (show) {
+        chartContainer.innerHTML = `
+            <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-secondary); text-align: center; padding: 20px;">
+                <div style="font-size: 48px; margin-bottom: 10px;">📊</div>
+                <div style="font-weight: 500; margin-bottom: 5px;">Демо-график</div>
+                <div style="font-size: 12px; opacity: 0.7;">Реальные данные графика временно недоступны</div>
+            </div>
+        `;
+    } else {
+        chartContainer.innerHTML = '<canvas id="priceChart"></canvas>';
+    }
+}
+
+async function updateChartForPeriod(period) {
+    const periodText = getPeriodText(period);
+    document.getElementById('current-period').textContent = periodText;
+    
+    await createRealPriceChart(period);
+}
+
+async function createRealPriceChart(period) {
+    const chartContainer = document.getElementById('priceChart');
+    if (!chartContainer) {
+        const container = document.querySelector('.chart-container');
+        container.innerHTML = '<canvas id="priceChart"></canvas>';
+    }
+    
+    const ctx = document.getElementById('priceChart').getContext('2d');
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    
+    if (currentChart) {
+        currentChart.destroy();
+    }
+    
+    try {
+        const chartData = await fetchRealChartData(period);
+        
+        if (!chartData || !chartData.labels || !chartData.prices) {
+            throw new Error('No real chart data available');
+        }
+        
+        createChart(ctx, isDark, chartData.labels, chartData.prices);
+        showChartError(false);
+    } catch (error) {
+        console.error('Error creating real chart:', error);
+        createDemoChart(period, ctx, isDark);
+    }
+}
+
+function createChart(ctx, isDark, labels, prices) {
+    const firstPrice = prices[0];
+    const lastPrice = prices[prices.length - 1];
+    const isPositive = lastPrice >= firstPrice;
+    
+    const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+    
+    if (isPositive) {
+        gradient.addColorStop(0, 'rgba(0, 200, 81, 0.3)');
+        gradient.addColorStop(1, 'rgba(0, 200, 81, 0.05)');
+        var borderColor = '#00c851';
+    } else {
+        gradient.addColorStop(0, 'rgba(255, 68, 68, 0.3)');
+        gradient.addColorStop(1, 'rgba(255, 68, 68, 0.05)');
+        var borderColor = '#ff4444';
+    }
+    
+    currentChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: prices,
+                borderColor: borderColor,
+                backgroundColor: gradient,
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: borderColor,
+                pointBorderColor: isDark ? '#2d2d2d' : '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 0,
+                pointHoverRadius: 4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { display: false },
+                tooltip: {
+                    mode: 'index',
+                    intersect: false,
+                    backgroundColor: isDark ? 'rgba(45, 45, 45, 0.95)' : 'rgba(255, 255, 255, 0.95)',
+                    bodyColor: isDark ? '#ffffff' : '#1a1a1a',
+                    titleColor: isDark ? '#ffffff' : '#1a1a1a',
+                    borderColor: isDark ? '#404040' : '#e9ecef',
+                    borderWidth: 1,
+                    callbacks: {
+                        label: function(context) {
+                            return `Цена: $${context.parsed.y.toFixed(8)}`;
+                        }
+                    }
+                }
+            },
+            scales: {
+                x: {
+                    grid: { 
+                        display: false,
+                        color: isDark ? '#404040' : '#e9ecef'
+                    },
+                    ticks: {
+                        color: isDark ? '#b0b0b0' : '#666',
+                        font: { size: 10 },
+                        maxTicksLimit: 6
+                    }
+                },
+                y: {
+                    display: false,
+                    grid: {
+                        color: isDark ? '#404040' : '#e9ecef'
+                    }
+                }
+            },
+            interaction: {
+                intersect: false,
+                mode: 'nearest'
+            }
+        }
+    });
+}
+
+async function fetchRealChartData(period) {
+    try {
+        const response = await fetchWithCache(
+            'https://api.allorigins.win/raw?url=https://api.mexc.com/api/v3/klines?symbol=HMSTRUSDT&interval=1h&limit=24',
+            'chart_data',
+            30000
+        );
+        if (response) {
+            return parseKlinesData(response, period);
+        }
+    } catch (error) {
+        console.log('Real chart data unavailable, using demo data');
+    }
+    
+    throw new Error('Real chart data not available');
+}
+
+function parseKlinesData(klines, period) {
+    const prices = [];
+    const labels = [];
+    
+    klines.forEach((kline, index) => {
+        const price = parseFloat(kline[4]);
+        prices.push(price);
+        
+        if (period === '1D') {
+            const date = new Date(kline[0]);
+            labels.push(date.getHours() + ':00');
+        } else {
+            labels.push(`Точка ${index + 1}`);
+        }
+    });
+    
+    if (labels.length > 0) {
+        labels[labels.length - 1] = 'Сейчас';
+    }
+    
+    return { labels, prices };
+}
+
+function createDemoChart(period, ctx, isDark) {
+    const basePrice = currentPriceData.current || 0.000621;
+    const change24h = currentPriceData.change24h || -4.13;
+    
+    let labels, prices;
+    
+    switch(period) {
+        case '1D':
+            labels = ['00:00', '04:00', '08:00', '12:00', '16:00', '20:00', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, change24h, 7);
+            break;
+        case '1W':
+            labels = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, change24h * 1.5, 7);
+            break;
+        case '1M':
+            labels = ['Нед1', 'Нед2', 'Нед3', 'Нед4', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, change24h * 3, 5);
+            break;
+        case '1Y':
+            labels = ['Янв', 'Мар', 'Май', 'Июл', 'Сен', 'Ноя', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, change24h * 8, 7);
+            break;
+        case 'ALL':
+            labels = ['Запуск', 'М1', 'М2', 'М3', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, 25, 5);
+            break;
+        default:
+            labels = ['00:00', '06:00', '12:00', '18:00', 'Сейчас'];
+            prices = generateRealisticPrices(basePrice, change24h, 5);
+    }
+    
+    createChart(ctx, isDark, labels, prices);
+    showChartError(true);
+}
+
+function generateRealisticPrices(basePrice, totalChangePercent, points) {
+    const prices = [];
+    const startPrice = basePrice / (1 + totalChangePercent / 100);
+    
+    for (let i = 0; i < points; i++) {
+        const progress = i / (points - 1);
+        let price = startPrice + (basePrice - startPrice) * progress;
+        
+        const randomFactor = 1 + (Math.random() - 0.5) * 0.03;
+        price *= randomFactor;
+        
+        if (i === points - 1) {
+            price = basePrice;
+        }
+        
+        prices.push(price);
+    }
+    
+    return prices;
+}
+
+function getPeriodText(period) {
+    switch(period) {
+        case '1D': return 'Сегодня';
+        case '1W': return 'За неделю';
+        case '1M': return 'За месяц';
+        case '1Y': return 'За год';
+        case 'ALL': return 'За всё время';
+        default: return 'Сегодня';
+    }
+}
+
+function setupGuideToggle() {
+    const guideToggle = document.getElementById('guide-toggle');
+    const buyGuide = document.getElementById('buy-guide');
+    
+    if (guideToggle && buyGuide) {
+        // Collapse by default
+        buyGuide.classList.add('collapsed');
+        
+        guideToggle.addEventListener('click', function() {
+            if (buyGuide.classList.contains('collapsed')) {
+                buyGuide.classList.remove('collapsed');
+                this.classList.add('open');
+            } else {
+                buyGuide.classList.add('collapsed');
+                this.classList.remove('open');
+            }
+        });
+    }
+}
+
 function setupThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = themeToggle.querySelector('.theme-icon');
@@ -896,6 +585,7 @@ function setupThemeToggle() {
         const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
         setTheme(newTheme);
+        showNotification(`Тема изменена на ${newTheme === 'dark' ? 'тёмную' : 'светлую'} 🎨`, 'info');
     });
     
     function setTheme(theme) {
@@ -909,202 +599,217 @@ function setupThemeToggle() {
             themeIcon.textContent = '🌙';
             themeText.textContent = 'Темная тема';
         }
+        
+        if (currentChart) {
+            const activePeriod = document.querySelector('.time-btn.active').getAttribute('data-period');
+            updateChartForPeriod(activePeriod);
+        }
     }
 }
 
-// Новости
-function setupNewsSection() {
-    loadNews();
+function setupRefreshButton() {
+    const refreshBtn = document.getElementById('refresh-btn');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', async function() {
+            this.style.animation = 'spin 1s linear';
+            
+            showNotification('Обновление данных... 🔄', 'info');
+            
+            await Promise.all([
+                fetchRealPriceData(),
+                updateOnlineCounter()
+            ]);
+            
+            setTimeout(() => {
+                this.style.animation = '';
+                showNotification('Данные обновлены! ✅', 'success');
+            }, 1000);
+        });
+    }
 }
 
-function loadNews() {
-    const newsContainer = document.getElementById('news-container');
-    const news = getNewsData();
+function setupShareApp() {
+    const shareBtn = document.getElementById('share-app');
+    if (shareBtn) {
+        shareBtn.addEventListener('click', function() {
+            const shareText = 'Присоединяйся к Hamster Verse - все игры Hamster Kombat в одном приложении! 🐹🎮';
+            const shareUrl = window.location.href;
+            
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Hamster Verse',
+                    text: shareText,
+                    url: shareUrl
+                }).then(() => {
+                    showNotification('Спасибо за распространение! 🙏', 'success');
+                });
+            } else {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showNotification('Ссылка скопирована в буфер обмена! 📋', 'success');
+                });
+            }
+            
+            trackShareAction();
+        });
+    }
+}
+
+function setupUserStats() {
+    // Load user stats from localStorage
+    const stats = JSON.parse(localStorage.getItem('user_stats') || '{}');
     
-    if (news.length === 0) {
-        newsContainer.innerHTML = `
-            <div class="news-item">
-                <span class="news-date">Сегодня</span>
-                <div class="news-title">Добро пожаловать в Hamster Verse!</div>
-                <div class="news-content">Теперь вы можете оставлять комментарии и ставить лайки! Делитесь мнением об играх с сообществом.</div>
-            </div>
-        `;
-        return;
+    // Update session count
+    stats.sessions = (stats.sessions || 0) + 1;
+    stats.lastActive = new Date().toISOString();
+    
+    // Update favorite game (simple logic)
+    const gameClicks = stats.gameClicks || {};
+    let favGame = 'GameDev';
+    let maxClicks = 0;
+    
+    for (const game in gameClicks) {
+        if (gameClicks[game] > maxClicks) {
+            maxClicks = gameClicks[game];
+            favGame = game;
+        }
     }
     
-    newsContainer.innerHTML = news.map(item => `
-        <div class="news-item">
-            <span class="news-date">${formatDate(item.date)}</span>
-            <div class="news-title">${item.title}</div>
-            <div class="news-content">${item.content}</div>
-        </div>
-    `).join('');
+    // Update DOM
+    document.getElementById('sessions-count').textContent = stats.sessions;
+    document.getElementById('fav-game').textContent = favGame;
+    document.getElementById('last-active').textContent = 'Сегодня';
+    
+    // Save updated stats
+    localStorage.setItem('user_stats', JSON.stringify(stats));
 }
 
-function getNewsData() {
-    return [
-        {
-            date: new Date().toISOString(),
-            title: "Добавлена система комментариев",
-            content: "Теперь вы можете оставлять комментарии к играм и ставить лайки! Самые популярные комментарии будут отображаться первыми."
-        },
-        {
-            date: new Date(Date.now() - 86400000).toISOString(),
-            title: "Новая система рейтингов",
-            content: "Теперь вы можете оценивать игры! Ваша оценка помогает сообществу выбирать лучшие игры."
+function setupOnlineCounter() {
+    updateOnlineCounter();
+    // Update every 30 seconds
+    setInterval(updateOnlineCounter, 30000);
+}
+
+function updateOnlineCounter() {
+    const counter = document.getElementById('online-counter');
+    if (!counter) return;
+    
+    // Simulate online users (in real app, this would come from API)
+    const baseUsers = 70000;
+    const randomVariation = Math.floor(Math.random() * 5000) - 2500;
+    const onlineUsers = baseUsers + randomVariation;
+    
+    counter.textContent = `🎯 Игроков онлайн: ${(onlineUsers / 1000).toFixed(1)}K+`;
+    
+    // Update quick stats
+    document.getElementById('total-players').textContent = '500K+';
+    document.getElementById('active-now').textContent = `${(onlineUsers / 1000).toFixed(1)}K+`;
+}
+
+function setupAppMetrics() {
+    const startTime = Date.now();
+    let currentSection = 'games-section';
+    
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            trackUserSession(currentSection, Date.now() - startTime);
         }
-    ];
-}
-
-// Авто-обновление
-function setupAutoRefresh() {
-    setInterval(() => {
-        if (document.querySelector('#hmstr-section.active')) {
-            refreshPriceData();
-        }
-    }, 120000);
-}
-
-// Обработка ошибок
-function setupErrorHandling() {
-    window.addEventListener('error', function(e) {
-        console.error('Global error:', e);
     });
     
-    window.addEventListener('unhandledrejection', function(e) {
-        console.error('Unhandled promise rejection:', e);
-    });
+    // Track initial session
+    trackUserSession(currentSection, 0);
 }
 
-// Вспомогательные функции
-function formatDate(dateString) {
-    const date = new Date(dateString);
-    const now = new Date();
-    const diff = now - date;
-    
-    if (diff < 60000) {
-        return 'Только что';
-    } else if (diff < 3600000) {
-        const minutes = Math.floor(diff / 60000);
-        return `${minutes} мин. назад`;
-    } else if (diff < 86400000) {
-        const hours = Math.floor(diff / 3600000);
-        return `${hours} ч. назад`;
-    } else {
-        return date.toLocaleDateString('ru-RU');
-    }
+function trackUserSession(section, duration) {
+    const stats = JSON.parse(localStorage.getItem('app_stats') || '{}');
+    stats[section] = (stats[section] || 0) + Math.round(duration / 1000);
+    localStorage.setItem('app_stats', JSON.stringify(stats));
 }
 
-function formatCommentDate(timestamp) {
-    if (!timestamp) return 'недавно';
-    
-    const date = timestamp.toDate ? timestamp.toDate() : new Date(timestamp);
-    const now = new Date();
-    const diff = now - date;
-    
-    if (diff < 60000) {
-        return 'только что';
-    } else if (diff < 3600000) {
-        const minutes = Math.floor(diff / 60000);
-        return `${minutes} мин. назад`;
-    } else if (diff < 86400000) {
-        const hours = Math.floor(diff / 3600000);
-        return `${hours} ч. назад`;
-    } else {
-        return date.toLocaleDateString('ru-RU');
-    }
+function trackSectionChange(section) {
+    const stats = JSON.parse(localStorage.getItem('app_stats') || '{}');
+    stats.sectionChanges = (stats.sectionChanges || 0) + 1;
+    localStorage.setItem('app_stats', JSON.stringify(stats));
 }
 
+function trackGameClick(gameName) {
+    const stats = JSON.parse(localStorage.getItem('user_stats') || '{}');
+    stats.gameClicks = stats.gameClicks || {};
+    stats.gameClicks[gameName] = (stats.gameClicks[gameName] || 0) + 1;
+    localStorage.setItem('user_stats', JSON.stringify(stats));
+}
+
+function trackShareAction() {
+    const stats = JSON.parse(localStorage.getItem('app_stats') || '{}');
+    stats.shares = (stats.shares || 0) + 1;
+    localStorage.setItem('app_stats', JSON.stringify(stats));
+}
+
+// Notification system
 function showNotification(message, type = 'info') {
+    const container = document.getElementById('notification-container');
     const notification = document.createElement('div');
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        background: ${type === 'success' ? '#00c851' : type === 'error' ? '#ff4444' : '#667eea'};
-        color: white;
-        padding: 10px 16px;
-        border-radius: 8px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        z-index: 10000;
-        animation: slideInRight 0.3s ease;
-        font-size: 13px;
-        font-weight: 500;
-        max-width: 280px;
+    notification.className = `notification ${type}`;
+    notification.innerHTML = `
+        <span>${message}</span>
+        <button onclick="this.parentElement.remove()">×</button>
     `;
-    notification.textContent = message;
+    container.appendChild(notification);
     
-    document.body.appendChild(notification);
-    
+    // Auto remove after 5 seconds
     setTimeout(() => {
-        notification.style.animation = 'slideOutRight 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
 }
 
-function generateCommentId() {
-    return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
-
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// Закрытие анонса
-function closeAnnouncement() {
-    const banner = document.getElementById('announcement');
-    if (banner) {
-        banner.style.display = 'none';
-        localStorage.setItem('announcement_closed', 'true');
-    }
-}
-
-// Проверяем, был ли анонс закрыт ранее
-function checkAnnouncementState() {
-    const isClosed = localStorage.getItem('announcement_closed');
-    if (isClosed === 'true') {
-        const banner = document.getElementById('announcement');
-        if (banner) {
-            banner.style.display = 'none';
+// Cache system
+async function fetchWithCache(url, cacheKey, ttl = 60000) {
+    const cached = localStorage.getItem(cacheKey);
+    const now = Date.now();
+    
+    if (cached) {
+        const { data, timestamp } = JSON.parse(cached);
+        if (now - timestamp < ttl) {
+            return data;
         }
     }
+    
+    try {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+        
+        const data = await response.json();
+        localStorage.setItem(cacheKey, JSON.stringify({
+            data,
+            timestamp: now
+        }));
+        return data;
+    } catch (error) {
+        console.error('Fetch error:', error);
+        if (cached) {
+            return JSON.parse(cached).data;
+        }
+        throw error;
+    }
 }
 
-// Предотвращаем перетаскивание изображений
+// Prevent image drag
 document.addEventListener('DOMContentLoaded', function() {
     const images = document.querySelectorAll('img');
     images.forEach(img => {
         img.setAttribute('draggable', 'false');
     });
-    
-    checkAnnouncementState();
 });
 
-// Добавляем CSS для анимации уведомлений
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes slideInRight {
-        from {
-            opacity: 0;
-            transform: translateX(100%);
-        }
-        to {
-            opacity: 1;
-            transform: translateX(0);
-        }
+// Cleanup on close
+window.addEventListener('beforeunload', function() {
+    if (priceUpdateInterval) {
+        clearInterval(priceUpdateInterval);
     }
     
-    @keyframes slideOutRight {
-        from {
-            opacity: 1;
-            transform: translateX(0);
-        }
-        to {
-            opacity: 0;
-            transform: translateX(100%);
-        }
-    }
-`;
-document.head.appendChild(style);
+    // Track total session time
+    const stats = JSON.parse(localStorage.getItem('app_stats') || '{}');
+    stats.totalUsage = (stats.totalUsage || 0) + Math.round(performance.now() / 1000);
+    localStorage.setItem('app_stats', JSON.stringify(stats));
+});
