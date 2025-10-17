@@ -1,6 +1,6 @@
 // Конфигурация приложения
 const APP_CONFIG = {
-    version: '2.3.0',
+    version: '2.4.0',
     features: {
         ratings: true,
         comments: true,
@@ -11,19 +11,27 @@ const APP_CONFIG = {
 
 // Система рейтингов
 const RATINGS_SYSTEM = {
-    storageKey: 'game_ratings_v2',
+    storageKey: 'game_ratings_v3',
     maxRating: 5
 };
 
 // Система комментариев
 const COMMENTS_SYSTEM = {
-    storageKey: 'game_comments_v1',
+    storageKey: 'game_comments_v2',
     maxCommentLength: 500
 };
 
 // Коллекции Firestore
 const COMMENTS_COLLECTION = "comments";
 const RATINGS_COLLECTION = "ratings";
+
+// Данные токена HMSTR
+let currentPriceData = {
+    usd: 0.000687,
+    rub: 0.062,
+    change: 2.42,
+    lastUpdated: new Date().toISOString()
+};
 
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
@@ -173,7 +181,7 @@ async function setupRatingSystem() {
 }
 
 async function loadAllRatings() {
-    const gameIds = ['1', '2']; // Добавьте остальные ID игр
+    const gameIds = ['1', '2', '3', '4'];
     for (const gameId of gameIds) {
         await loadRatings(gameId);
     }
@@ -282,7 +290,7 @@ async function setupCommentsSystem() {
 }
 
 async function loadAllCommentsCount() {
-    const gameIds = ['1', '2']; // Добавьте остальные ID игр
+    const gameIds = ['1', '2', '3', '4'];
     let totalComments = 0;
     
     for (const gameId of gameIds) {
@@ -393,9 +401,7 @@ async function loadComments(gameId) {
             return;
         }
         
-        const sortedComments = comments.sort((a, b) => b.likes - a.likes);
-        
-        commentsList.innerHTML = sortedComments.map(comment => `
+        commentsList.innerHTML = comments.map(comment => `
             <div class="comment-item" data-comment-id="${comment.id}">
                 <div class="comment-header">
                     <div class="comment-author">
@@ -493,12 +499,6 @@ async function toggleLike(gameId, commentId) {
         // Обновляем отображение
         loadComments(gameId);
         
-        // Анимация
-        const likeBtn = document.querySelector(`.like-btn[data-comment-id="${commentId}"]`);
-        if (!userLiked) {
-            likeBtn.classList.add('liked');
-        }
-        
         showNotification(userLiked ? 'Лайк удален' : 'Лайк добавлен!', 'info');
         
     } catch (error) {
@@ -527,8 +527,10 @@ function setupStarsInteractions() {
         
         stars.forEach(star => {
             star.addEventListener('click', function() {
-                const rating = parseInt(this.getAttribute('data-rating'));
-                rateGame(gameId, rating);
+                if (!ratingContainer.classList.contains('disabled')) {
+                    const rating = parseInt(this.getAttribute('data-rating'));
+                    rateGame(gameId, rating);
+                }
             });
             
             star.addEventListener('mouseover', function() {
@@ -556,7 +558,7 @@ function updateRatingDisplay(gameId, gameData) {
     const staticStars = gameCard.querySelectorAll('.stars-static .star');
     
     if (averageElement) {
-        averageElement.textContent = gameData.total.toFixed(1);
+        averageElement.textContent = gameData.total > 0 ? gameData.total.toFixed(1) : '0.0';
     }
     
     if (countElement) {
@@ -618,14 +620,6 @@ function getUserId() {
     if (!userId) {
         userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
         localStorage.setItem('hamster_user_id', userId);
-        
-        const userInfo = {
-            id: userId,
-            created: new Date().toISOString(),
-            name: 'Анонимный Хомяк',
-            type: 'anonymous'
-        };
-        localStorage.setItem('hamster_user_info', JSON.stringify(userInfo));
     }
     return userId;
 }
@@ -639,11 +633,6 @@ function getUserInfo() {
             avatar: user.photo_url || null,
             type: 'telegram'
         };
-    }
-    
-    const storedInfo = localStorage.getItem('hamster_user_info');
-    if (storedInfo) {
-        return JSON.parse(storedInfo);
     }
     
     return {
@@ -676,9 +665,7 @@ function loadCommentsFromLocalStorage(gameId) {
         return;
     }
     
-    const sortedComments = gameComments.sort((a, b) => b.likes - a.likes);
-    
-    commentsList.innerHTML = sortedComments.map(comment => `
+    commentsList.innerHTML = gameComments.map(comment => `
         <div class="comment-item" data-comment-id="${comment.id}">
             <div class="comment-header">
                 <div class="comment-author">
@@ -770,11 +757,6 @@ function toggleLikeInLocalStorage(gameId, commentId) {
     localStorage.setItem(COMMENTS_SYSTEM.storageKey, JSON.stringify(comments));
     loadCommentsFromLocalStorage(gameId);
     
-    const likeBtn = document.querySelector(`.like-btn[data-comment-id="${commentId}"]`);
-    if (!userLiked) {
-        likeBtn.classList.add('liked');
-    }
-    
     showNotification(userLiked ? 'Лайк удален' : 'Лайк добавлен!', 'info');
 }
 
@@ -832,14 +814,6 @@ function checkUserRatingInLocalStorage(gameId) {
 }
 
 // ==================== ОСТАЛЬНЫЕ ФУНКЦИИ ====================
-
-// Данные токена HMSTR
-let currentPriceData = {
-    usd: 0.000621,
-    rub: 0.056,
-    change: 2.34,
-    lastUpdated: new Date().toISOString()
-};
 
 function setupPriceData() {
     loadPriceData();
@@ -1049,14 +1023,14 @@ function showNotification(message, type = 'info') {
         right: 20px;
         background: ${type === 'success' ? '#00c851' : type === 'error' ? '#ff4444' : '#667eea'};
         color: white;
-        padding: 12px 20px;
+        padding: 10px 16px;
         border-radius: 8px;
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
         z-index: 10000;
         animation: slideInRight 0.3s ease;
-        font-size: 14px;
+        font-size: 13px;
         font-weight: 500;
-        max-width: 300px;
+        max-width: 280px;
     `;
     notification.textContent = message;
     
