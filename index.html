@@ -9,7 +9,6 @@
     <title>Hamster Verse</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -18,43 +17,32 @@
             <div class="header-content">
                 <div class="header-titles">
                     <h1 class="app-title">🐹 Hamster Verse</h1>
-                    <span class="app-subtitle" id="online-counter">🎯 Загрузка статистики...</span>
+                    <span class="app-subtitle">Все игры в одном месте</span>
                 </div>
-                <div class="header-actions">
-                    <button class="icon-button" id="refresh-btn" title="Обновить данные">
-                        🔄
-                    </button>
-                    <div class="user-avatar" id="user-avatar">H</div>
-                </div>
+                <div class="user-avatar" id="user-avatar">H</div>
             </div>
         </header>
-
-        <!-- Notification Container -->
-        <div class="notification-container" id="notification-container"></div>
 
         <!-- Main Content -->
         <main class="main-content">
             <!-- Games Section -->
             <section id="games-section" class="content-section active">
                 <div class="section-header">
-                    <h2>🎮 Игры Hamster</h2>
-                    <span class="section-subtitle">Выберите игру для начала заработка</span>
+                    <h2>🎮 Игры</h2>
+                    <span class="section-subtitle">Выберите игру для начала</span>
                 </div>
                 
-                <div class="games-grid" id="games-grid">
+                <div class="games-grid">
                     <div class="game-card">
                         <div class="game-image">
-                            <img src="images/hamster-gamedev.jpg" alt="Hamster GameDev" class="game-avatar" loading="lazy">
+                            <div class="game-avatar">🎮</div>
                         </div>
                         <div class="game-info">
                             <div class="game-header">
                                 <h3>Hamster GameDev</h3>
-                                <span class="game-beta">Beta</span>
+                                <span class="game-beta">Бета</span>
                             </div>
-                            <p>Создай игровую студию и зарабатывай</p>
-                            <div class="game-stats">
-                                <span class="stat">🔥 24.5K онлайн</span>
-                            </div>
+                            <p>Создай игровую студию</p>
                         </div>
                         <button class="play-button" data-url="https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584">
                             Играть
@@ -63,14 +51,11 @@
 
                     <div class="game-card">
                         <div class="game-image">
-                            <img src="images/hamster-king.jpg" alt="Hamster King" class="game-avatar" loading="lazy">
+                            <div class="game-avatar">👑</div>
                         </div>
                         <div class="game-info">
                             <h3>Hamster King</h3>
-                            <p>Стань королём в битвах хомяков</p>
-                            <div class="game-stats">
-                                <span class="stat">👑 18.2K онлайн</span>
-                            </div>
+                            <p>Стань королём в битвах</p>
                         </div>
                         <button class="play-button" data-url="https://t.me/hamsterking_game_bot?startapp=6823288584">
                             Играть
@@ -79,14 +64,11 @@
 
                     <div class="game-card">
                         <div class="game-image">
-                            <img src="images/hamstr-fight-club.jpg" alt="Hamster Fight Club" class="game-avatar" loading="lazy">
+                            <div class="game-avatar">🥊</div>
                         </div>
                         <div class="game-info">
                             <h3>Hamster Fight Club</h3>
-                            <p>Бойцовский клуб хомяков</p>
-                            <div class="game-stats">
-                                <span class="stat">🥊 15.7K онлайн</span>
-                            </div>
+                            <p>Бойцовский клуб</p>
                         </div>
                         <button class="play-button" data-url="https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyYS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5">
                             Играть
@@ -95,14 +77,11 @@
 
                     <div class="game-card">
                         <div class="game-image">
-                            <img src="images/bitquest.jpg" alt="BitQuest" class="game-avatar" loading="lazy">
+                            <div class="game-avatar">💰</div>
                         </div>
                         <div class="game-info">
                             <h3>BitQuest</h3>
                             <p>Крипто-приключения</p>
-                            <div class="game-stats">
-                                <span class="stat">💰 12.3K онлайн</span>
-                            </div>
                         </div>
                         <button class="play-button" data-url="https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584">
                             Играть
@@ -110,27 +89,23 @@
                     </div>
                 </div>
 
-                <!-- Quick Stats -->
-                <div class="quick-stats">
-                    <div class="stat-card">
-                        <div class="stat-icon">👥</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="total-players">500K+</span>
-                            <span class="stat-label">Игроков</span>
+                <!-- Quick Info -->
+                <div class="info-section">
+                    <h3>💡 Важная информация</h3>
+                    <div class="info-cards">
+                        <div class="info-card">
+                            <div class="info-icon">🚀</div>
+                            <div class="info-content">
+                                <strong>Новые игры скоро</strong>
+                                <p>Разработчики готовят новые проекты</p>
+                            </div>
                         </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🎯</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="active-now">70K+</span>
-                            <span class="stat-label">Онлайн</span>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">🚀</div>
-                        <div class="stat-info">
-                            <span class="stat-value" id="games-count">4</span>
-                            <span class="stat-label">Игры</span>
+                        <div class="info-card">
+                            <div class="info-icon">📱</div>
+                            <div class="info-content">
+                                <strong>Удобный доступ</strong>
+                                <p>Все игры в одном приложении</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -139,193 +114,51 @@
             <!-- News Section -->
             <section id="news-section" class="content-section">
                 <div class="section-header">
-                    <h2>📢 Новости & Апдейты</h2>
-                    <span class="section-subtitle">Будь в курсе всех обновлений</span>
+                    <h2>📢 Новости</h2>
+                    <span class="section-subtitle">Будь в курсе обновлений</span>
                 </div>
                 
-                <div class="news-container" id="news-container">
-                    <div class="news-card">
-                        <div class="news-header">
-                            <span class="news-date">Только что</span>
-                            <span class="news-badge update">Обновление</span>
-                        </div>
-                        <h4>Запущен Hamster Verse!</h4>
-                        <p>Все игры Hamster Kombat теперь в одном приложении. Удобный доступ, актуальные цены HMSTR и новости.</p>
-                    </div>
-
-                    <div class="news-card">
-                        <div class="news-header">
-                            <span class="news-date">2 часа назад</span>
-                            <span class="news-badge token">HMSTR</span>
-                        </div>
-                        <h4>Токен HMSTR в тестовой сети</h4>
-                        <p>Команда тестирует токен HMSTR в сети TON. Основной запуск ожидается в ближайшее время.</p>
-                    </div>
-
+                <div class="news-container">
                     <div class="news-card">
                         <div class="news-header">
                             <span class="news-date">Сегодня</span>
-                            <span class="news-badge event">Событие</span>
+                            <span class="news-badge">Новое</span>
                         </div>
-                        <h4>Новая игра скоро</h4>
-                        <p>Разработчики анонсировали скорый запуск пятой игры в экосистеме Hamster Kombat.</p>
+                        <h4>Запущен Hamster Verse!</h4>
+                        <p>Все игры Hamster Kombat теперь в одном приложении. Удобный доступ и быстрый запуск.</p>
+                    </div>
+
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-date">Вчера</span>
+                            <span class="news-badge">Обновление</span>
+                        </div>
+                        <h4>Улучшенный интерфейс</h4>
+                        <p>Приложение стало ещё удобнее и красивее. Попробуйте новые функции!</p>
+                    </div>
+
+                    <div class="news-card">
+                        <div class="news-header">
+                            <span class="news-date">2 дня назад</span>
+                            <span class="news-badge">Совет</span>
+                        </div>
+                        <h4>Как зарабатывать больше</h4>
+                        <p>Регулярно заходите в игры и выполняйте задания для увеличения дохода.</p>
                     </div>
                 </div>
 
                 <!-- Community Links -->
                 <div class="community-section">
-                    <h3>📱 Сообщество</h3>
+                    <h3>🔗 Полезные ссылки</h3>
                     <div class="community-links">
                         <a href="https://t.me/hamster_kombat" class="community-link" target="_blank">
-                            <span class="link-icon">👑</span>
+                            <span class="link-icon">📢</span>
                             <span class="link-text">Официальный канал</span>
-                            <span class="link-arrow">→</span>
                         </a>
                         <a href="https://t.me/hamster_chat" class="community-link" target="_blank">
                             <span class="link-icon">💬</span>
                             <span class="link-text">Чат сообщества</span>
-                            <span class="link-arrow">→</span>
                         </a>
-                        <a href="https://t.me/hamster_news" class="community-link" target="_blank">
-                            <span class="link-icon">📢</span>
-                            <span class="link-text">Новости</span>
-                            <span class="link-arrow">→</span>
-                        </a>
-                    </div>
-                </div>
-            </section>
-
-            <!-- HMSTR Section -->
-            <section id="hmstr-section" class="content-section">
-                <div class="section-header">
-                    <h2>💰 Токен HMSTR</h2>
-                    <span class="section-subtitle">Актуальная цена и торговля</span>
-                </div>
-                
-                <!-- Price Card -->
-                <div class="price-card">
-                    <div class="price-header">
-                        <div class="coin-info">
-                            <div class="coin-logo">
-                                <img src="images/hmstr-token.png" alt="HMSTR" class="coin-avatar" loading="lazy">
-                            </div>
-                            <div class="coin-details">
-                                <h3>HMSTR / USDT</h3>
-                                <p>Хамстер Комбат Токен</p>
-                            </div>
-                        </div>
-                        <div class="current-price">
-                            <span class="price" id="hmstr-price">$0.000621</span>
-                            <span class="change negative" id="hmstr-change">-4.13%</span>
-                            <span class="time-period" id="current-period">Сегодня</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Loading Indicator -->
-                    <div class="loading-indicator hidden" id="price-loading">
-                        <span>🔄 Поиск актуальных данных HMSTR...</span>
-                    </div>
-                    
-                    <!-- Time Period Selector -->
-                    <div class="time-selector">
-                        <button class="time-btn active" data-period="1D">1Д</button>
-                        <button class="time-btn" data-period="1W">7Д</button>
-                        <button class="time-btn" data-period="1M">1М</button>
-                        <button class="time-btn" data-period="1Y">1Г</button>
-                        <button class="time-btn" data-period="ALL">Все</button>
-                    </div>
-                    
-                    <!-- Price Chart -->
-                    <div class="chart-container">
-                        <canvas id="priceChart"></canvas>
-                    </div>
-
-                    <!-- Additional Stats -->
-                    <div class="price-stats">
-                        <div class="stat-item">
-                            <span class="stat-label">24ч Объем</span>
-                            <span class="stat-value" id="volume-24h">$2.1M</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Рыноч. кап.</span>
-                            <span class="stat-value" id="market-cap">$18.5M</span>
-                        </div>
-                        <div class="stat-item">
-                            <span class="stat-label">Ликвидность</span>
-                            <span class="stat-value" id="liquidity">$5.2M</span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Exchanges List -->
-                <div class="exchanges-section">
-                    <h3>💱 Где купить HMSTR</h3>
-                    <div class="exchanges-list">
-                        <a href="https://www.binance.com/ru/trade/HMSTR_USDT" class="exchange-card" target="_blank">
-                            <div class="exchange-logo">
-                                <img src="images/binance.png" alt="Binance" class="exchange-avatar" loading="lazy">
-                            </div>
-                            <div class="exchange-info">
-                                <h3>Binance</h3>
-                                <p>Крупнейшая биржа</p>
-                            </div>
-                            <div class="exchange-arrow">→</div>
-                        </a>
-
-                        <a href="https://www.bybit.com/trade/spot/HMSTR/USDT" class="exchange-card" target="_blank">
-                            <div class="exchange-logo">
-                                <img src="images/bybit.jpg" alt="Bybit" class="exchange-avatar" loading="lazy">
-                            </div>
-                            <div class="exchange-info">
-                                <h3>Bybit</h3>
-                                <p>Фьючерсы и спот</p>
-                            </div>
-                            <div class="exchange-arrow">→</div>
-                        </a>
-
-                        <a href="https://www.okx.com/ru/trade-spot/hmstr-usdt" class="exchange-card" target="_blank">
-                            <div class="exchange-logo">
-                                <img src="images/okx.jpg" alt="OKX" class="exchange-avatar" loading="lazy">
-                            </div>
-                            <div class="exchange-info">
-                                <h3>OKX</h3>
-                                <p>Много торговых пар</p>
-                            </div>
-                            <div class="exchange-arrow">→</div>
-                        </a>
-                    </div>
-                </div>
-
-                <!-- Buy Guide -->
-                <div class="guide-section">
-                    <div class="guide-header">
-                        <h3>📖 Как купить HMSTR</h3>
-                        <button class="guide-toggle" id="guide-toggle">▼</button>
-                    </div>
-                    <div class="buy-guide" id="buy-guide">
-                        <div class="guide-steps">
-                            <div class="guide-step">
-                                <span class="step-number">1</span>
-                                <div class="step-content">
-                                    <strong>Выберите биржу</strong>
-                                    <p>Зарегистрируйтесь на Binance, Bybit или другой поддерживаемой бирже</p>
-                                </div>
-                            </div>
-                            <div class="guide-step">
-                                <span class="step-number">2</span>
-                                <div class="step-content">
-                                    <strong>Пополните баланс</strong>
-                                    <p>Внесите USDT на биржу через банковскую карту или P2P</p>
-                                </div>
-                            </div>
-                            <div class="guide-step">
-                                <span class="step-number">3</span>
-                                <div class="step-content">
-                                    <strong>Купите HMSTR</strong>
-                                    <p>Найдите пару HMSTR/USDT и совершите покупку по рыночной или лимитной цене</p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </section>
@@ -344,41 +177,30 @@
                 <div class="profile-header">
                     <div class="profile-avatar" id="tg-avatar">H</div>
                     <div class="profile-info">
-                        <h2 id="tg-name">Хомяк Игрок</h2>
-                        <p id="tg-username">@hamster_fan</p>
-                        <div class="profile-badge">
-                            <span class="badge">🐹 Участник Hamster Verse</span>
-                        </div>
+                        <h2 id="tg-name">Игрок</h2>
+                        <p id="tg-username">Добро пожаловать!</p>
                     </div>
                 </div>
 
-                <!-- Quick Actions -->
-                <div class="profile-actions">
-                    <button class="action-button" id="share-app">
-                        <span class="action-icon">📤</span>
-                        <span class="action-text">Пригласить друзей</span>
-                    </button>
-                    <button class="action-button" id="export-stats">
-                        <span class="action-icon">📊</span>
-                        <span class="action-text">Моя статистика</span>
-                    </button>
-                </div>
-
-                <!-- User Stats -->
-                <div class="user-stats">
-                    <h3>📈 Моя активность</h3>
-                    <div class="stats-grid">
-                        <div class="user-stat">
-                            <span class="user-stat-value" id="sessions-count">12</span>
-                            <span class="user-stat-label">Сессий</span>
+                <!-- App Features -->
+                <div class="features-section">
+                    <h3>⭐ Возможности</h3>
+                    <div class="features-list">
+                        <div class="feature-item">
+                            <span class="feature-icon">⚡</span>
+                            <span class="feature-text">Быстрый запуск игр</span>
                         </div>
-                        <div class="user-stat">
-                            <span class="user-stat-value" id="fav-game">GameDev</span>
-                            <span class="user-stat-label">Любимая игра</span>
+                        <div class="feature-item">
+                            <span class="feature-icon">🎨</span>
+                            <span class="feature-text">Удобный интерфейс</span>
                         </div>
-                        <div class="user-stat">
-                            <span class="user-stat-value" id="last-active">Сегодня</span>
-                            <span class="user-stat-label">Был в сети</span>
+                        <div class="feature-item">
+                            <span class="feature-icon">🔔</span>
+                            <span class="feature-text">Актуальные новости</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="feature-icon">🌙</span>
+                            <span class="feature-text">Темная тема</span>
                         </div>
                     </div>
                 </div>
@@ -389,15 +211,11 @@
                     <div class="info-list">
                         <div class="info-item">
                             <span class="info-label">Версия</span>
-                            <span class="info-value">2.0.0</span>
+                            <span class="info-value">2.0</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">Обновлено</span>
-                            <span class="info-value" id="app-updated">Сегодня</span>
-                        </div>
-                        <div class="info-item">
-                            <span class="info-label">Разработчик</span>
-                            <span class="info-value">Hamster Community</span>
+                            <span class="info-value">Сегодня</span>
                         </div>
                     </div>
                 </div>
@@ -413,10 +231,6 @@
             <button class="nav-item" data-section="news-section">
                 <span class="nav-icon">📢</span>
                 <span class="nav-label">Новости</span>
-            </button>
-            <button class="nav-item" data-section="hmstr-section">
-                <span class="nav-icon">💰</span>
-                <span class="nav-label">HMSTR</span>
             </button>
             <button class="nav-item" data-section="profile-section">
                 <span class="nav-icon">👤</span>
