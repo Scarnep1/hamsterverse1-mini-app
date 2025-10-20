@@ -31,19 +31,19 @@
         <main class="main-content">
             <!-- Games Section -->
             <section id="games-section" class="content-section active">
-                <div class="section-header-left">
+                <div class="section-header">
                     <h2>Игры</h2>
                     <span class="section-subtitle">Выберите игру для начала</span>
                 </div>
                 
                 <div class="games-grid" id="games-container">
-                    <!-- Игры загружаются динамически -->
+                    <!-- Games will be loaded dynamically -->
                 </div>
             </section>
 
             <!-- HMSTR Section -->
             <section id="hmstr-section" class="content-section">
-                <div class="section-header-left">
+                <div class="section-header">
                     <h2>Токен HMSTR</h2>
                     <span class="section-subtitle">Курс и торговые пары</span>
                 </div>
@@ -62,6 +62,7 @@
                 
                 <!-- Price Cards -->
                 <div class="price-cards-container">
+                    <!-- USD Price Card -->
                     <div class="price-card">
                         <div class="price-card-header">
                             <div class="currency-flag">🇺🇸</div>
@@ -73,7 +74,7 @@
                         <div class="price-card-content">
                             <div class="price-main" id="hmstr-price-usd">~$0.000621</div>
                             <div class="price-change">
-                                <span class="change positive" id="hmstr-change-usd">~+2.34%</span>
+                                <span class="change positive" id="hmstr-change-usd">+2.34%</span>
                                 <span class="change-time">за 24ч</span>
                             </div>
                         </div>
@@ -118,11 +119,45 @@
                         </a>
                     </div>
                 </div>
+
+                <!-- Buy Guide Button -->
+                <div class="guide-button-container">
+                    <button class="guide-button" id="show-guide">
+                        📖 Как купить HMSTR
+                    </button>
+                </div>
+
+                <!-- Buy Guide -->
+                <div class="buy-guide hidden" id="buy-guide">
+                    <div class="guide-steps">
+                        <div class="guide-step">
+                            <span class="step-number">1</span>
+                            <div class="step-content">
+                                <strong>Выберите биржу</strong>
+                                <p>Зарегистрируйтесь на Binance, Bybit или другой поддерживаемой бирже</p>
+                            </div>
+                        </div>
+                        <div class="guide-step">
+                            <span class="step-number">2</span>
+                            <div class="step-content">
+                                <strong>Пополните баланс</strong>
+                                <p>Внесите USDT или другую валюту на биржу</p>
+                            </div>
+                        </div>
+                        <div class="guide-step">
+                            <span class="step-number">3</span>
+                            <div class="step-content">
+                                <strong>Купите HMSTR</strong>
+                                <p>Найдите пару HMSTR/USDT и совершите покупку</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </section>
 
             <!-- News Section -->
             <section id="news-section" class="content-section">
-                <div class="section-header-left">
+                <div class="section-header">
                     <h2>Новости</h2>
                     <span class="section-subtitle">Последние обновления проекта</span>
                 </div>
@@ -134,7 +169,7 @@
 
             <!-- Profile Section -->
             <section id="profile-section" class="content-section">
-                <div class="section-header-left">
+                <div class="section-header">
                     <h2>Профиль</h2>
                     <span class="section-subtitle">Управление настройками</span>
                 </div>
@@ -154,6 +189,13 @@
                     </button>
                 </div>
 
+                <!-- Feedback Button -->
+                <div class="guide-button-container">
+                    <button class="guide-button secondary" id="feedback-button">
+                        💬 Обратная связь
+                    </button>
+                </div>
+
                 <!-- Theme Toggle -->
                 <div class="theme-toggle-container">
                     <button class="theme-toggle" id="theme-toggle">
@@ -164,13 +206,13 @@
 
                 <!-- App Info -->
                 <div class="app-info">
-                    <p>Hamster Verse v<span id="app-version">2.3.0</span></p>
-                    <p class="app-build">Build: <span id="app-build">2024.01.16</span></p>
+                    <p>Hamster Verse v<span id="app-version">2.2.0</span></p>
+                    <p class="app-build">Build: <span id="app-build">2024.01.15</span></p>
                 </div>
 
                 <!-- Admin Link -->
                 <div class="guide-button-container" id="admin-button-container" style="display: none;">
-                    <button class="guide-button secondary" onclick="openAdminPanel()">
+                    <button class="guide-button secondary" onclick="window.open('admin.html', '_blank')">
                         ⚙️ Админ-панель
                     </button>
                 </div>
@@ -198,75 +240,18 @@
         </nav>
     </div>
 
-    <!-- Admin Panel Modal -->
-    <div class="modal-overlay hidden" id="admin-modal">
-        <div class="modal admin-modal">
+    <!-- Feedback Modal -->
+    <div class="modal-overlay hidden" id="feedback-modal">
+        <div class="modal">
             <div class="modal-header">
-                <h3>⚙️ Админ-панель</h3>
-                <button class="close-modal" onclick="closeAdminModal()">×</button>
+                <h3>Обратная связь</h3>
+                <button class="close-modal" onclick="closeFeedbackModal()">×</button>
             </div>
             <div class="modal-content">
-                <div class="admin-tabs">
-                    <button class="admin-tab active" data-tab="games">🎮 Игры</button>
-                    <button class="admin-tab" data-tab="hmstr">💰 HMSTR</button>
-                    <button class="admin-tab" data-tab="news">📰 Новости</button>
-                </div>
-
-                <!-- Games Management -->
-                <div class="admin-tab-content active" id="games-tab">
-                    <div class="admin-section">
-                        <h4>Добавить новую игру</h4>
-                        <div class="admin-form">
-                            <input type="text" id="game-title" placeholder="Название игры" class="admin-input">
-                            <textarea id="game-description" placeholder="Описание игры" class="admin-textarea"></textarea>
-                            <input type="text" id="game-url" placeholder="Ссылка для запуска" class="admin-input">
-                            <input type="text" id="game-image" placeholder="URL картинки" class="admin-input">
-                            <input type="text" id="game-players" placeholder="Количество игроков (например: 128K)" class="admin-input">
-                            <button onclick="addGame()" class="admin-btn primary">Добавить игру</button>
-                        </div>
-                    </div>
-                    
-                    <div class="admin-section">
-                        <h4>Управление играми</h4>
-                        <div class="games-list" id="admin-games-list">
-                            <!-- Список игр для управления -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- HMSTR Management -->
-                <div class="admin-tab-content" id="hmstr-tab">
-                    <div class="admin-section">
-                        <h4>Курс токена</h4>
-                        <div class="admin-form">
-                            <input type="text" id="hmstr-price" placeholder="Цена (например: 0.000621)" class="admin-input">
-                            <input type="text" id="hmstr-change" placeholder="Изменение % (например: +2.34)" class="admin-input">
-                            <input type="text" id="hmstr-marketcap" placeholder="Капитализация (например: 12.5M)" class="admin-input">
-                            <input type="text" id="hmstr-volume" placeholder="Объем 24ч (например: 1.2M)" class="admin-input">
-                            <button onclick="updateHmstrData()" class="admin-btn primary">Обновить данные</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- News Management -->
-                <div class="admin-tab-content" id="news-tab">
-                    <div class="admin-section">
-                        <h4>Добавить новость</h4>
-                        <div class="admin-form">
-                            <input type="text" id="news-title" placeholder="Заголовок новости" class="admin-input">
-                            <textarea id="news-content" placeholder="Текст новости" class="admin-textarea"></textarea>
-                            <input type="text" id="news-image" placeholder="URL картинки (опционально)" class="admin-input">
-                            <input type="date" id="news-date" class="admin-input">
-                            <button onclick="addNews()" class="admin-btn primary">Добавить новость</button>
-                        </div>
-                    </div>
-                    
-                    <div class="admin-section">
-                        <h4>Управление новостями</h4>
-                        <div class="news-list-admin" id="admin-news-list">
-                            <!-- Список новостей для управления -->
-                        </div>
-                    </div>
+                <textarea id="feedback-text" placeholder="Расскажите о вашем опыте использования приложения, предложениях или проблемах..." rows="5"></textarea>
+                <div class="modal-actions">
+                    <button class="modal-btn secondary" onclick="closeFeedbackModal()">Отмена</button>
+                    <button class="modal-btn primary" onclick="sendFeedback()">Отправить</button>
                 </div>
             </div>
         </div>
