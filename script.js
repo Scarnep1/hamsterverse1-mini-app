@@ -299,20 +299,8 @@ function loadHmstrData() {
         };
         localStorage.setItem('admin_hmstr_data', JSON.stringify(defaultData));
         updateHmstrDisplay(defaultData);
-        
-        // Заполняем форму в админке
-        document.getElementById('hmstr-price').value = defaultData.price;
-        document.getElementById('hmstr-change').value = defaultData.change;
-        document.getElementById('hmstr-marketcap').value = defaultData.marketcap;
-        document.getElementById('hmstr-volume').value = defaultData.volume;
     } else {
         updateHmstrDisplay(hmstrData);
-        
-        // Заполняем форму в админке
-        document.getElementById('hmstr-price').value = hmstrData.price;
-        document.getElementById('hmstr-change').value = hmstrData.change;
-        document.getElementById('hmstr-marketcap').value = hmstrData.marketcap;
-        document.getElementById('hmstr-volume').value = hmstrData.volume;
     }
 }
 
@@ -457,10 +445,70 @@ function updateAdminNewsList(news) {
     `).join('');
 }
 
-// Админ-панель
+// Админ-панель - ИСПРАВЛЕННАЯ СИСТЕМА ДОСТУПА
 function setupAdminPanel() {
     setupAdminTabs();
     checkAdminAccess();
+    
+    // Добавляем простой способ входа для тестирования
+    setupSimpleAdminAccess();
+}
+
+function setupSimpleAdminAccess() {
+    // Простой способ активации админки - через тройное нажатие на заголовок
+    const header = document.querySelector('.header-titles');
+    let tapCount = 0;
+    let lastTap = 0;
+    
+    header.addEventListener('click', function() {
+        const currentTime = new Date().getTime();
+        const tapLength = currentTime - lastTap;
+        
+        if (tapLength < 500 && tapLength > 0) {
+            tapCount++;
+        } else {
+            tapCount = 1;
+        }
+        
+        lastTap = currentTime;
+        
+        if (tapCount >= 3) {
+            activateAdminMode();
+            tapCount = 0;
+        }
+    });
+    
+    // Также оставляем старый способ с вводом пароля
+    let passwordInput = '';
+    document.addEventListener('keydown', function(e) {
+        // Игнорируем специальные клавиши
+        if (e.key.length === 1) {
+            passwordInput += e.key.toLowerCase();
+        }
+        
+        // Ограничиваем длину ввода
+        if (passwordInput.length > 20) {
+            passwordInput = passwordInput.slice(-20);
+        }
+        
+        // Проверяем пароль
+        if (passwordInput.includes(APP_CONFIG.adminPassword.toLowerCase())) {
+            activateAdminMode();
+            passwordInput = '';
+        }
+    });
+}
+
+function activateAdminMode() {
+    localStorage.setItem('is_admin', 'true');
+    checkAdminAccess();
+    showNotification('🔓 Режим администратора активирован!', 'success');
+    
+    // Показываем кнопку админки в профиле
+    const adminContainer = document.getElementById('admin-button-container');
+    if (adminContainer) {
+        adminContainer.style.display = 'block';
+    }
 }
 
 function setupAdminTabs() {
@@ -479,8 +527,30 @@ function setupAdminTabs() {
                 content.classList.remove('active');
             });
             document.getElementById(`${targetTab}-tab`).classList.add('active');
+            
+            // Загружаем данные в формы при переключении табов
+            if (targetTab === 'hmstr') {
+                loadHmstrDataToForm();
+            }
         });
     });
+}
+
+function loadHmstrDataToForm() {
+    const hmstrData = JSON.parse(localStorage.getItem('admin_hmstr_data') || '{}');
+    
+    if (hmstrData.price) {
+        document.getElementById('hmstr-price').value = hmstrData.price;
+    }
+    if (hmstrData.change) {
+        document.getElementById('hmstr-change').value = hmstrData.change;
+    }
+    if (hmstrData.marketcap) {
+        document.getElementById('hmstr-marketcap').value = hmstrData.marketcap;
+    }
+    if (hmstrData.volume) {
+        document.getElementById('hmstr-volume').value = hmstrData.volume;
+    }
 }
 
 function checkAdminAccess() {
@@ -490,27 +560,19 @@ function checkAdminAccess() {
     if (adminContainer) {
         adminContainer.style.display = isAdmin ? 'block' : 'none';
     }
-    
-    // Секретная комбинация для доступа к админке
-    let keySequence = '';
-    document.addEventListener('keydown', function(e) {
-        keySequence += e.key;
-        if (keySequence.length > 10) {
-            keySequence = keySequence.slice(-10);
-        }
-        
-        if (keySequence.includes(APP_CONFIG.adminPassword)) {
-            localStorage.setItem('is_admin', 'true');
-            checkAdminAccess();
-            showNotification('Режим администратора активирован!', 'success');
-            keySequence = '';
-        }
-    });
 }
 
 function openAdminPanel() {
+    if (localStorage.getItem('is_admin') !== 'true') {
+        showNotification('Доступ запрещен. Активируйте режим администратора.', 'error');
+        return;
+    }
+    
     const modal = document.getElementById('admin-modal');
     modal.classList.remove('hidden');
+    
+    // Загружаем данные в формы
+    loadHmstrDataToForm();
 }
 
 function closeAdminModal() {
@@ -597,6 +659,14 @@ function formatDate(dateString) {
 }
 
 function showNotification(message, type = 'info') {
+    // Удаляем старые уведомления
+    const oldNotifications = document.querySelectorAll('.notification');
+    oldNotifications.forEach(notification => {
+        if (notification.parentNode) {
+            notification.parentNode.removeChild(notification);
+        }
+    });
+    
     // Создаем уведомление
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
@@ -657,3 +727,13 @@ document.addEventListener('DOMContentLoaded', function() {
     
     checkAnnouncementState();
 });
+
+// Добавляем функцию для принудительной активации админки (для отладки)
+function forceAdminAccess() {
+    localStorage.setItem('is_admin', 'true');
+    checkAdminAccess();
+    showNotification('Админка принудительно активирована!', 'success');
+}
+
+// Для отладки - добавляем глобальную функцию
+window.forceAdminAccess = forceAdminAccess;
