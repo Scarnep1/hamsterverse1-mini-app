@@ -156,24 +156,33 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- User Reviews Section -->
+                <div class="user-reviews-section">
+                    <h3>Отзывы игроков</h3>
+                    <div class="reviews-list" id="reviews-list">
+                        <!-- Reviews loaded dynamically -->
+                    </div>
+                    <button class="add-review-btn" onclick="showReviewModal()">+ Добавить отзыв</button>
+                </div>
             </section>
 
             <!-- HMSTR Section -->
             <section id="hmstr-section" class="content-section">
                 <div class="section-header">
                     <h2>Токен HMSTR</h2>
-                    <span class="section-subtitle">Курс и торговые пары</span>
+                    <span class="section-subtitle">Реальные данные с бирж</span>
                 </div>
                 
                 <!-- Token Statistics -->
                 <div class="token-stats-grid">
                     <div class="token-stat">
                         <span class="stat-label">Капитализация</span>
-                        <span class="stat-value" id="market-cap">$12.5M</span>
+                        <span class="stat-value" id="market-cap">-</span>
                     </div>
                     <div class="token-stat">
                         <span class="stat-label">Объем 24ч</span>
-                        <span class="stat-value" id="volume-24h">$1.2M</span>
+                        <span class="stat-value" id="volume-24h">-</span>
                     </div>
                 </div>
                 
@@ -189,18 +198,24 @@
                             </div>
                         </div>
                         <div class="price-card-content">
-                            <div class="price-main" id="hmstr-price-usd">$0.000621</div>
+                            <div class="price-main" id="hmstr-price-usd">-</div>
                             <div class="price-change">
-                                <span class="change positive" id="hmstr-change-usd">+2.34%</span>
+                                <span class="change" id="hmstr-change-usd">-</span>
                                 <span class="change-time">за 24ч</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
+                <!-- Data Source Info -->
+                <div class="data-source">
+                    <span>📊 Данные обновляются автоматически</span>
+                    <button class="refresh-btn" onclick="refreshPriceData()">🔄</button>
+                </div>
+
                 <!-- Loading Indicator -->
                 <div class="loading-indicator hidden" id="price-loading">
-                    <span>🔄 Обновление данных...</span>
+                    <span>🔄 Загрузка данных...</span>
                 </div>
 
                 <!-- Exchanges List -->
@@ -281,10 +296,18 @@
             <section id="news-section" class="content-section">
                 <div class="section-header">
                     <h2>Новости</h2>
-                    <span class="section-subtitle">Последние обновления проекта</span>
+                    <span class="section-subtitle">Автоматические обновления</span>
                 </div>
+                
+                <!-- News Filters -->
+                <div class="news-filters">
+                    <button class="filter-btn active" data-filter="all">Все</button>
+                    <button class="filter-btn" data-filter="updates">Обновления</button>
+                    <button class="filter-btn" data-filter="events">События</button>
+                </div>
+                
                 <div class="news-list" id="news-container">
-                    <!-- Новости загружаются динамически -->
+                    <!-- News loaded dynamically -->
                 </div>
             </section>
 
@@ -292,7 +315,7 @@
             <section id="profile-section" class="content-section">
                 <div class="section-header">
                     <h2>Профиль</h2>
-                    <span class="section-subtitle">Управление настройками</span>
+                    <span class="section-subtitle">Ваша статистика и настройки</span>
                 </div>
 
                 <div class="profile-header">
@@ -300,6 +323,18 @@
                     <div class="profile-info">
                         <h2 id="tg-name">Пользователь</h2>
                         <p id="tg-username">@username</p>
+                        <div class="user-stats">
+                            <span>🎮 Игр сыграно: <span id="games-played">0</span></span>
+                            <span>⭐ Оценок: <span id="ratings-given">0</span></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Achievements -->
+                <div class="achievements-section">
+                    <h3>Достижения</h3>
+                    <div class="achievements-grid" id="achievements-container">
+                        <!-- Achievements loaded dynamically -->
                     </div>
                 </div>
 
@@ -315,6 +350,13 @@
                     <button class="theme-toggle" id="theme-toggle">
                         <span class="theme-icon">🌙</span>
                         <span class="theme-text">Темная тема</span>
+                    </button>
+                </div>
+
+                <!-- Analytics Button -->
+                <div class="guide-button-container">
+                    <button class="guide-button secondary" onclick="showAnalytics()">
+                        📊 Моя статистика
                     </button>
                 </div>
 
@@ -346,6 +388,52 @@
                 <span class="nav-label">Профиль</span>
             </button>
         </nav>
+    </div>
+
+    <!-- Review Modal -->
+    <div id="review-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить отзыв</h3>
+                <button class="close-modal" onclick="closeReviewModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <select id="review-game-select">
+                    <option value="1">Hamster GameDev</option>
+                    <option value="2">Hamster King</option>
+                    <option value="3">Hamster Fight Club</option>
+                    <option value="4">BitQuest</option>
+                </select>
+                <div class="review-stars">
+                    <span class="star" data-rating="1">★</span>
+                    <span class="star" data-rating="2">★</span>
+                    <span class="star" data-rating="3">★</span>
+                    <span class="star" data-rating="4">★</span>
+                    <span class="star" data-rating="5">★</span>
+                </div>
+                <textarea id="review-text" placeholder="Напишите ваш отзыв..." maxlength="500"></textarea>
+                <div class="char-count"><span id="review-chars">0</span>/500</div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeReviewModal()">Отмена</button>
+                <button class="btn-primary" onclick="submitReview()">Опубликовать</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Modal -->
+    <div id="analytics-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Моя статистика</h3>
+                <button class="close-modal" onclick="closeAnalyticsModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="analytics-stats" id="analytics-stats">
+                    <!-- Analytics data loaded dynamically -->
+                </div>
+            </div>
+        </div>
     </div>
 
     <script src="script.js"></script>
