@@ -13,9 +13,9 @@ const APP_CONFIG = {
 
 // Конфигурация для аналитики и обратной связи
 const FEEDBACK_CONFIG = {
-    botToken: '', // Добавьте токен бота для уведомлений
-    chatId: '',   // Добавьте ваш chat_id
-    enabled: false // Включите когда добавите токен
+    botToken: '',
+    chatId: '',
+    enabled: false
 };
 
 // Резервные данные
@@ -282,12 +282,12 @@ function updatePriceDisplay() {
     const volumeElement = document.getElementById('volume-24h');
     
     if (marketCapElement) {
-        const marketCap = (currentPriceData.usd * 20000000000).toFixed(1); // Примерный расчет
+        const marketCap = (currentPriceData.usd * 20000000000).toFixed(1);
         marketCapElement.textContent = `$${marketCap}M`;
     }
     
     if (volumeElement) {
-        const volume = (currentPriceData.usd * 2000000).toFixed(1); // Примерный расчет
+        const volume = (currentPriceData.usd * 2000000).toFixed(1);
         volumeElement.textContent = `$${volume}M`;
     }
 }
@@ -640,12 +640,24 @@ function setupFeedbackSystem() {
 function openFeedbackModal() {
     const modal = document.getElementById('feedback-modal');
     modal.classList.remove('hidden');
+    
+    // Фокус на текстовое поле
+    setTimeout(() => {
+        const textarea = document.getElementById('feedback-text');
+        textarea.focus();
+    }, 100);
+    
     sendAnalytics('feedback_opened', {});
 }
 
 function closeFeedbackModal() {
     const modal = document.getElementById('feedback-modal');
-    modal.classList.add('hidden');
+    modal.classList.add('closing');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('closing');
+    }, 300);
 }
 
 function sendFeedback() {
