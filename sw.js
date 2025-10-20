@@ -1,0 +1,48 @@
+const CACHE_NAME = 'hamster-verse-v3';
+const urlsToCache = [
+  '/',
+  '/index.html',
+  '/style.css',
+  '/script.js',
+  '/admin.html',
+  '/images/hamster-gamedev.jpg',
+  '/images/hamster-king.jpg',
+  '/images/hamstr-fight-club.jpg',
+  '/images/bitquest.jpg'
+];
+
+self.addEventListener('install', function(event) {
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then(function(cache) {
+        return cache.addAll(urlsToCache);
+      })
+  );
+});
+
+self.addEventListener('fetch', function(event) {
+  event.respondWith(
+    caches.match(event.request)
+      .then(function(response) {
+        if (response) {
+          return response;
+        }
+        return fetch(event.request);
+      }
+    )
+  );
+});
+
+self.addEventListener('activate', function(event) {
+  event.waitUntil(
+    caches.keys().then(function(cacheNames) {
+      return Promise.all(
+        cacheNames.map(function(cacheName) {
+          if (cacheName !== CACHE_NAME) {
+            return caches.delete(cacheName);
+          }
+        })
+      );
+    })
+  );
+});
