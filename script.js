@@ -1,7 +1,21 @@
+// Конфигурация Firebase
+const firebaseConfig = {
+    apiKey: "AIzaSyCCq4W9XdanihE4d7c66CGmJmfGPY4KY_c",
+    authDomain: "hamster-verse-fc1fb.firebaseapp.com",
+    projectId: "hamster-verse-fc1fb",
+    storageBucket: "hamster-verse-fc1fb.firebasestorage.app",
+    messagingSenderId: "878070837551",
+    appId: "1:878070837551:web:ec855619bc52f474d2b1da"
+};
+
+// Инициализация Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
 // Конфигурация приложения
 const APP_CONFIG = {
-    version: '2.2.0',
-    build: '2024.01.15',
+    version: '2.3.0',
+    build: '2024.01.20',
     adminPassword: 'hamster2024'
 };
 
@@ -16,19 +30,15 @@ async function initializeApp() {
     try {
         setupNavigation();
         setupTelegramIntegration();
-        setupPriceData();
         setupGuideButton();
         setupThemeToggle();
         setupShareButton();
         setupFeedbackSystem();
         setupAdminButton();
         
-        // Загрузка данных
-        loadGames();
-        loadNews();
-        loadPriceData();
+        // Загрузка данных из Firebase
+        await loadAllData();
         
-        // Обновление информации о версии
         document.getElementById('app-version').textContent = APP_CONFIG.version;
         document.getElementById('app-build').textContent = APP_CONFIG.build;
         
@@ -36,11 +46,188 @@ async function initializeApp() {
         
     } catch (error) {
         console.error('❌ App initialization failed:', error);
-        showNotification('Ошибка инициализации приложения', 'error');
+        showNotification('Ошибка загрузки приложения', 'error');
+        loadCachedData();
     }
 }
 
-// Навигация
+// ==================== FIREBASE FUNCTIONS ====================
+
+async function loadAllData() {
+    try {
+        console.log('🔄 Загрузка данных из Firebase...');
+        
+        const [gamesSnapshot, priceSnapshot, newsSnapshot] = await Promise.all([
+            db.collection('games').get(),
+            db.collection('settings').doc('price').get(),
+            db.collection('news').orderBy('date', 'desc').get()
+        ]);
+
+        const games = gamesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const price = priceSnapshot.exists ? priceSnapshot.data() : getDefaultPrice();
+        const news = newsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+        const allData = { games, price, news };
+        
+        // Сохраняем в кеш
+        localStorage.setItem('cached_data', JSON.stringify(allData));
+        localStorage.setItem('cache_time', Date.now().toString());
+        
+        // Обновляем интерфейс
+        displayGames(games);
+        updatePriceDisplay(price);
+        displayNews(news);
+        
+        console.log('✅ Данные загружены из Firebase');
+        
+    } catch (error) {
+        console.log('⚠️ Ошибка Firebase:', error);
+        showNotification('Используем кешированные данные', 'info');
+        loadCachedData();
+    }
+}
+
+function loadCachedData() {
+    const cached = localStorage.getItem('cached_data');
+    if (cached) {
+        const data = JSON.parse(cached);
+        displayGames(data.games || []);
+        updatePriceDisplay(data.price || {});
+        displayNews(data.news || []);
+    } else {
+        // Данные по умолчанию
+        displayGames(getDefaultGames());
+        updatePriceDisplay(getDefaultPrice());
+        displayNews(getDefaultNews());
+    }
+}
+
+function getDefaultGames() {
+    return [
+        {
+            id: "1",
+            name: "Hamster GameDev",
+            description: "Создай игровую студию и стань лидером",
+            image: "images/hamster-gamedev.jpg",
+            url: "https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584",
+            players: "12.8K",
+            beta: true
+        }
+    ];
+}
+
+function getDefaultPrice() {
+    return {
+        price: 0.000621,
+        change: 2.34,
+        marketCap: "12.5",
+        volume: "1.2"
+    };
+}
+
+function getDefaultNews() {
+    return [
+        {
+            id: "1", 
+            title: "Добро пожаловать в Hamster Verse!",
+            content: "Запущена новая игровая платформа с лучшими играми",
+            date: new Date().toISOString(),
+            image: ""
+        }
+    ];
+}
+
+// ==================== UI FUNCTIONS ====================
+
+function displayGames(games) {
+    const container = document.getElementById('games-container');
+    
+    if (!games || games.length === 0) {
+        container.innerHTML = '<p>Игры временно недоступны</p>';
+        return;
+    }
+    
+    container.innerHTML = games.map(game => `
+        <div class="game-card" data-game-id="${game.id}">
+            <div class="game-image">
+                <img src="${game.image}" alt="${game.name}" class="game-avatar" 
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiM2NjdlZWEiLz4KPC9zdmc+'">
+            </div>
+            <div class="game-info">
+                <div class="game-header">
+                    <h3>${game.name}</h3>
+                    ${game.beta ? '<span class="game-beta">Beta</span>' : ''}
+                </div>
+                <p>${game.description}</p>
+                <div class="game-players">👥 ${game.players} игроков</div>
+            </div>
+            <button class="play-button" data-url="${game.url}">
+                Играть
+            </button>
+        </div>
+    `).join('');
+    
+    setupGameButtons();
+}
+
+function updatePriceDisplay(priceData) {
+    if (!priceData) return;
+    
+    document.getElementById('hmstr-price-usd').textContent = `~$${priceData.price.toFixed(6)}`;
+    document.getElementById('hmstr-change-usd').textContent = `${priceData.change >= 0 ? '+' : ''}${priceData.change.toFixed(2)}%`;
+    document.getElementById('hmstr-change-usd').className = `change ${priceData.change >= 0 ? 'positive' : 'negative'}`;
+    document.getElementById('market-cap').textContent = `~$${priceData.marketCap}M`;
+    document.getElementById('volume-24h').textContent = `~$${priceData.volume}M`;
+}
+
+function displayNews(news) {
+    const container = document.getElementById('news-container');
+    
+    if (!news || news.length === 0) {
+        container.innerHTML = '<div class="news-item"><p>Новости временно недоступны</p></div>';
+        return;
+    }
+    
+    container.innerHTML = news.map(item => `
+        <div class="news-item">
+            <span class="news-date">${formatDate(item.date)}</span>
+            <div class="news-title">${item.title}</div>
+            <div class="news-content">${item.content}</div>
+            ${item.image ? `<img src="${item.image}" alt="News image" class="news-image">` : ''}
+        </div>
+    `).join('');
+}
+
+function setupGameButtons() {
+    const playButtons = document.querySelectorAll('.play-button');
+    playButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const url = this.getAttribute('data-url');
+            openGame(url);
+        });
+    });
+    
+    const gameCards = document.querySelectorAll('.game-card');
+    gameCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const playButton = this.querySelector('.play-button');
+            const url = playButton.getAttribute('data-url');
+            openGame(url);
+        });
+    });
+}
+
+function openGame(url) {
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.openLink(url);
+    } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
+    }
+}
+
+// ==================== OTHER FUNCTIONS ====================
+
 function setupNavigation() {
     const navItems = document.querySelectorAll('.nav-item');
     const sections = document.querySelectorAll('.content-section');
@@ -49,11 +236,9 @@ function setupNavigation() {
         item.addEventListener('click', function() {
             const targetSection = this.getAttribute('data-section');
             
-            // Обновляем активные элементы
             navItems.forEach(nav => nav.classList.remove('active'));
             this.classList.add('active');
             
-            // Показываем соответствующую секцию
             sections.forEach(section => {
                 section.classList.remove('active');
                 if (section.id === targetSection) {
@@ -64,7 +249,6 @@ function setupNavigation() {
     });
 }
 
-// Интеграция с Telegram
 function setupTelegramIntegration() {
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.expand();
@@ -124,153 +308,6 @@ function simulateUserProfile() {
     document.getElementById('tg-username').textContent = `@${username}`;
 }
 
-// Загрузка игр
-function loadGames() {
-    const games = JSON.parse(localStorage.getItem('admin_games')) || getDefaultGames();
-    const container = document.getElementById('games-container');
-    
-    container.innerHTML = games.map(game => `
-        <div class="game-card" data-game-id="${game.id}">
-            <div class="game-image">
-                <img src="${game.image}" alt="${game.name}" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTIgMTNWMTVNMTIgN1Y3TTQgMTJIMjBNMTIgMjBWMjBNMTIgMTZWMTZNOCA4TDUgNU04IDhMMTIgNE04IDE2TDEyIDIwTTggMTZMMTUgOU0xNiA4TDE5IDVNMTYgOEwyMCA0TTE2IDE2TDIwIDEyTTE2IDE2TDEyIDIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cjwvc3ZnPgo='">
-            </div>
-            <div class="game-info">
-                <div class="game-header">
-                    <h3>${game.name}</h3>
-                    ${game.beta ? '<span class="game-beta">Beta</span>' : ''}
-                </div>
-                <p>${game.description}</p>
-                <div class="game-players">👥 ${game.players} игроков</div>
-            </div>
-            <button class="play-button" data-url="${game.url}">
-                Играть
-            </button>
-        </div>
-    `).join('');
-    
-    // Добавляем обработчики для кнопок
-    const playButtons = document.querySelectorAll('.play-button');
-    playButtons.forEach(button => {
-        button.addEventListener('click', function(e) {
-            e.stopPropagation();
-            const url = this.getAttribute('data-url');
-            openGame(url);
-        });
-    });
-    
-    const gameCards = document.querySelectorAll('.game-card');
-    gameCards.forEach(card => {
-        card.addEventListener('click', function() {
-            const playButton = this.querySelector('.play-button');
-            const url = playButton.getAttribute('data-url');
-            openGame(url);
-        });
-    });
-}
-
-function getDefaultGames() {
-    return [
-        {
-            id: 1,
-            name: "Hamster GameDev",
-            description: "Создай игровую студию и стань лидером",
-            image: "images/hamster-gamedev.jpg",
-            url: "https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584",
-            players: "12.8K",
-            beta: true
-        },
-        {
-            id: 2,
-            name: "Hamster King",
-            description: "Стань королём в эпических битвах",
-            image: "images/hamster-king.jpg",
-            url: "https://t.me/hamsterking_game_bot?startapp=6823288584",
-            players: "25.6K"
-        },
-        {
-            id: 3,
-            name: "Hamster Fight Club",
-            description: "Бойцовский клуб для чемпионов",
-            image: "images/hamstr-fight-club.jpg",
-            url: "https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyYS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5",
-            players: "18.9K"
-        },
-        {
-            id: 4,
-            name: "BitQuest",
-            description: "Крипто-приключение с наградами",
-            image: "images/bitquest.jpg",
-            url: "https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584",
-            players: "31.2K"
-        }
-    ];
-}
-
-function openGame(url) {
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.openLink(url);
-    } else {
-        window.open(url, '_blank', 'noopener,noreferrer');
-    }
-}
-
-// Данные токена HMSTR
-function setupPriceData() {
-    loadPriceData();
-}
-
-function loadPriceData() {
-    const priceData = JSON.parse(localStorage.getItem('admin_price_data'));
-    
-    if (priceData) {
-        updatePriceDisplay(priceData);
-    } else {
-        // Данные по умолчанию
-        updatePriceDisplay({
-            price: 0.000621,
-            change: 2.34,
-            marketCap: "12.5",
-            volume: "1.2"
-        });
-    }
-}
-
-function updatePriceDisplay(data) {
-    document.getElementById('hmstr-price-usd').textContent = `~$${data.price.toFixed(6)}`;
-    document.getElementById('hmstr-change-usd').textContent = `${data.change >= 0 ? '+' : ''}${data.change.toFixed(2)}%`;
-    document.getElementById('hmstr-change-usd').className = `change ${data.change >= 0 ? 'positive' : 'negative'}`;
-    document.getElementById('market-cap').textContent = `~$${data.marketCap}M`;
-    document.getElementById('volume-24h').textContent = `~$${data.volume}M`;
-}
-
-// Новости
-function loadNews() {
-    const news = JSON.parse(localStorage.getItem('admin_news')) || getDefaultNews();
-    const container = document.getElementById('news-container');
-    
-    container.innerHTML = news.map(item => `
-        <div class="news-item">
-            <span class="news-date">${formatDate(item.date)}</span>
-            <div class="news-title">${item.title}</div>
-            <div class="news-content">${item.content}</div>
-            ${item.image ? `<img src="${item.image}" alt="News image" class="news-image">` : ''}
-        </div>
-    `).join('');
-}
-
-function getDefaultNews() {
-    return [
-        {
-            id: 1,
-            date: new Date().toISOString(),
-            title: "Добро пожаловать в Hamster Verse!",
-            content: "Запущена новая игровая платформа с лучшими играми от Hamster. Теперь все в одном месте!",
-            image: ""
-        }
-    ];
-}
-
-// Гайд покупки HMSTR
 function setupGuideButton() {
     const guideButton = document.getElementById('show-guide');
     const buyGuide = document.getElementById('buy-guide');
@@ -290,7 +327,6 @@ function setupGuideButton() {
     }
 }
 
-// Переключение темы
 function setupThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
     const themeIcon = themeToggle.querySelector('.theme-icon');
@@ -319,7 +355,6 @@ function setupThemeToggle() {
     }
 }
 
-// Кнопка поделиться
 function setupShareButton() {
     const shareButton = document.getElementById('share-button');
     
@@ -347,7 +382,6 @@ function shareApp() {
     }
 }
 
-// Система обратной связи
 function setupFeedbackSystem() {
     const feedbackButton = document.getElementById('feedback-button');
     
@@ -390,7 +424,6 @@ function sendFeedback() {
     textarea.value = '';
 }
 
-// Кнопка админ-панели
 function setupAdminButton() {
     const adminContainer = document.getElementById('admin-button-container');
     
@@ -416,7 +449,6 @@ function setupAdminButton() {
     });
 }
 
-// Вспомогательные функции
 function formatDate(dateString) {
     const date = new Date(dateString);
     return date.toLocaleDateString('ru-RU');
@@ -456,7 +488,6 @@ function closeAnnouncement() {
     }
 }
 
-// Проверяем, был ли анонс закрыт ранее
 function checkAnnouncementState() {
     const isClosed = localStorage.getItem('announcement_closed');
     if (isClosed === 'true') {
