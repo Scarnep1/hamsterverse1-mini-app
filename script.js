@@ -1,16 +1,11 @@
-// Конфигурация Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyC7ET2n5MJ6V_jFMjNWaDycd4LRyfkZnMw",
-    authDomain: "hamsterversehost.firebaseapp.com",
-    projectId: "hamsterversehost",
-    storageBucket: "hamsterversehost.firebasestorage.app",
-    messagingSenderId: "895206280147",
-    appId: "1:895206280147:web:64e4929ee7e1599ca47d26"
+// Конфигурация Supabase
+const SUPABASE_CONFIG = {
+    url: 'https://hubgtmchajwzerldgtjh.supabase.co',
+    anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1Ymd0bWNoYWp3emVybGRndGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2NDMyNjAsImV4cCI6MjA3NjIxOTI2MH0.bHMgD-GMSwAwd7tO_I1v_aHC82yYrWQgEySRAoHbJ5o'
 };
 
-// Инициализация Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+// Инициализация Supabase
+const supabase = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
 
 // Конфигурация приложения
 const APP_CONFIG = {
@@ -36,7 +31,7 @@ async function initializeApp() {
         setupFeedbackSystem();
         setupAdminButton();
         
-        // Загрузка данных из Firebase
+        // Загрузка данных из Supabase
         await loadAllData();
         
         document.getElementById('app-version').textContent = APP_CONFIG.version;
@@ -51,40 +46,136 @@ async function initializeApp() {
     }
 }
 
-// ==================== FIREBASE FUNCTIONS ====================
+// ==================== SUPABASE FUNCTIONS ====================
+
+// Слушатели реального времени
+function setupRealtimeListeners() {
+    console.log('🔔 Настройка слушателей реального времени Supabase...');
+    
+    // Слушатель для игр
+    supabase
+        .channel('games-changes')
+        .on('postgres_changes', 
+            { event: '*', schema: 'public', table: 'games' },
+            (payload) => {
+                console.log('🔄 Обновление игр из Supabase:', payload);
+                loadGames();
+            }
+        )
+        .subscribe();
+
+    // Слушатель для цены
+    supabase
+        .channel('price-changes')
+        .on('postgres_changes',
+            { event: 'UPDATE', schema: 'public', table: 'settings', filter: 'id=eq.price' },
+            (payload) => {
+                console.log('🔄 Обновление курса из Supabase:', payload);
+                updatePriceDisplay(payload.new);
+            }
+        )
+        .subscribe();
+
+    // Слушатель для новостей
+    supabase
+        .channel('news-changes')
+        .on('postgres_changes',
+            { event: '*', schema: 'public', table: 'news' },
+            (payload) => {
+                console.log('🔄 Обновление новостей из Supabase:', payload);
+                loadNews();
+            }
+        )
+        .subscribe();
+}
 
 async function loadAllData() {
     try {
-        console.log('🔄 Загрузка данных из Firebase...');
+        console.log('🔄 Загрузка данных из Supabase...');
         
-        const [gamesSnapshot, priceSnapshot, newsSnapshot] = await Promise.all([
-            db.collection('games').get(),
-            db.collection('settings').doc('price').get(),
-            db.collection('news').orderBy('date', 'desc').get()
+        // Настраиваем слушатели реального времени
+        setupRealtimeListeners();
+        
+        // Загружаем начальные данные
+        await Promise.all([
+            loadGames(),
+            loadPriceData(),
+            loadNews()
         ]);
 
-        const games = gamesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const price = priceSnapshot.exists ? priceSnapshot.data() : getDefaultPrice();
-        const news = newsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        const allData = { games, price, news };
-        
-        // Сохраняем в кеш
-        localStorage.setItem('cached_data', JSON.stringify(allData));
-        localStorage.setItem('cache_time', Date.now().toString());
-        
-        // Обновляем интерфейс
-        displayGames(games);
-        updatePriceDisplay(price);
-        displayNews(news);
-        
-        console.log('✅ Данные загружены из Firebase');
+        console.log('✅ Данные загружены из Supabase');
         
     } catch (error) {
-        console.log('⚠️ Ошибка Firebase:', error);
+        console.log('⚠️ Ошибка Supabase:', error);
         showNotification('Используем кешированные данные', 'info');
         loadCachedData();
     }
+}
+
+async function loadGames() {
+    try {
+        const { data: games, error } = await supabase
+            .from('games')
+            .select('*')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        displayGames(games || []);
+        updateCache('games', games);
+        return games;
+        
+    } catch (error) {
+        console.error('Ошибка загрузки игр:', error);
+        return [];
+    }
+}
+
+async function loadPriceData() {
+    try {
+        const { data: price, error } = await supabase
+            .from('settings')
+            .select('*')
+            .eq('id', 'price')
+            .single();
+
+        if (error) throw error;
+
+        updatePriceDisplay(price || getDefaultPrice());
+        updateCache('price', price);
+        return price;
+        
+    } catch (error) {
+        console.error('Ошибка загрузки курса:', error);
+        return getDefaultPrice();
+    }
+}
+
+async function loadNews() {
+    try {
+        const { data: news, error } = await supabase
+            .from('news')
+            .select('*')
+            .eq('is_published', true)
+            .order('publish_date', { ascending: false });
+
+        if (error) throw error;
+
+        displayNews(news || []);
+        updateCache('news', news);
+        return news;
+        
+    } catch (error) {
+        console.error('Ошибка загрузки новостей:', error);
+        return [];
+    }
+}
+
+function updateCache(type, data) {
+    const cached = JSON.parse(localStorage.getItem('cached_data') || '{}');
+    cached[type] = data;
+    cached.cache_time = Date.now();
+    localStorage.setItem('cached_data', JSON.stringify(cached));
 }
 
 function loadCachedData() {
@@ -92,10 +183,9 @@ function loadCachedData() {
     if (cached) {
         const data = JSON.parse(cached);
         displayGames(data.games || []);
-        updatePriceDisplay(data.price || {});
+        updatePriceDisplay(data.price || getDefaultPrice());
         displayNews(data.news || []);
     } else {
-        // Данные по умолчанию
         displayGames(getDefaultGames());
         updatePriceDisplay(getDefaultPrice());
         displayNews(getDefaultNews());
@@ -108,20 +198,20 @@ function getDefaultGames() {
             id: "1",
             name: "Hamster GameDev",
             description: "Создай игровую студию и стань лидером",
-            image: "images/hamster-gamedev.jpg",
-            url: "https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584",
-            players: "12.8K",
-            beta: true
+            image_url: "https://placehold.co/100x100/667eea/white?text=HG",
+            game_url: "https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584",
+            players_count: "12.8K",
+            is_beta: true
         }
     ];
 }
 
 function getDefaultPrice() {
     return {
-        price: 0.000621,
-        change: 2.34,
-        marketCap: "12.5",
-        volume: "1.2"
+        hmstr_price: 0.000621,
+        price_change: 2.34,
+        market_cap: "12.5",
+        volume_24h: "1.2"
     };
 }
 
@@ -131,8 +221,8 @@ function getDefaultNews() {
             id: "1", 
             title: "Добро пожаловать в Hamster Verse!",
             content: "Запущена новая игровая платформа с лучшими играми",
-            date: new Date().toISOString(),
-            image: ""
+            publish_date: new Date().toISOString(),
+            image_url: ""
         }
     ];
 }
@@ -150,18 +240,18 @@ function displayGames(games) {
     container.innerHTML = games.map(game => `
         <div class="game-card" data-game-id="${game.id}">
             <div class="game-image">
-                <img src="${game.image}" alt="${game.name}" class="game-avatar" 
+                <img src="${game.image_url}" alt="${game.name}" class="game-avatar" 
                      onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiM2NjdlZWEiLz4KPC9zdmc+'">
             </div>
             <div class="game-info">
                 <div class="game-header">
                     <h3>${game.name}</h3>
-                    ${game.beta ? '<span class="game-beta">Beta</span>' : ''}
+                    ${game.is_beta ? '<span class="game-beta">Beta</span>' : ''}
                 </div>
                 <p>${game.description}</p>
-                <div class="game-players">👥 ${game.players} игроков</div>
+                <div class="game-players">👥 ${game.players_count} игроков</div>
             </div>
-            <button class="play-button" data-url="${game.url}">
+            <button class="play-button" data-url="${game.game_url}">
                 Играть
             </button>
         </div>
@@ -173,11 +263,11 @@ function displayGames(games) {
 function updatePriceDisplay(priceData) {
     if (!priceData) return;
     
-    document.getElementById('hmstr-price-usd').textContent = `~$${priceData.price.toFixed(6)}`;
-    document.getElementById('hmstr-change-usd').textContent = `${priceData.change >= 0 ? '+' : ''}${priceData.change.toFixed(2)}%`;
-    document.getElementById('hmstr-change-usd').className = `change ${priceData.change >= 0 ? 'positive' : 'negative'}`;
-    document.getElementById('market-cap').textContent = `~$${priceData.marketCap}M`;
-    document.getElementById('volume-24h').textContent = `~$${priceData.volume}M`;
+    document.getElementById('hmstr-price-usd').textContent = `~$${priceData.hmstr_price.toFixed(6)}`;
+    document.getElementById('hmstr-change-usd').textContent = `${priceData.price_change >= 0 ? '+' : ''}${priceData.price_change.toFixed(2)}%`;
+    document.getElementById('hmstr-change-usd').className = `change ${priceData.price_change >= 0 ? 'positive' : 'negative'}`;
+    document.getElementById('market-cap').textContent = `~$${priceData.market_cap}M`;
+    document.getElementById('volume-24h').textContent = `~$${priceData.volume_24h}M`;
 }
 
 function displayNews(news) {
@@ -190,10 +280,10 @@ function displayNews(news) {
     
     container.innerHTML = news.map(item => `
         <div class="news-item">
-            <span class="news-date">${formatDate(item.date)}</span>
+            <span class="news-date">${formatDate(item.publish_date)}</span>
             <div class="news-title">${item.title}</div>
             <div class="news-content">${item.content}</div>
-            ${item.image ? `<img src="${item.image}" alt="News image" class="news-image">` : ''}
+            ${item.image_url ? `<img src="${item.image_url}" alt="News image" class="news-image">` : ''}
         </div>
     `).join('');
 }
