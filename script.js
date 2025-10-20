@@ -263,11 +263,14 @@ function displayGames(games) {
 function updatePriceDisplay(priceData) {
     if (!priceData) return;
     
-    document.getElementById('hmstr-price-usd').textContent = `~$${priceData.hmstr_price.toFixed(6)}`;
-    document.getElementById('hmstr-change-usd').textContent = `${priceData.price_change >= 0 ? '+' : ''}${priceData.price_change.toFixed(2)}%`;
-    document.getElementById('hmstr-change-usd').className = `change ${priceData.price_change >= 0 ? 'positive' : 'negative'}`;
-    document.getElementById('market-cap').textContent = `~$${priceData.market_cap}M`;
-    document.getElementById('volume-24h').textContent = `~$${priceData.volume_24h}M`;
+    document.getElementById('hmstr-price-usd').textContent = `~$${priceData.hmstr_price?.toFixed(6) || '0.000000'}`;
+    
+    const changeValue = priceData.price_change || 0;
+    document.getElementById('hmstr-change-usd').textContent = `${changeValue >= 0 ? '+' : ''}${changeValue.toFixed(2)}%`;
+    document.getElementById('hmstr-change-usd').className = `change ${changeValue >= 0 ? 'positive' : 'negative'}`;
+    
+    document.getElementById('market-cap').textContent = `~$${priceData.market_cap || '0'}M`;
+    document.getElementById('volume-24h').textContent = `~$${priceData.volume_24h || '0'}M`;
 }
 
 function displayNews(news) {
@@ -326,15 +329,21 @@ function setupNavigation() {
         item.addEventListener('click', function() {
             const targetSection = this.getAttribute('data-section');
             
+            // Убираем активный класс у всех кнопок
             navItems.forEach(nav => nav.classList.remove('active'));
+            // Добавляем активный класс текущей кнопке
             this.classList.add('active');
             
+            // Скрываем все секции
             sections.forEach(section => {
                 section.classList.remove('active');
-                if (section.id === targetSection) {
-                    section.classList.add('active');
-                }
             });
+            
+            // Показываем целевую секцию
+            const targetElement = document.getElementById(targetSection);
+            if (targetElement) {
+                targetElement.classList.add('active');
+            }
         });
     });
 }
@@ -419,6 +428,8 @@ function setupGuideButton() {
 
 function setupThemeToggle() {
     const themeToggle = document.getElementById('theme-toggle');
+    if (!themeToggle) return;
+    
     const themeIcon = themeToggle.querySelector('.theme-icon');
     const themeText = themeToggle.querySelector('.theme-text');
     
@@ -447,10 +458,9 @@ function setupThemeToggle() {
 
 function setupShareButton() {
     const shareButton = document.getElementById('share-button');
+    if (!shareButton) return;
     
-    if (shareButton) {
-        shareButton.addEventListener('click', shareApp);
-    }
+    shareButton.addEventListener('click', shareApp);
 }
 
 function shareApp() {
@@ -474,24 +484,27 @@ function shareApp() {
 
 function setupFeedbackSystem() {
     const feedbackButton = document.getElementById('feedback-button');
+    if (!feedbackButton) return;
     
-    if (feedbackButton) {
-        feedbackButton.addEventListener('click', openFeedbackModal);
-    }
+    feedbackButton.addEventListener('click', openFeedbackModal);
 }
 
 function openFeedbackModal() {
     const modal = document.getElementById('feedback-modal');
+    if (!modal) return;
+    
     modal.classList.remove('hidden');
     
     setTimeout(() => {
         const textarea = document.getElementById('feedback-text');
-        textarea.focus();
+        if (textarea) textarea.focus();
     }, 100);
 }
 
 function closeFeedbackModal() {
     const modal = document.getElementById('feedback-modal');
+    if (!modal) return;
+    
     modal.classList.add('closing');
     
     setTimeout(() => {
@@ -502,6 +515,8 @@ function closeFeedbackModal() {
 
 function sendFeedback() {
     const textarea = document.getElementById('feedback-text');
+    if (!textarea) return;
+    
     const feedback = textarea.value.trim();
     
     if (!feedback) {
@@ -516,6 +531,7 @@ function sendFeedback() {
 
 function setupAdminButton() {
     const adminContainer = document.getElementById('admin-button-container');
+    if (!adminContainer) return;
     
     const isAdmin = localStorage.getItem('is_admin') === 'true';
     
@@ -540,6 +556,7 @@ function setupAdminButton() {
 }
 
 function formatDate(dateString) {
+    if (!dateString) return '';
     const date = new Date(dateString);
     return date.toLocaleDateString('ru-RU');
 }
@@ -588,6 +605,7 @@ function checkAnnouncementState() {
     }
 }
 
+// Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function() {
     const images = document.querySelectorAll('img');
     images.forEach(img => {
@@ -595,4 +613,19 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     checkAnnouncementState();
+    
+    // Добавляем обработчики для модального окна
+    const closeModalBtn = document.querySelector('.close-modal');
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', closeFeedbackModal);
+    }
+    
+    const modalOverlay = document.getElementById('feedback-modal');
+    if (modalOverlay) {
+        modalOverlay.addEventListener('click', function(e) {
+            if (e.target === modalOverlay) {
+                closeFeedbackModal();
+            }
+        });
+    }
 });
