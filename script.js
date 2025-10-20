@@ -710,16 +710,18 @@ async function sendFeedbackToTelegram(feedback) {
     }
 }
 
-// Кнопка админ-панели
+// Кнопка админ-панели - ВИДНА ВСЕМ БЕЗ ПРОВЕРОК
 function setupAdminButton() {
     const adminContainer = document.getElementById('admin-button-container');
     
-    // Показываем кнопку админ-панели только если пользователь знает пароль
-    const isAdmin = localStorage.getItem('is_admin') === 'true';
-    
+    // Всегда показываем админ-панель
     if (adminContainer) {
-        adminContainer.style.display = isAdmin ? 'block' : 'none';
+        adminContainer.style.display = 'block';
     }
+    
+    // Убираем все проверки пароля
+    localStorage.setItem('is_admin', 'true');
+}
     
     // Секретная комбинация для доступа к админке
     let keySequence = '';
