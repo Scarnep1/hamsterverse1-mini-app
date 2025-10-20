@@ -1,7 +1,7 @@
 // Конфигурация приложения
 const APP_CONFIG = {
-    version: '2.3.0',
-    build: '2024.01.16',
+    version: '2.2.0',
+    build: '2024.01.15',
     adminPassword: 'hamster2024'
 };
 
@@ -15,16 +15,18 @@ async function initializeApp() {
     
     try {
         setupNavigation();
-        setupPlayButtons();
         setupTelegramIntegration();
-        setupAdminPanel();
+        setupPriceData();
+        setupGuideButton();
         setupThemeToggle();
         setupShareButton();
+        setupFeedbackSystem();
+        setupAdminButton();
         
         // Загрузка данных
         loadGames();
-        loadHmstrData();
         loadNews();
+        loadPriceData();
         
         // Обновление информации о версии
         document.getElementById('app-version').textContent = APP_CONFIG.version;
@@ -62,38 +64,9 @@ function setupNavigation() {
     });
 }
 
-// Кнопки запуска игр
-function setupPlayButtons() {
-    document.addEventListener('click', function(e) {
-        if (e.target.classList.contains('play-button')) {
-            e.stopPropagation();
-            const url = e.target.getAttribute('data-url');
-            openGame(url);
-        }
-        
-        if (e.target.closest('.game-card')) {
-            const gameCard = e.target.closest('.game-card');
-            if (!e.target.classList.contains('play-button')) {
-                const playButton = gameCard.querySelector('.play-button');
-                const url = playButton.getAttribute('data-url');
-                openGame(url);
-            }
-        }
-    });
-}
-
-function openGame(url) {
-    if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.openLink(url);
-    } else {
-        window.open(url, '_blank', 'noopener,noreferrer');
-    }
-}
-
 // Интеграция с Telegram
 function setupTelegramIntegration() {
     if (window.Telegram && window.Telegram.WebApp) {
-        // Расширяем на весь экран
         window.Telegram.WebApp.expand();
         
         const user = window.Telegram.WebApp.initDataUnsafe?.user;
@@ -102,8 +75,11 @@ function setupTelegramIntegration() {
             updateUserProfile(user);
         }
         
+        if (window.Telegram.WebApp.colorScheme === 'dark') {
+            setTheme('dark');
+        }
+        
     } else {
-        // Заглушка для браузера
         simulateUserProfile();
     }
 }
@@ -148,436 +124,170 @@ function simulateUserProfile() {
     document.getElementById('tg-username').textContent = `@${username}`;
 }
 
-// Управление играми
+// Загрузка игр
 function loadGames() {
-    const games = JSON.parse(localStorage.getItem('admin_games') || '[]');
-    
-    if (games.length === 0) {
-        // Загрузка стандартных игр
-        const defaultGames = [
-            {
-                id: 1,
-                title: "Hamster GameDev",
-                description: "Создай игровую студию и стань лидером",
-                url: "https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584",
-                image: "images/hamster-gamedev.jpg",
-                players: "128K"
-            },
-            {
-                id: 2,
-                title: "Hamster King",
-                description: "Стань королём в эпических битвах",
-                url: "https://t.me/hamsterking_game_bot?startapp=6823288584",
-                image: "images/hamster-king.jpg",
-                players: "256K"
-            },
-            {
-                id: 3,
-                title: "Hamster Fight Club",
-                description: "Бойцовский клуб для чемпионов",
-                url: "https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyYS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5",
-                image: "images/hamstr-fight-club.jpg",
-                players: "189K"
-            },
-            {
-                id: 4,
-                title: "BitQuest",
-                description: "Крипто-приключение с наградами",
-                url: "https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584",
-                image: "images/bitquest.jpg",
-                players: "312K"
-            }
-        ];
-        localStorage.setItem('admin_games', JSON.stringify(defaultGames));
-        displayGames(defaultGames);
-        updateAdminGamesList(defaultGames);
-    } else {
-        displayGames(games);
-        updateAdminGamesList(games);
-    }
-}
-
-function displayGames(games) {
+    const games = JSON.parse(localStorage.getItem('admin_games')) || getDefaultGames();
     const container = document.getElementById('games-container');
     
     container.innerHTML = games.map(game => `
         <div class="game-card" data-game-id="${game.id}">
             <div class="game-image">
-                <img src="${game.image}" alt="${game.title}" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiM2NjdlZWEiLz4KPC9zdmc+Cg=='">
+                <img src="${game.image}" alt="${game.name}" class="game-avatar" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSIxMiIgeT0iMTIiIHdpZHRoPSIyNiIgaGVpZ2h0PSIyNiIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IndoaXRlIiBzdHJva2Utd2lkdGg9IjIiPgo8cGF0aCBkPSJNMTIgMTNWMTVNMTIgN1Y3TTQgMTJIMjBNMTIgMjBWMjBNMTIgMTZWMTZNOCA4TDUgNU04IDhMMTIgNE04IDE2TDEyIDIwTTggMTZMMTUgOU0xNiA4TDE5IDVNMTYgOEwyMCA0TTE2IDE2TDIwIDEyTTE2IDE2TDEyIDIwIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cjwvc3ZnPgo='">
             </div>
             <div class="game-info">
-                <h3>${game.title}</h3>
+                <div class="game-header">
+                    <h3>${game.name}</h3>
+                    ${game.beta ? '<span class="game-beta">Beta</span>' : ''}
+                </div>
                 <p>${game.description}</p>
-                <div class="players-count">${game.players} игроков</div>
+                <div class="game-players">👥 ${game.players} игроков</div>
             </div>
             <button class="play-button" data-url="${game.url}">
                 Играть
             </button>
         </div>
     `).join('');
-}
-
-function addGame() {
-    const title = document.getElementById('game-title').value.trim();
-    const description = document.getElementById('game-description').value.trim();
-    const url = document.getElementById('game-url').value.trim();
-    const image = document.getElementById('game-image').value.trim();
-    const players = document.getElementById('game-players').value.trim();
     
-    if (!title || !description || !url) {
-        showNotification('Заполните название, описание и ссылку', 'error');
-        return;
-    }
-    
-    const games = JSON.parse(localStorage.getItem('admin_games') || '[]');
-    const newGame = {
-        id: Date.now(),
-        title,
-        description,
-        url,
-        image: image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTAiIGhlaWdodD0iNTAiIHZpZXdCb3g9IjAgMCA1MCA1MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjUwIiBoZWlnaHQ9IjUwIiByeD0iMTIiIGZpbGw9IiM2NjdlZWEiLz4KPC9zdmc+Cg==',
-        players: players || "0"
-    };
-    
-    games.push(newGame);
-    localStorage.setItem('admin_games', JSON.stringify(games));
-    
-    displayGames(games);
-    updateAdminGamesList(games);
-    
-    // Очищаем форму
-    document.getElementById('game-title').value = '';
-    document.getElementById('game-description').value = '';
-    document.getElementById('game-url').value = '';
-    document.getElementById('game-image').value = '';
-    document.getElementById('game-players').value = '';
-    
-    showNotification('Игра успешно добавлена!', 'success');
-}
-
-function deleteGame(gameId) {
-    const games = JSON.parse(localStorage.getItem('admin_games') || '[]');
-    const updatedGames = games.filter(game => game.id !== gameId);
-    
-    localStorage.setItem('admin_games', JSON.stringify(updatedGames));
-    displayGames(updatedGames);
-    updateAdminGamesList(updatedGames);
-    
-    showNotification('Игра удалена', 'success');
-}
-
-function updateAdminGamesList(games) {
-    const container = document.getElementById('admin-games-list');
-    
-    container.innerHTML = games.map(game => `
-        <div class="admin-item">
-            <div class="admin-item-header">
-                <h4 class="admin-item-title">${game.title}</h4>
-                <div class="admin-item-actions">
-                    <button class="admin-btn danger" onclick="deleteGame(${game.id})">Удалить</button>
-                </div>
-            </div>
-            <div class="admin-item-content">${game.description}</div>
-            <div class="admin-item-meta">
-                Игроков: ${game.players} | URL: ${game.url.substring(0, 30)}...
-            </div>
-        </div>
-    `).join('');
-}
-
-// Управление данными HMSTR
-function loadHmstrData() {
-    const hmstrData = JSON.parse(localStorage.getItem('admin_hmstr_data') || '{}');
-    
-    if (Object.keys(hmstrData).length === 0) {
-        // Данные по умолчанию
-        const defaultData = {
-            price: "0.000621",
-            change: "+2.34",
-            marketcap: "12.5M",
-            volume: "1.2M"
-        };
-        localStorage.setItem('admin_hmstr_data', JSON.stringify(defaultData));
-        updateHmstrDisplay(defaultData);
-    } else {
-        updateHmstrDisplay(hmstrData);
-    }
-}
-
-function updateHmstrDisplay(data) {
-    document.getElementById('hmstr-price-usd').textContent = `~$${data.price}`;
-    document.getElementById('hmstr-change-usd').textContent = `~${data.change}%`;
-    document.getElementById('hmstr-change-usd').className = `change ${data.change.includes('+') ? 'positive' : 'negative'}`;
-    document.getElementById('market-cap').textContent = `~$${data.marketcap}`;
-    document.getElementById('volume-24h').textContent = `~$${data.volume}`;
-}
-
-function updateHmstrData() {
-    const price = document.getElementById('hmstr-price').value.trim();
-    const change = document.getElementById('hmstr-change').value.trim();
-    const marketcap = document.getElementById('hmstr-marketcap').value.trim();
-    const volume = document.getElementById('hmstr-volume').value.trim();
-    
-    if (!price || !change || !marketcap || !volume) {
-        showNotification('Заполните все поля', 'error');
-        return;
-    }
-    
-    const hmstrData = { price, change, marketcap, volume };
-    localStorage.setItem('admin_hmstr_data', JSON.stringify(hmstrData));
-    
-    updateHmstrDisplay(hmstrData);
-    showNotification('Данные HMSTR обновлены!', 'success');
-}
-
-// Управление новостями
-function loadNews() {
-    const news = JSON.parse(localStorage.getItem('admin_news') || '[]');
-    
-    if (news.length === 0) {
-        // Новости по умолчанию
-        const defaultNews = [
-            {
-                id: 1,
-                date: new Date().toISOString(),
-                title: "Добро пожаловать в Hamster Verse!",
-                content: "Запущена новая игровая платформа с лучшими играми от Hamster. Теперь все в одном месте!",
-                image: ""
-            }
-        ];
-        localStorage.setItem('admin_news', JSON.stringify(defaultNews));
-        displayNews(defaultNews);
-        updateAdminNewsList(defaultNews);
-    } else {
-        displayNews(news);
-        updateAdminNewsList(news);
-    }
-}
-
-function displayNews(news) {
-    const container = document.getElementById('news-container');
-    
-    if (!news || news.length === 0) {
-        container.innerHTML = `
-            <div class="news-item">
-                <span class="news-date">${new Date().toLocaleDateString('ru-RU')}</span>
-                <div class="news-title">Новости пока отсутствуют</div>
-                <div class="news-content">Следите за обновлениями, скоро здесь появятся свежие новости!</div>
-            </div>
-        `;
-        return;
-    }
-    
-    const sortedNews = news.sort((a, b) => new Date(b.date) - new Date(a.date));
-    
-    container.innerHTML = sortedNews.map(item => `
-        <div class="news-item">
-            <span class="news-date">${formatDate(item.date)}</span>
-            ${item.image ? `<img src="${item.image}" alt="News image" class="news-image" onerror="this.style.display='none'">` : ''}
-            <div class="news-title">${item.title}</div>
-            <div class="news-content">${item.content}</div>
-        </div>
-    `).join('');
-}
-
-function addNews() {
-    const title = document.getElementById('news-title').value.trim();
-    const content = document.getElementById('news-content').value.trim();
-    const image = document.getElementById('news-image').value.trim();
-    const date = document.getElementById('news-date').value || new Date().toISOString().split('T')[0];
-    
-    if (!title || !content) {
-        showNotification('Заполните заголовок и содержание', 'error');
-        return;
-    }
-    
-    const news = JSON.parse(localStorage.getItem('admin_news') || '[]');
-    const newNews = {
-        id: Date.now(),
-        date: new Date(date).toISOString(),
-        title,
-        content,
-        image
-    };
-    
-    news.push(newNews);
-    localStorage.setItem('admin_news', JSON.stringify(news));
-    
-    displayNews(news);
-    updateAdminNewsList(news);
-    
-    // Очищаем форму
-    document.getElementById('news-title').value = '';
-    document.getElementById('news-content').value = '';
-    document.getElementById('news-image').value = '';
-    document.getElementById('news-date').value = '';
-    
-    showNotification('Новость добавлена!', 'success');
-}
-
-function deleteNews(newsId) {
-    const news = JSON.parse(localStorage.getItem('admin_news') || '[]');
-    const updatedNews = news.filter(item => item.id !== newsId);
-    
-    localStorage.setItem('admin_news', JSON.stringify(updatedNews));
-    displayNews(updatedNews);
-    updateAdminNewsList(updatedNews);
-    
-    showNotification('Новость удалена', 'success');
-}
-
-function updateAdminNewsList(news) {
-    const container = document.getElementById('admin-news-list');
-    
-    container.innerHTML = news.map(item => `
-        <div class="admin-item">
-            <div class="admin-item-header">
-                <h4 class="admin-item-title">${item.title}</h4>
-                <div class="admin-item-actions">
-                    <button class="admin-btn danger" onclick="deleteNews(${item.id})">Удалить</button>
-                </div>
-            </div>
-            <div class="admin-item-content">${item.content}</div>
-            <div class="admin-item-meta">
-                ${formatDate(item.date)} ${item.image ? '| С изображением' : ''}
-            </div>
-        </div>
-    `).join('');
-}
-
-// Админ-панель - ИСПРАВЛЕННАЯ СИСТЕМА ДОСТУПА
-function setupAdminPanel() {
-    setupAdminTabs();
-    checkAdminAccess();
-    
-    // Добавляем простой способ входа для тестирования
-    setupSimpleAdminAccess();
-}
-
-function setupSimpleAdminAccess() {
-    // Простой способ активации админки - через тройное нажатие на заголовок
-    const header = document.querySelector('.header-titles');
-    let tapCount = 0;
-    let lastTap = 0;
-    
-    header.addEventListener('click', function() {
-        const currentTime = new Date().getTime();
-        const tapLength = currentTime - lastTap;
-        
-        if (tapLength < 500 && tapLength > 0) {
-            tapCount++;
-        } else {
-            tapCount = 1;
-        }
-        
-        lastTap = currentTime;
-        
-        if (tapCount >= 3) {
-            activateAdminMode();
-            tapCount = 0;
-        }
+    // Добавляем обработчики для кнопок
+    const playButtons = document.querySelectorAll('.play-button');
+    playButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const url = this.getAttribute('data-url');
+            openGame(url);
+        });
     });
     
-    // Также оставляем старый способ с вводом пароля
-    let passwordInput = '';
-    document.addEventListener('keydown', function(e) {
-        // Игнорируем специальные клавиши
-        if (e.key.length === 1) {
-            passwordInput += e.key.toLowerCase();
-        }
-        
-        // Ограничиваем длину ввода
-        if (passwordInput.length > 20) {
-            passwordInput = passwordInput.slice(-20);
-        }
-        
-        // Проверяем пароль
-        if (passwordInput.includes(APP_CONFIG.adminPassword.toLowerCase())) {
-            activateAdminMode();
-            passwordInput = '';
-        }
-    });
-}
-
-function activateAdminMode() {
-    localStorage.setItem('is_admin', 'true');
-    checkAdminAccess();
-    showNotification('🔓 Режим администратора активирован!', 'success');
-    
-    // Показываем кнопку админки в профиле
-    const adminContainer = document.getElementById('admin-button-container');
-    if (adminContainer) {
-        adminContainer.style.display = 'block';
-    }
-}
-
-function setupAdminTabs() {
-    const tabs = document.querySelectorAll('.admin-tab');
-    
-    tabs.forEach(tab => {
-        tab.addEventListener('click', function() {
-            const targetTab = this.getAttribute('data-tab');
-            
-            // Обновляем активные табы
-            tabs.forEach(t => t.classList.remove('active'));
-            this.classList.add('active');
-            
-            // Показываем соответствующий контент
-            document.querySelectorAll('.admin-tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(`${targetTab}-tab`).classList.add('active');
-            
-            // Загружаем данные в формы при переключении табов
-            if (targetTab === 'hmstr') {
-                loadHmstrDataToForm();
-            }
+    const gameCards = document.querySelectorAll('.game-card');
+    gameCards.forEach(card => {
+        card.addEventListener('click', function() {
+            const playButton = this.querySelector('.play-button');
+            const url = playButton.getAttribute('data-url');
+            openGame(url);
         });
     });
 }
 
-function loadHmstrDataToForm() {
-    const hmstrData = JSON.parse(localStorage.getItem('admin_hmstr_data') || '{}');
-    
-    if (hmstrData.price) {
-        document.getElementById('hmstr-price').value = hmstrData.price;
-    }
-    if (hmstrData.change) {
-        document.getElementById('hmstr-change').value = hmstrData.change;
-    }
-    if (hmstrData.marketcap) {
-        document.getElementById('hmstr-marketcap').value = hmstrData.marketcap;
-    }
-    if (hmstrData.volume) {
-        document.getElementById('hmstr-volume').value = hmstrData.volume;
+function getDefaultGames() {
+    return [
+        {
+            id: 1,
+            name: "Hamster GameDev",
+            description: "Создай игровую студию и стань лидером",
+            image: "images/hamster-gamedev.jpg",
+            url: "https://t.me/Hamster_GAme_Dev_bot/start?startapp=kentId6823288584",
+            players: "12.8K",
+            beta: true
+        },
+        {
+            id: 2,
+            name: "Hamster King",
+            description: "Стань королём в эпических битвах",
+            image: "images/hamster-king.jpg",
+            url: "https://t.me/hamsterking_game_bot?startapp=6823288584",
+            players: "25.6K"
+        },
+        {
+            id: 3,
+            name: "Hamster Fight Club",
+            description: "Бойцовский клуб для чемпионов",
+            image: "images/hamstr-fight-club.jpg",
+            url: "https://t.me/hamster_fightclub_bot?startapp=NWE1YjA2YWUtZTAyYS01ZjA1LTg4ZTYtMGZmZjUwNDQwNjU5",
+            players: "18.9K"
+        },
+        {
+            id: 4,
+            name: "BitQuest",
+            description: "Крипто-приключение с наградами",
+            image: "images/bitquest.jpg",
+            url: "https://t.me/BitquestgamesBot/start?startapp=kentId_6823288584",
+            players: "31.2K"
+        }
+    ];
+}
+
+function openGame(url) {
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.openLink(url);
+    } else {
+        window.open(url, '_blank', 'noopener,noreferrer');
     }
 }
 
-function checkAdminAccess() {
-    const isAdmin = localStorage.getItem('is_admin') === 'true';
-    const adminContainer = document.getElementById('admin-button-container');
+// Данные токена HMSTR
+function setupPriceData() {
+    loadPriceData();
+}
+
+function loadPriceData() {
+    const priceData = JSON.parse(localStorage.getItem('admin_price_data'));
     
-    if (adminContainer) {
-        adminContainer.style.display = isAdmin ? 'block' : 'none';
+    if (priceData) {
+        updatePriceDisplay(priceData);
+    } else {
+        // Данные по умолчанию
+        updatePriceDisplay({
+            price: 0.000621,
+            change: 2.34,
+            marketCap: "12.5",
+            volume: "1.2"
+        });
     }
 }
 
-function openAdminPanel() {
-    if (localStorage.getItem('is_admin') !== 'true') {
-        showNotification('Доступ запрещен. Активируйте режим администратора.', 'error');
-        return;
-    }
-    
-    const modal = document.getElementById('admin-modal');
-    modal.classList.remove('hidden');
-    
-    // Загружаем данные в формы
-    loadHmstrDataToForm();
+function updatePriceDisplay(data) {
+    document.getElementById('hmstr-price-usd').textContent = `~$${data.price.toFixed(6)}`;
+    document.getElementById('hmstr-change-usd').textContent = `${data.change >= 0 ? '+' : ''}${data.change.toFixed(2)}%`;
+    document.getElementById('hmstr-change-usd').className = `change ${data.change >= 0 ? 'positive' : 'negative'}`;
+    document.getElementById('market-cap').textContent = `~$${data.marketCap}M`;
+    document.getElementById('volume-24h').textContent = `~$${data.volume}M`;
 }
 
-function closeAdminModal() {
-    const modal = document.getElementById('admin-modal');
-    modal.classList.add('hidden');
+// Новости
+function loadNews() {
+    const news = JSON.parse(localStorage.getItem('admin_news')) || getDefaultNews();
+    const container = document.getElementById('news-container');
+    
+    container.innerHTML = news.map(item => `
+        <div class="news-item">
+            <span class="news-date">${formatDate(item.date)}</span>
+            <div class="news-title">${item.title}</div>
+            <div class="news-content">${item.content}</div>
+            ${item.image ? `<img src="${item.image}" alt="News image" class="news-image">` : ''}
+        </div>
+    `).join('');
+}
+
+function getDefaultNews() {
+    return [
+        {
+            id: 1,
+            date: new Date().toISOString(),
+            title: "Добро пожаловать в Hamster Verse!",
+            content: "Запущена новая игровая платформа с лучшими играми от Hamster. Теперь все в одном месте!",
+            image: ""
+        }
+    ];
+}
+
+// Гайд покупки HMSTR
+function setupGuideButton() {
+    const guideButton = document.getElementById('show-guide');
+    const buyGuide = document.getElementById('buy-guide');
+    
+    if (guideButton && buyGuide) {
+        guideButton.addEventListener('click', function() {
+            const isHidden = buyGuide.classList.contains('hidden');
+            
+            if (isHidden) {
+                buyGuide.classList.remove('hidden');
+                guideButton.textContent = '📖 Скрыть инструкцию';
+            } else {
+                buyGuide.classList.add('hidden');
+                guideButton.textContent = '📖 Как купить HMSTR';
+            }
+        });
+    }
 }
 
 // Переключение темы
@@ -586,7 +296,6 @@ function setupThemeToggle() {
     const themeIcon = themeToggle.querySelector('.theme-icon');
     const themeText = themeToggle.querySelector('.theme-text');
     
-    // Загружаем сохраненную тему
     const savedTheme = localStorage.getItem('theme') || 'light';
     setTheme(savedTheme);
     
@@ -615,59 +324,105 @@ function setupShareButton() {
     const shareButton = document.getElementById('share-button');
     
     if (shareButton) {
-        shareButton.addEventListener('click', function() {
-            const shareText = "🎮 Открой для себя Hamster Verse - все лучшие игры в одном приложении! Присоединяйся сейчас!";
-            const shareUrl = window.location.href;
-            
-            if (window.Telegram && window.Telegram.WebApp) {
-                window.Telegram.WebApp.shareUrl(shareUrl, shareText);
-            } else if (navigator.share) {
-                navigator.share({
-                    title: 'Hamster Verse',
-                    text: shareText,
-                    url: shareUrl
-                });
-            } else {
-                // Fallback - копирование в буфер
-                navigator.clipboard.writeText(shareUrl).then(() => {
-                    showNotification('Ссылка скопирована в буфер!', 'success');
-                }).catch(() => {
-                    showNotification('Скопируйте ссылку вручную: ' + shareUrl, 'info');
-                });
-            }
+        shareButton.addEventListener('click', shareApp);
+    }
+}
+
+function shareApp() {
+    const shareText = "🎮 Открой для себя Hamster Verse - все лучшие игры в одном приложении! Присоединяйся сейчас!";
+    const shareUrl = window.location.href;
+    
+    if (window.Telegram && window.Telegram.WebApp) {
+        window.Telegram.WebApp.shareUrl(shareUrl, shareText);
+    } else if (navigator.share) {
+        navigator.share({
+            title: 'Hamster Verse',
+            text: shareText,
+            url: shareUrl
+        });
+    } else {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            showNotification('Ссылка скопирована в буфер!', 'success');
         });
     }
+}
+
+// Система обратной связи
+function setupFeedbackSystem() {
+    const feedbackButton = document.getElementById('feedback-button');
+    
+    if (feedbackButton) {
+        feedbackButton.addEventListener('click', openFeedbackModal);
+    }
+}
+
+function openFeedbackModal() {
+    const modal = document.getElementById('feedback-modal');
+    modal.classList.remove('hidden');
+    
+    setTimeout(() => {
+        const textarea = document.getElementById('feedback-text');
+        textarea.focus();
+    }, 100);
+}
+
+function closeFeedbackModal() {
+    const modal = document.getElementById('feedback-modal');
+    modal.classList.add('closing');
+    
+    setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.classList.remove('closing');
+    }, 300);
+}
+
+function sendFeedback() {
+    const textarea = document.getElementById('feedback-text');
+    const feedback = textarea.value.trim();
+    
+    if (!feedback) {
+        showNotification('Пожалуйста, введите ваше сообщение', 'error');
+        return;
+    }
+    
+    showNotification('Спасибо за ваш отзыв!', 'success');
+    closeFeedbackModal();
+    textarea.value = '';
+}
+
+// Кнопка админ-панели
+function setupAdminButton() {
+    const adminContainer = document.getElementById('admin-button-container');
+    
+    const isAdmin = localStorage.getItem('is_admin') === 'true';
+    
+    if (adminContainer) {
+        adminContainer.style.display = isAdmin ? 'block' : 'none';
+    }
+    
+    let keySequence = '';
+    document.addEventListener('keydown', function(e) {
+        keySequence += e.key;
+        if (keySequence.length > 10) {
+            keySequence = keySequence.slice(-10);
+        }
+        
+        if (keySequence.includes(APP_CONFIG.adminPassword)) {
+            localStorage.setItem('is_admin', 'true');
+            setupAdminButton();
+            showNotification('Режим администратора активирован!', 'success');
+            keySequence = '';
+        }
+    });
 }
 
 // Вспомогательные функции
 function formatDate(dateString) {
     const date = new Date(dateString);
-    const now = new Date();
-    const diff = now - date;
-    
-    if (diff < 60000) {
-        return 'Только что';
-    } else if (diff < 3600000) {
-        const minutes = Math.floor(diff / 60000);
-        return `${minutes} мин. назад`;
-    } else if (diff < 86400000) {
-        const hours = Math.floor(diff / 3600000);
-        return `${hours} ч. назад`;
-    } else {
-        return date.toLocaleDateString('ru-RU');
-    }
+    return date.toLocaleDateString('ru-RU');
 }
 
 function showNotification(message, type = 'info') {
-    // Удаляем старые уведомления
-    const oldNotifications = document.querySelectorAll('.notification');
-    oldNotifications.forEach(notification => {
-        if (notification.parentNode) {
-            notification.parentNode.removeChild(notification);
-        }
-    });
-    
-    // Создаем уведомление
     const notification = document.createElement('div');
     notification.className = `notification ${type}`;
     
@@ -687,18 +442,12 @@ function showNotification(message, type = 'info') {
     
     document.body.appendChild(notification);
     
-    // Автоматическое удаление через 4 секунды
     setTimeout(() => {
         notification.classList.add('slide-out');
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 300);
+        setTimeout(() => notification.remove(), 300);
     }, 4000);
 }
 
-// Закрытие анонса
 function closeAnnouncement() {
     const banner = document.getElementById('announcement');
     if (banner) {
@@ -718,7 +467,6 @@ function checkAnnouncementState() {
     }
 }
 
-// Предотвращаем перетаскивание изображений
 document.addEventListener('DOMContentLoaded', function() {
     const images = document.querySelectorAll('img');
     images.forEach(img => {
@@ -727,13 +475,3 @@ document.addEventListener('DOMContentLoaded', function() {
     
     checkAnnouncementState();
 });
-
-// Добавляем функцию для принудительной активации админки (для отладки)
-function forceAdminAccess() {
-    localStorage.setItem('is_admin', 'true');
-    checkAdminAccess();
-    showNotification('Админка принудительно активирована!', 'success');
-}
-
-// Для отладки - добавляем глобальную функцию
-window.forceAdminAccess = forceAdminAccess;
