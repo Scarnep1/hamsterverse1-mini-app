@@ -7,6 +7,9 @@
     <title>Hamster Verse - Игровая платформа</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -37,7 +40,7 @@
                 </div>
                 
                 <div class="games-grid" id="games-container">
-                    <!-- Games will be loaded dynamically -->
+                    <!-- Games will be loaded from Firebase -->
                 </div>
             </section>
 
@@ -163,7 +166,7 @@
                 </div>
                 
                 <div class="news-list" id="news-container">
-                    <!-- Новости загружаются динамически -->
+                    <!-- News will be loaded from Firebase -->
                 </div>
             </section>
 
@@ -206,8 +209,8 @@
 
                 <!-- App Info -->
                 <div class="app-info">
-                    <p>Hamster Verse v<span id="app-version">2.2.0</span></p>
-                    <p class="app-build">Build: <span id="app-build">2024.01.15</span></p>
+                    <p>Hamster Verse v<span id="app-version">2.3.0</span></p>
+                    <p class="app-build">Build: <span id="app-build">2024.01.20</span></p>
                 </div>
 
                 <!-- Admin Link -->
