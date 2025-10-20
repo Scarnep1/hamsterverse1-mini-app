@@ -1,4 +1,3 @@
-/* Сброс и базовые стили */
 * {
     margin: 0;
     padding: 0;
@@ -43,7 +42,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Основной контейнер */
 .app-container {
     max-width: 400px;
     margin: 0 auto;
@@ -53,7 +51,6 @@ body {
     padding-bottom: 80px;
 }
 
-/* Баннер */
 .announcement-banner {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
@@ -81,7 +78,6 @@ body {
     justify-content: center;
 }
 
-/* Шапка */
 .header {
     background: var(--header-bg);
     color: white;
@@ -128,7 +124,6 @@ body {
     backdrop-filter: blur(10px);
 }
 
-/* Основной контент */
 .main-content {
     padding: 20px 16px;
     position: relative;
@@ -144,7 +139,6 @@ body {
     display: block;
 }
 
-/* Заголовки секций */
 .section-header {
     margin-bottom: 20px;
     text-align: center;
@@ -163,7 +157,6 @@ body {
     font-weight: 500;
 }
 
-/* Сетка игр - ИСПРАВЛЕНА */
 .games-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -251,7 +244,6 @@ body {
     margin-bottom: 8px;
 }
 
-/* Рейтинг игр */
 .game-rating {
     margin-top: 4px;
 }
@@ -285,7 +277,6 @@ body {
     font-weight: 500;
 }
 
-/* Кнопка игры */
 .play-button {
     background: var(--accent-gradient);
     color: white;
@@ -307,7 +298,6 @@ body {
     box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
 }
 
-/* Отзывы пользователей */
 .user-reviews-section {
     margin-top: 24px;
     padding-top: 20px;
@@ -388,7 +378,394 @@ body {
     border-color: var(--text-secondary);
 }
 
-/* Навигация */
+.price-cards-container {
+    margin-bottom: 16px;
+}
+
+.price-card {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.price-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.price-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: #26a17b;
+}
+
+.price-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+}
+
+.currency-flag {
+    font-size: 24px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+    border-radius: 10px;
+}
+
+.currency-info h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 2px;
+    color: var(--text-primary);
+}
+
+.currency-info p {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.price-card-content {
+    text-align: center;
+}
+
+.price-main {
+    font-size: 28px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+}
+
+.price-change {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.change {
+    font-size: 14px;
+    font-weight: 600;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+
+.change.positive {
+    background: rgba(0, 200, 81, 0.1);
+    color: var(--positive-color);
+}
+
+.change.negative {
+    background: rgba(255, 68, 68, 0.1);
+    color: var(--negative-color);
+}
+
+.change-time {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.exchanges-section {
+    margin-bottom: 16px;
+}
+
+.exchanges-section h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 12px;
+    color: var(--text-primary);
+}
+
+.exchanges-list {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.exchange-card {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--border-color);
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: var(--shadow);
+}
+
+.exchange-card:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-hover);
+    background: var(--bg-secondary);
+}
+
+.exchange-logo {
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-secondary);
+}
+
+.exchange-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    background: var(--accent-gradient);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.exchange-info {
+    flex: 1;
+}
+
+.exchange-info h3 {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: var(--text-primary);
+}
+
+.exchange-info p {
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.exchange-arrow {
+    margin-left: auto;
+    font-size: 18px;
+    color: var(--text-secondary);
+    flex-shrink: 0;
+}
+
+.guide-button-container {
+    margin-bottom: 16px;
+}
+
+.guide-button {
+    width: 100%;
+    background: var(--accent-gradient);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    padding: 12px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.guide-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.buy-guide {
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    margin-bottom: 16px;
+    box-shadow: var(--shadow);
+}
+
+.buy-guide.hidden {
+    display: none;
+}
+
+.guide-steps {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.guide-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.step-number {
+    width: 20px;
+    height: 20px;
+    background: var(--accent-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    flex-shrink: 0;
+}
+
+.step-content strong {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    margin-bottom: 2px;
+    color: var(--text-primary);
+}
+
+.step-content p {
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.3;
+}
+
+.news-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.news-item {
+    background: var(--bg-card);
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+    transition: all 0.3s ease;
+}
+
+.news-item:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-hover);
+}
+
+.news-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.news-title {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+}
+
+.news-content {
+    font-size: 13px;
+    color: var(--text-secondary);
+    line-height: 1.4;
+}
+
+.profile-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 20px;
+    background: var(--bg-card);
+    border-radius: 16px;
+    padding: 20px;
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow);
+}
+
+.profile-avatar {
+    width: 70px;
+    height: 70px;
+    background: var(--accent-gradient);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 700;
+    color: white;
+    flex-shrink: 0;
+}
+
+.profile-info h2 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: var(--text-primary);
+}
+
+.profile-info p {
+    color: var(--text-secondary);
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+.user-stats {
+    display: flex;
+    gap: 15px;
+    margin-top: 8px;
+}
+
+.user-stats span {
+    font-size: 12px;
+    color: var(--text-secondary);
+    background: var(--bg-secondary);
+    padding: 4px 8px;
+    border-radius: 8px;
+}
+
+.theme-toggle-container {
+    margin-bottom: 16px;
+}
+
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: var(--text-primary);
+    box-shadow: var(--shadow);
+    width: 100%;
+    justify-content: center;
+}
+
+.theme-toggle:hover {
+    background: var(--bg-secondary);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-hover);
+}
+
+.theme-icon {
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
 .bottom-nav {
     position: fixed;
     bottom: 0;
@@ -448,7 +825,6 @@ body {
     color: var(--text-secondary);
 }
 
-/* Модальные окна */
 .modal {
     position: fixed;
     top: 0;
@@ -548,7 +924,6 @@ body {
     background: var(--border-color);
 }
 
-/* Форма отзыва */
 #review-game-select {
     width: 100%;
     padding: 12px;
@@ -599,7 +974,6 @@ body {
     margin-top: 5px;
 }
 
-/* Анимации */
 @keyframes slideFade {
     from {
         opacity: 0;
@@ -632,12 +1006,10 @@ body {
     animation: starPulse 0.5s ease;
 }
 
-/* Утилиты */
 .hidden {
     display: none !important;
 }
 
-/* Адаптивность */
 @media (max-width: 480px) {
     .app-container {
         padding-bottom: 70px;
@@ -692,7 +1064,6 @@ body {
     }
 }
 
-/* Предотвращение выделения и перетаскивания */
 img {
     -webkit-user-drag: none;
     -khtml-user-drag: none;
