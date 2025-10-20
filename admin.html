@@ -6,122 +6,30 @@
     <title>Админ-панель - Hamster Verse</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <style>
-        .admin-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-        
-        .admin-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            border-bottom: 1px solid var(--border-color);
-            padding-bottom: 10px;
-        }
-        
-        .admin-tab {
-            padding: 10px 20px;
-            background: var(--bg-secondary);
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-        }
-        
-        .admin-tab.active {
-            background: var(--accent-gradient);
-            color: white;
-        }
-        
-        .admin-section {
-            display: none;
-        }
-        
-        .admin-section.active {
-            display: block;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            font-family: inherit;
-        }
-        
-        .form-control:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-primary {
-            background: var(--accent-gradient);
-            color: white;
-        }
-        
-        .btn-danger {
-            background: #ff4444;
-            color: white;
-        }
-        
-        .items-list {
-            display: grid;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .item-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .item-actions {
-            display: flex;
-            gap: 10px;
-        }
-        
-        .game-preview {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .game-preview img {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-            object-fit: cover;
-        }
+        .admin-container { max-width: 800px; margin: 0 auto; padding: 20px; }
+        .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
+        .admin-tab { padding: 10px 20px; background: var(--bg-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; }
+        .admin-tab.active { background: var(--accent-gradient); color: white; }
+        .admin-section { display: none; }
+        .admin-section.active { display: block; }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary); }
+        .form-control { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
+        .btn-primary { background: var(--accent-gradient); color: white; }
+        .btn-danger { background: #ff4444; color: white; }
+        .items-list { display: grid; gap: 15px; margin-top: 20px; }
+        .item-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
+        .item-actions { display: flex; gap: 10px; }
+        .game-preview { display: flex; align-items: center; gap: 15px; }
+        .game-preview img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+        .status { padding: 4px 8px; border-radius: 4px; font-size: 12px; }
+        .status.success { background: #00c851; color: white; }
+        .status.error { background: #ff4444; color: white; }
     </style>
 </head>
 <body>
@@ -130,7 +38,7 @@
             <div class="header-content">
                 <div class="header-titles">
                     <h1 class="app-title">Админ-панель</h1>
-                    <span class="app-subtitle">Hamster Verse</span>
+                    <span class="app-subtitle">Hamster Verse - Firebase</span>
                 </div>
                 <button class="guide-button" onclick="window.location.href='index.html'">
                     ← Назад к приложению
@@ -168,21 +76,16 @@
                             <input type="url" id="game-url" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label for="game-players">Количество игроков (например: 12.8K)</label>
+                            <label for="game-players">Количество игроков</label>
                             <input type="text" id="game-players" class="form-control" required>
                         </div>
                         <div class="form-group">
-                            <label>
-                                <input type="checkbox" id="game-beta">
-                                Бета-версия
-                            </label>
+                            <label><input type="checkbox" id="game-beta"> Бета-версия</label>
                         </div>
-                        <button type="submit" class="btn btn-primary">Сохранить игру</button>
+                        <button type="submit" class="btn btn-primary">💾 Сохранить в Firebase</button>
                     </form>
 
-                    <div class="items-list" id="games-list">
-                        <!-- Games will be loaded here -->
-                    </div>
+                    <div class="items-list" id="games-list"></div>
                 </div>
 
                 <!-- Price Section -->
@@ -205,7 +108,7 @@
                             <label for="hmstr-volume">Объем торгов 24ч (в миллионах)</label>
                             <input type="number" id="hmstr-volume" class="form-control" step="0.1" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Сохранить данные</button>
+                        <button type="submit" class="btn btn-primary">💾 Сохранить в Firebase</button>
                     </form>
                 </div>
 
@@ -230,19 +133,31 @@
                             <label for="news-date">Дата публикации</label>
                             <input type="datetime-local" id="news-date" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">Сохранить новость</button>
+                        <button type="submit" class="btn btn-primary">💾 Сохранить в Firebase</button>
                     </form>
 
-                    <div class="items-list" id="news-list">
-                        <!-- News will be loaded here -->
-                    </div>
+                    <div class="items-list" id="news-list"></div>
                 </div>
             </div>
         </main>
     </div>
 
     <script>
-        // Проверка прав администратора
+        // Firebase конфиг
+        const firebaseConfig = {
+            apiKey: "AIzaSyCCq4W9XdanihE4d7c66CGmJmfGPY4KY_c",
+            authDomain: "hamster-verse-fc1fb.firebaseapp.com",
+            projectId: "hamster-verse-fc1fb",
+            storageBucket: "hamster-verse-fc1fb.firebasestorage.app",
+            messagingSenderId: "878070837551",
+            appId: "1:878070837551:web:ec855619bc52f474d2b1da"
+        };
+
+        // Инициализация
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        // Проверка прав
         if (localStorage.getItem('is_admin') !== 'true') {
             alert('Доступ запрещен');
             window.location.href = 'index.html';
@@ -252,15 +167,9 @@
         document.querySelectorAll('.admin-tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 const targetTab = this.getAttribute('data-tab');
-                
-                // Обновляем активные табы
                 document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
                 this.classList.add('active');
-                
-                // Показываем соответствующую секцию
-                document.querySelectorAll('.admin-section').forEach(section => {
-                    section.classList.remove('active');
-                });
                 document.getElementById(`${targetTab}-section`).classList.add('active');
             });
         });
@@ -271,20 +180,50 @@
         loadNews();
 
         // Управление играми
-        document.getElementById('game-form').addEventListener('submit', function(e) {
+        document.getElementById('game-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            saveGame();
+            await saveGame();
         });
 
-        function loadGames() {
-            const games = JSON.parse(localStorage.getItem('admin_games')) || [];
-            const container = document.getElementById('games-list');
-            
-            if (games.length === 0) {
-                container.innerHTML = '<p>Игры не добавлены</p>';
-                return;
+        async function loadGames() {
+            try {
+                const snapshot = await db.collection('games').get();
+                const games = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                displayGamesList(games);
+            } catch (error) {
+                console.error('Ошибка загрузки игр:', error);
+                document.getElementById('games-list').innerHTML = '<p>Ошибка загрузки</p>';
             }
-            
+        }
+
+        async function saveGame() {
+            const gameData = {
+                name: document.getElementById('game-name').value,
+                description: document.getElementById('game-description').value,
+                image: document.getElementById('game-image').value,
+                url: document.getElementById('game-url').value,
+                players: document.getElementById('game-players').value,
+                beta: document.getElementById('game-beta').checked
+            };
+
+            const gameId = document.getElementById('game-id').value;
+
+            try {
+                if (gameId) {
+                    await db.collection('games').doc(gameId).set(gameData);
+                } else {
+                    await db.collection('games').add(gameData);
+                }
+                alert('✅ Игра сохранена в Firebase!');
+                resetGameForm();
+                loadGames();
+            } catch (error) {
+                alert('❌ Ошибка сохранения: ' + error.message);
+            }
+        }
+
+        function displayGamesList(games) {
+            const container = document.getElementById('games-list');
             container.innerHTML = games.map(game => `
                 <div class="item-card">
                     <div class="game-preview">
@@ -295,66 +234,40 @@
                         </div>
                     </div>
                     <div class="item-actions">
-                        <button class="btn" onclick="editGame(${game.id})">✏️</button>
-                        <button class="btn btn-danger" onclick="deleteGame(${game.id})">🗑️</button>
+                        <button class="btn" onclick="editGame('${game.id}')">✏️</button>
+                        <button class="btn btn-danger" onclick="deleteGame('${game.id}')">🗑️</button>
                     </div>
                 </div>
             `).join('');
         }
 
-        function saveGame() {
-            const games = JSON.parse(localStorage.getItem('admin_games')) || [];
-            const gameId = document.getElementById('game-id').value;
-            const gameData = {
-                id: gameId ? parseInt(gameId) : Date.now(),
-                name: document.getElementById('game-name').value,
-                description: document.getElementById('game-description').value,
-                image: document.getElementById('game-image').value,
-                url: document.getElementById('game-url').value,
-                players: document.getElementById('game-players').value,
-                beta: document.getElementById('game-beta').checked
-            };
-
-            if (gameId) {
-                // Редактирование
-                const index = games.findIndex(g => g.id === parseInt(gameId));
-                if (index !== -1) {
-                    games[index] = gameData;
+        async function editGame(id) {
+            try {
+                const doc = await db.collection('games').doc(id).get();
+                if (doc.exists) {
+                    const game = doc.data();
+                    document.getElementById('game-id').value = id;
+                    document.getElementById('game-name').value = game.name;
+                    document.getElementById('game-description').value = game.description;
+                    document.getElementById('game-image').value = game.image;
+                    document.getElementById('game-url').value = game.url;
+                    document.getElementById('game-players').value = game.players;
+                    document.getElementById('game-beta').checked = game.beta || false;
                 }
-            } else {
-                // Добавление
-                games.push(gameData);
-            }
-
-            localStorage.setItem('admin_games', JSON.stringify(games));
-            loadGames();
-            resetGameForm();
-            alert('Игра сохранена!');
-        }
-
-        function editGame(id) {
-            const games = JSON.parse(localStorage.getItem('admin_games')) || [];
-            const game = games.find(g => g.id === id);
-            
-            if (game) {
-                document.getElementById('game-id').value = game.id;
-                document.getElementById('game-name').value = game.name;
-                document.getElementById('game-description').value = game.description;
-                document.getElementById('game-image').value = game.image;
-                document.getElementById('game-url').value = game.url;
-                document.getElementById('game-players').value = game.players;
-                document.getElementById('game-beta').checked = game.beta || false;
-                
-                document.getElementById('game-form').scrollIntoView();
+            } catch (error) {
+                alert('Ошибка загрузки игры: ' + error.message);
             }
         }
 
-        function deleteGame(id) {
+        async function deleteGame(id) {
             if (confirm('Удалить эту игру?')) {
-                const games = JSON.parse(localStorage.getItem('admin_games')) || [];
-                const filteredGames = games.filter(g => g.id !== id);
-                localStorage.setItem('admin_games', JSON.stringify(filteredGames));
-                loadGames();
+                try {
+                    await db.collection('games').doc(id).delete();
+                    alert('✅ Игра удалена!');
+                    loadGames();
+                } catch (error) {
+                    alert('❌ Ошибка удаления: ' + error.message);
+                }
             }
         }
 
@@ -364,23 +277,27 @@
         }
 
         // Управление курсом
-        document.getElementById('price-form').addEventListener('submit', function(e) {
+        document.getElementById('price-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            savePriceData();
+            await savePriceData();
         });
 
-        function loadPriceData() {
-            const priceData = JSON.parse(localStorage.getItem('admin_price_data'));
-            
-            if (priceData) {
-                document.getElementById('hmstr-price').value = priceData.price;
-                document.getElementById('hmstr-change').value = priceData.change;
-                document.getElementById('hmstr-marketcap').value = priceData.marketCap;
-                document.getElementById('hmstr-volume').value = priceData.volume;
+        async function loadPriceData() {
+            try {
+                const doc = await db.collection('settings').doc('price').get();
+                if (doc.exists) {
+                    const priceData = doc.data();
+                    document.getElementById('hmstr-price').value = priceData.price;
+                    document.getElementById('hmstr-change').value = priceData.change;
+                    document.getElementById('hmstr-marketcap').value = priceData.marketCap;
+                    document.getElementById('hmstr-volume').value = priceData.volume;
+                }
+            } catch (error) {
+                console.error('Ошибка загрузки курса:', error);
             }
         }
 
-        function savePriceData() {
+        async function savePriceData() {
             const priceData = {
                 price: parseFloat(document.getElementById('hmstr-price').value),
                 change: parseFloat(document.getElementById('hmstr-change').value),
@@ -388,25 +305,56 @@
                 volume: document.getElementById('hmstr-volume').value
             };
 
-            localStorage.setItem('admin_price_data', JSON.stringify(priceData));
-            alert('Данные курса сохранены!');
+            try {
+                await db.collection('settings').doc('price').set(priceData);
+                alert('✅ Курс сохранен в Firebase!');
+            } catch (error) {
+                alert('❌ Ошибка сохранения: ' + error.message);
+            }
         }
 
         // Управление новостями
-        document.getElementById('news-form').addEventListener('submit', function(e) {
+        document.getElementById('news-form').addEventListener('submit', async function(e) {
             e.preventDefault();
-            saveNews();
+            await saveNews();
         });
 
-        function loadNews() {
-            const news = JSON.parse(localStorage.getItem('admin_news')) || [];
-            const container = document.getElementById('news-list');
-            
-            if (news.length === 0) {
-                container.innerHTML = '<p>Новости не добавлены</p>';
-                return;
+        async function loadNews() {
+            try {
+                const snapshot = await db.collection('news').orderBy('date', 'desc').get();
+                const news = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                displayNewsList(news);
+            } catch (error) {
+                console.error('Ошибка загрузки новостей:', error);
             }
-            
+        }
+
+        async function saveNews() {
+            const newsData = {
+                title: document.getElementById('news-title').value,
+                content: document.getElementById('news-content').value,
+                image: document.getElementById('news-image').value,
+                date: document.getElementById('news-date').value
+            };
+
+            const newsId = document.getElementById('news-id').value;
+
+            try {
+                if (newsId) {
+                    await db.collection('news').doc(newsId).set(newsData);
+                } else {
+                    await db.collection('news').add(newsData);
+                }
+                alert('✅ Новость сохранена в Firebase!');
+                resetNewsForm();
+                loadNews();
+            } catch (error) {
+                alert('❌ Ошибка сохранения: ' + error.message);
+            }
+        }
+
+        function displayNewsList(news) {
+            const container = document.getElementById('news-list');
             container.innerHTML = news.map(item => `
                 <div class="item-card">
                     <div>
@@ -423,55 +371,31 @@
             `).join('');
         }
 
-        function saveNews() {
-            const news = JSON.parse(localStorage.getItem('admin_news')) || [];
-            const newsId = document.getElementById('news-id').value;
-            const newsData = {
-                id: newsId || Date.now().toString(),
-                title: document.getElementById('news-title').value,
-                content: document.getElementById('news-content').value,
-                image: document.getElementById('news-image').value,
-                date: document.getElementById('news-date').value
-            };
-
-            if (newsId) {
-                // Редактирование
-                const index = news.findIndex(n => n.id === newsId);
-                if (index !== -1) {
-                    news[index] = newsData;
+        async function editNews(id) {
+            try {
+                const doc = await db.collection('news').doc(id).get();
+                if (doc.exists) {
+                    const news = doc.data();
+                    document.getElementById('news-id').value = id;
+                    document.getElementById('news-title').value = news.title;
+                    document.getElementById('news-content').value = news.content;
+                    document.getElementById('news-image').value = news.image || '';
+                    document.getElementById('news-date').value = news.date;
                 }
-            } else {
-                // Добавление
-                news.push(newsData);
-            }
-
-            localStorage.setItem('admin_news', JSON.stringify(news));
-            loadNews();
-            resetNewsForm();
-            alert('Новость сохранена!');
-        }
-
-        function editNews(id) {
-            const news = JSON.parse(localStorage.getItem('admin_news')) || [];
-            const newsItem = news.find(n => n.id === id);
-            
-            if (newsItem) {
-                document.getElementById('news-id').value = newsItem.id;
-                document.getElementById('news-title').value = newsItem.title;
-                document.getElementById('news-content').value = newsItem.content;
-                document.getElementById('news-image').value = newsItem.image || '';
-                document.getElementById('news-date').value = newsItem.date;
-                
-                document.getElementById('news-form').scrollIntoView();
+            } catch (error) {
+                alert('Ошибка загрузки новости: ' + error.message);
             }
         }
 
-        function deleteNews(id) {
+        async function deleteNews(id) {
             if (confirm('Удалить эту новость?')) {
-                const news = JSON.parse(localStorage.getItem('admin_news')) || [];
-                const filteredNews = news.filter(n => n.id !== id);
-                localStorage.setItem('admin_news', JSON.stringify(filteredNews));
-                loadNews();
+                try {
+                    await db.collection('news').doc(id).delete();
+                    alert('✅ Новость удалена!');
+                    loadNews();
+                } catch (error) {
+                    alert('❌ Ошибка удаления: ' + error.message);
+                }
             }
         }
 
@@ -481,8 +405,16 @@
             document.getElementById('news-date').value = new Date().toISOString().slice(0, 16);
         }
 
-        // Устанавливаем текущую дату по умолчанию
+        // Установите текущую дату по умолчанию
         document.getElementById('news-date').value = new Date().toISOString().slice(0, 16);
+
+        // Проверка подключения
+        db.collection('games').limit(1).get().then(() => {
+            console.log('✅ Firebase подключен');
+        }).catch((error) => {
+            console.error('❌ Ошибка Firebase:', error);
+            alert('Ошибка подключения к Firebase: ' + error.message);
+        });
     </script>
 </body>
 </html>
