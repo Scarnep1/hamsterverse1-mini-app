@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="referrer" content="no-referrer">
-    <title>Games Verse - Игровая платформа</title>
+    <title>Hamster Verse - Игровая платформа</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -12,7 +12,7 @@
     <div class="app-container">
         <!-- Announcement Banner -->
         <div class="announcement-banner" id="announcement">
-            <span>🎉 Добро пожаловать в Games Verse! Новые игры уже доступны</span>
+            <span>🎉 Добро пожаловать в Hamster Verse! Новые игры уже доступны</span>
             <button class="close-announcement" onclick="closeAnnouncement()">×</button>
         </div>
 
@@ -20,7 +20,7 @@
         <header class="header">
             <div class="header-content">
                 <div class="header-titles">
-                    <h1 class="app-title">Games Verse</h1>
+                    <h1 class="app-title">Hamster Verse</h1>
                     <span class="app-subtitle">Ваша игровая вселенная</span>
                 </div>
                 <div class="user-avatar" id="user-avatar">👤</div>
@@ -50,39 +50,8 @@
                 
                 <!-- Exchanges List -->
                 <div class="exchanges-section">
-                    <div class="exchanges-list">
-                        <a href="https://www.binance.com" class="exchange-card" target="_blank" rel="noopener">
-                            <div class="exchange-logo">
-                                <div class="exchange-avatar">B</div>
-                            </div>
-                            <div class="exchange-info">
-                                <h3>Binance</h3>
-                                <p>Крупнейшая биржа</p>
-                            </div>
-                            <div class="exchange-arrow">→</div>
-                        </a>
-
-                        <a href="https://www.bybit.com" class="exchange-card" target="_blank" rel="noopener">
-                            <div class="exchange-logo">
-                                <div class="exchange-avatar">B</div>
-                            </div>
-                            <div class="exchange-info">
-                                <h3>Bybit</h3>
-                                <p>Фьючерсы и спот</p>
-                            </div>
-                            <div class="exchange-arrow">→</div>
-                        </a>
-
-                        <a href="https://www.okx.com" class="exchange-card" target="_blank" rel="noopener">
-                            <div class="exchange-logo">
-                                <div class="exchange-avatar">O</div>
-                            </div>
-                            <div class="exchange-info">
-                                <h3>OKX</h3>
-                                <p>Много торговых пар</p>
-                            </div>
-                            <div class="exchange-arrow">→</div>
-                        </a>
+                    <div class="exchanges-grid" id="exchanges-container">
+                        <!-- Exchanges will be loaded from static data -->
                     </div>
                 </div>
 
@@ -144,7 +113,7 @@
 
                 <!-- App Info -->
                 <div class="app-info">
-                    <p>Games Verse v<span id="app-version">2.3.0</span></p>
+                    <p>Hamster Verse v<span id="app-version">2.3.0</span></p>
                     <p class="app-build">Build: <span id="app-build">2024.01.20</span></p>
                 </div>
             </section>
