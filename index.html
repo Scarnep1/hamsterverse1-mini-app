@@ -9,12 +9,6 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Announcement Banner -->
-        <div class="announcement-banner" id="announcement">
-            <span>🎉 Новые игры уже доступны!</span>
-            <button class="close-announcement" onclick="closeAnnouncement()">×</button>
-        </div>
-
         <!-- Header -->
         <header class="header">
             <div class="header-content">
@@ -36,7 +30,7 @@
                     <h2>Игры</h2>
                     <p class="section-subtitle">Выберите игру и начните играть</p>
                 </div>
-                <div class="games-grid" id="games-container">
+                <div class="games-container" id="games-container">
                     <!-- Games will be loaded here -->
                 </div>
             </section>
@@ -47,37 +41,7 @@
                     <h2>Биржи</h2>
                     <p class="section-subtitle">Топовые криптобиржи</p>
                 </div>
-                <div class="guide-button-container">
-                    <button class="guide-button" onclick="showBuyGuide()">
-                        📚 Как купить криптовалюту
-                    </button>
-                </div>
-                <div class="buy-guide" id="buy-guide" style="display: none;">
-                    <div class="guide-steps">
-                        <div class="guide-step">
-                            <div class="step-number">1</div>
-                            <div class="step-content">
-                                <strong>Выберите биржу</strong>
-                                <p>Зарегистрируйтесь на одной из платформ</p>
-                            </div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="step-number">2</div>
-                            <div class="step-content">
-                                <strong>Пройдите верификацию</strong>
-                                <p>Подтвердите личность для полного доступа</p>
-                            </div>
-                        </div>
-                        <div class="guide-step">
-                            <div class="step-number">3</div>
-                            <div class="step-content">
-                                <strong>Пополните счет</strong>
-                                <p>Внесите средства через банковскую карту</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="exchanges-grid" id="exchanges-container">
+                <div class="exchanges-container" id="exchanges-container">
                     <!-- Exchanges will be loaded here -->
                 </div>
             </section>
@@ -88,52 +52,39 @@
                     <h2>Новости</h2>
                     <p class="section-subtitle">Последние обновления платформы</p>
                 </div>
-                <div class="news-list" id="news-container">
+                <div class="news-container" id="news-container">
                     <!-- News will be loaded here -->
                 </div>
             </section>
 
             <!-- Profile Section -->
             <section id="profile-section" class="content-section">
-                <div class="profile-header">
-                    <div class="profile-avatar" id="tg-avatar-large">
-                        🐹
-                    </div>
-                    <div class="profile-info">
-                        <h2 id="tg-name">Пользователь</h2>
-                        <p id="tg-username">@username</p>
-                        <div class="user-stats">
-                            <span class="stat">🎮 5 игр</span>
-                            <span class="stat">⭐ 128 очков</span>
+                <div class="profile-content">
+                    <div class="profile-header">
+                        <div class="profile-avatar" id="tg-avatar-large">
+                            🐹
+                        </div>
+                        <div class="profile-info">
+                            <h2 id="tg-name">Пользователь</h2>
+                            <p id="tg-username">@username</p>
                         </div>
                     </div>
-                </div>
 
-                <div class="theme-toggle-container">
-                    <button class="theme-toggle" id="theme-toggle">
-                        <span class="theme-icon">🌙</span>
-                        <span class="theme-text">Темная тема</span>
-                    </button>
-                </div>
+                    <div class="profile-actions">
+                        <button class="profile-action-btn" id="theme-toggle">
+                            <span class="action-icon">🌙</span>
+                            <span class="action-text">Сменить тему</span>
+                        </button>
+                        <button class="profile-action-btn" id="share-button">
+                            <span class="action-icon">📤</span>
+                            <span class="action-text">Поделиться</span>
+                        </button>
+                    </div>
 
-                <div class="action-buttons">
-                    <button class="action-button" id="share-button">
-                        <span class="action-icon">📤</span>
-                        <span class="action-text">Поделиться приложением</span>
-                    </button>
-                    <button class="action-button" onclick="showNotification('Функция в разработке', 'info')">
-                        <span class="action-icon">⚙️</span>
-                        <span class="action-text">Настройки</span>
-                    </button>
-                    <button class="action-button" onclick="showNotification('Функция в разработке', 'info')">
-                        <span class="action-icon">❓</span>
-                        <span class="action-text">Помощь</span>
-                    </button>
-                </div>
-
-                <div class="app-info">
-                    <p>Hamster Verse v<span id="app-version">2.3.0</span></p>
-                    <p class="app-build">Build: <span id="app-build">2024.01.20</span></p>
+                    <div class="app-info">
+                        <p>Hamster Verse v<span id="app-version">2.4.0</span></p>
+                        <p class="app-build">Build: <span id="app-build">2024.01.21</span></p>
+                    </div>
                 </div>
             </section>
         </main>
