@@ -158,132 +158,6 @@ body {
     font-weight: 500;
 }
 
-/* Token Statistics */
-.token-stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.token-stat {
-    background: var(--bg-secondary);
-    border-radius: 10px;
-    padding: 12px;
-    text-align: center;
-}
-
-.token-stat .stat-value {
-    font-size: 16px;
-    font-weight: 600;
-}
-
-.token-stat .stat-label {
-    font-size: 11px;
-    margin-top: 2px;
-}
-
-/* Price Cards */
-.price-cards-container {
-    margin-bottom: 16px;
-}
-
-.price-card {
-    background: var(--bg-card);
-    border-radius: 16px;
-    padding: 20px;
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
-}
-
-.price-card:hover {
-    transform: translateY(-2px);
-    box-shadow: var(--shadow-hover);
-}
-
-.price-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-    background: var(--usd-color);
-}
-
-.price-card-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 16px;
-}
-
-.currency-flag {
-    font-size: 24px;
-    width: 40px;
-    height: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: var(--bg-secondary);
-    border-radius: 10px;
-}
-
-.currency-info h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 2px;
-    color: var(--text-primary);
-}
-
-.currency-info p {
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
-.price-card-content {
-    text-align: center;
-}
-
-.price-main {
-    font-size: 28px;
-    font-weight: 800;
-    margin-bottom: 8px;
-    color: var(--text-primary);
-}
-
-.price-change {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-}
-
-.change {
-    font-size: 14px;
-    font-weight: 600;
-    padding: 4px 8px;
-    border-radius: 6px;
-}
-
-.change.positive {
-    background: rgba(0, 200, 81, 0.1);
-    color: var(--positive-color);
-}
-
-.change.negative {
-    background: rgba(255, 68, 68, 0.1);
-    color: var(--negative-color);
-}
-
-.change-time {
-    font-size: 12px;
-    color: var(--text-secondary);
-}
-
 /* Games Grid */
 .games-grid {
     display: grid;
@@ -1083,6 +957,19 @@ body {
     animation: notificationSlideOut 0.3s ease forwards;
 }
 
+/* Удаленные стили для ценовых карточек и статистики токенов */
+.token-stats-grid,
+.price-cards-container,
+.price-card,
+.price-card-header,
+.price-card-content,
+.price-main,
+.price-change,
+.change,
+.change-time {
+    display: none;
+}
+
 /* Адаптивность */
 @media (max-width: 480px) {
     .app-container {
@@ -1113,14 +1000,6 @@ body {
         padding: 8px 12px;
         font-size: 12px;
         min-width: 60px;
-    }
-    
-    .price-card {
-        padding: 16px;
-    }
-    
-    .price-main {
-        font-size: 24px;
     }
     
     .bottom-nav {
