@@ -158,7 +158,7 @@ body {
     font-weight: 500;
 }
 
-/* ==================== UPDATED GAME CARDS ==================== */
+/* ==================== IMPROVED GAME CARDS ==================== */
 
 .games-grid {
     display: grid;
@@ -171,7 +171,7 @@ body {
     background: var(--bg-card);
     border-radius: 24px;
     padding: 0;
-    transition: all 0.4s ease;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     border: 1px solid var(--border-color);
     cursor: pointer;
     box-shadow: var(--shadow);
@@ -179,7 +179,15 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    height: 280px;
+    animation: cardEntrance 0.6s ease-out;
+}
+
+.game-card:nth-child(odd) {
+    animation-delay: 0.1s;
+}
+
+.game-card:nth-child(even) {
+    animation-delay: 0.2s;
 }
 
 .game-card::before {
@@ -188,11 +196,10 @@ body {
     top: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+    height: 4px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
     opacity: 0;
     transition: opacity 0.3s ease;
-    z-index: 1;
 }
 
 .game-card:hover::before {
@@ -200,120 +207,94 @@ body {
 }
 
 .game-card:hover {
-    transform: translateY(-8px) scale(1.02);
+    transform: translateY(-8px);
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
 }
 
-.game-card:hover .game-image::after {
-    opacity: 1;
+.game-card-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px;
+    flex: 1;
 }
 
-/* Game Image Header */
 .game-image {
-    height: 140px;
-    position: relative;
+    width: 70px;
+    height: 70px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     overflow: hidden;
+    flex-shrink: 0;
+    position: relative;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.game-image::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.3) 100%);
-    opacity: 0;
-    transition: opacity 0.3s ease;
+    box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
 }
 
 .game-avatar {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    transition: transform 0.4s ease;
+    border-radius: 18px;
 }
 
-.game-card:hover .game-avatar {
-    transform: scale(1.1);
-}
-
-/* Game Badges */
-.game-badges {
+.game-badge {
     position: absolute;
-    top: 12px;
-    left: 12px;
-    display: flex;
-    gap: 6px;
-    z-index: 2;
-}
-
-.game-beta {
+    top: -6px;
+    right: -6px;
     background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
     color: white;
-    padding: 4px 10px;
-    border-radius: 20px;
+    padding: 4px 8px;
+    border-radius: 12px;
     font-size: 10px;
     font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3);
-}
-
-.game-popular {
-    background: linear-gradient(135deg, #00cec9 0%, #0984e3 100%);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 20px;
-    font-size: 10px;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    box-shadow: 0 4px 12px rgba(0, 206, 201, 0.3);
-}
-
-/* Game Content */
-.game-content {
-    padding: 20px;
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    position: relative;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
     z-index: 2;
+}
+
+.game-info {
+    flex: 1;
+    min-width: 0;
 }
 
 .game-header {
     display: flex;
-    justify-content: space-between;
     align-items: flex-start;
+    justify-content: space-between;
     margin-bottom: 8px;
+    gap: 8px;
+}
+
+.game-title-wrapper {
+    flex: 1;
+    min-width: 0;
 }
 
 .game-info h3 {
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
-    margin-bottom: 6px;
+    margin-bottom: 4px;
     color: var(--text-primary);
     line-height: 1.2;
 }
 
 .game-description {
-    font-size: 13px;
+    font-size: 14px;
     color: var(--text-secondary);
     line-height: 1.4;
-    margin-bottom: 16px;
+    margin-bottom: 12px;
     display: -webkit-box;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
 }
 
-/* Game Stats */
-.game-stats {
+.game-meta {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    gap: 16px;
     margin-top: auto;
 }
 
@@ -326,146 +307,150 @@ body {
     font-weight: 500;
 }
 
-.player-icon {
-    width: 16px;
-    height: 16px;
-    background: var(--accent-gradient);
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 8px;
-    color: white;
-}
-
-/* Play Button - Updated */
-.play-button {
-    background: var(--accent-gradient);
-    color: white;
-    border: none;
-    border-radius: 12px;
-    padding: 10px 20px;
-    font-size: 13px;
-    font-weight: 700;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    position: relative;
-    overflow: hidden;
-    min-width: 80px;
-}
-
-.play-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-    transition: left 0.5s ease;
-}
-
-.play-button:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
-}
-
-.play-button:hover::before {
-    left: 100%;
-}
-
-/* Game Rating */
 .game-rating {
     display: flex;
     align-items: center;
     gap: 4px;
-    margin-bottom: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 500;
 }
 
 .stars {
+    color: #ffc107;
+    font-size: 12px;
+}
+
+.game-actions {
     display: flex;
-    gap: 2px;
+    align-items: center;
+    gap: 8px;
+    padding: 16px 20px;
+    background: var(--bg-secondary);
+    border-top: 1px solid var(--border-color);
 }
 
-.star {
-    color: #ffd700;
-    font-size: 12px;
-}
-
-.rating-value {
-    font-size: 12px;
-    color: var(--text-muted);
-    font-weight: 600;
-}
-
-/* Featured Game Card */
-.game-card.featured {
-    border: 2px solid #667eea;
-    position: relative;
-}
-
-.game-card.featured::after {
-    content: '🔥 Популярная';
-    position: absolute;
-    top: 12px;
-    right: 12px;
+.play-button {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    border: none;
+    border-radius: 14px;
+    padding: 12px 24px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
+
+.play-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.5);
+}
+
+.play-button::after {
+    content: '→';
+    font-size: 16px;
+    transition: transform 0.3s ease;
+}
+
+.play-button:hover::after {
+    transform: translateX(3px);
+}
+
+.secondary-button {
+    background: var(--bg-card);
+    color: var(--text-primary);
+    border: 1px solid var(--border-color);
+    border-radius: 14px;
+    padding: 12px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+}
+
+.secondary-button:hover {
+    background: var(--bg-secondary);
+    transform: translateY(-1px);
+}
+
+/* Новые статусы игр */
+.game-status {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+.status-tag {
     padding: 4px 10px;
     border-radius: 20px;
     font-size: 10px;
     font-weight: 700;
-    z-index: 2;
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-/* No Games State */
-.no-games {
+.status-tag.beta {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.status-tag.trending {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+}
+
+.status-tag.new {
+    background: linear-gradient(135deg, #00d2d3 0%, #54a0ff 100%);
+    color: white;
+}
+
+.status-tag.popular {
+    background: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+    color: white;
+}
+
+/* Анимации для карточек */
+@keyframes cardEntrance {
+    from {
+        opacity: 0;
+        transform: translateY(30px) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* Стили для пустого состояния */
+.empty-state {
     text-align: center;
     padding: 60px 20px;
-    background: var(--bg-card);
-    border-radius: 20px;
-    border: 2px dashed var(--border-color);
+    color: var(--text-secondary);
 }
 
-.no-games-icon {
+.empty-icon {
     font-size: 64px;
     margin-bottom: 20px;
     opacity: 0.5;
 }
 
-.no-games h3 {
+.empty-state h3 {
     font-size: 18px;
-    font-weight: 600;
     margin-bottom: 8px;
     color: var(--text-primary);
 }
 
-.no-games p {
+.empty-state p {
     font-size: 14px;
-    color: var(--text-secondary);
 }
-
-/* Animation for new games */
-@keyframes slideUpFade {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-.game-card {
-    animation: slideUpFade 0.6s ease-out;
-}
-
-.game-card:nth-child(2) { animation-delay: 0.1s; }
-.game-card:nth-child(3) { animation-delay: 0.2s; }
-.game-card:nth-child(4) { animation-delay: 0.3s; }
 
 /* Exchanges Section */
 .exchanges-section {
@@ -1139,6 +1124,19 @@ body {
     animation: notificationSlideOut 0.3s ease forwards;
 }
 
+/* Удаленные стили для ценовых карточек и статистики токенов */
+.token-stats-grid,
+.price-cards-container,
+.price-card,
+.price-card-header,
+.price-card-content,
+.price-main,
+.price-change,
+.change,
+.change-time {
+    display: none;
+}
+
 /* Адаптивность */
 @media (max-width: 480px) {
     .app-container {
@@ -1158,15 +1156,15 @@ body {
     }
     
     .game-card {
-        height: 260px;
+        padding: 0;
     }
     
-    .game-image {
-        height: 120px;
-    }
-    
-    .game-content {
+    .game-card-content {
         padding: 16px;
+    }
+    
+    .game-actions {
+        padding: 12px 16px;
     }
     
     .exchange-card {
@@ -1174,9 +1172,8 @@ body {
     }
     
     .play-button {
-        padding: 8px 12px;
-        font-size: 12px;
-        min-width: 60px;
+        padding: 10px 16px;
+        font-size: 13px;
     }
     
     .bottom-nav {
