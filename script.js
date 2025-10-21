@@ -8,38 +8,35 @@ const APP_CONFIG = {
 const GAMES_DATA = [
     {
         id: "1",
-        name: "Hamster Kombat",
+        name: "Hamster Gamedev",
         description: "Создай игровую студию и стань лидером",
         players: "15.2K",
-        url: "https://t.me/hamster_kombat_bot/start"
+        url: "https://t.me/hamster_gamedev_bot/start",
+        image: "images/hamster_gamedev.png"
     },
     {
         id: "2", 
-        name: "Yescoin",
+        name: "Hamster King",
         description: "Стань королём в битвах за монеты",
         players: "8.7K",
-        url: "https://t.me/yescoin_coin_bot/start"
+        url: "https://t.me/hamster_king_bot/start",
+        image: "images/hamster_king.png"
     },
     {
         id: "3",
-        name: "Crypto Whales", 
-        description: "Бойцовский клуб для китов",
+        name: "Hamster Fight Club", 
+        description: "Бойцовский клуб для хомяков",
         players: "5.3K",
-        url: "https://t.me/cryptowhales_bot/start"
+        url: "https://t.me/hamster_fight_club_bot/start",
+        image: "images/hamster_fight_club.png"
     },
     {
         id: "4",
-        name: "Tap Fantasy",
+        name: "Bitquest",
         description: "Крипто-приключение в фэнтези мире",
         players: "12.1K",
-        url: "https://t.me/tapfantasy_bot/start"
-    },
-    {
-        id: "5",
-        name: "Nut Collector",
-        description: "Зарабатывай орехи и развивайся",
-        players: "3.8K",
-        url: "https://t.me/nutcollector_bot/start"
+        url: "https://t.me/bitquest_bot/start",
+        image: "images/bitquest.png"
     }
 ];
 
@@ -50,7 +47,7 @@ const EXCHANGES_DATA = [
         name: "Binance",
         description: "Крупнейшая криптобиржа",
         url: "https://www.binance.com",
-        logo: "binance",
+        logo: "images/binance.png",
         features: ["Spot", "Futures", "Earn"]
     },
     {
@@ -58,7 +55,7 @@ const EXCHANGES_DATA = [
         name: "Bybit",
         description: "Лучшие условия для трейдинга",
         url: "https://www.bybit.com",
-        logo: "bybit",
+        logo: "images/bybit.png",
         features: ["Futures", "Copy Trading", "Options"]
     },
     {
@@ -66,7 +63,7 @@ const EXCHANGES_DATA = [
         name: "OKX",
         description: "Много торговых пар",
         url: "https://www.okx.com",
-        logo: "okx",
+        logo: "images/okx.png",
         features: ["Spot", "DeFi", "NFT"]
     },
     {
@@ -74,7 +71,7 @@ const EXCHANGES_DATA = [
         name: "Gate.io",
         description: "Международная платформа",
         url: "https://www.gate.io",
-        logo: "gate",
+        logo: "images/gate.png",
         features: ["HODL", "Startup", "Labs"]
     },
     {
@@ -82,7 +79,7 @@ const EXCHANGES_DATA = [
         name: "MEXC",
         description: "Популярные листинги",
         url: "https://www.mexc.com",
-        logo: "mexc",
+        logo: "images/mexc.png",
         features: ["Spot", "ETF", "Earn"]
     }
 ];
@@ -98,7 +95,7 @@ const NEWS_DATA = [
     {
         id: "2",
         title: "Новые игры добавлены",
-        content: "В каталог добавлены популярные игры: Hamster Kombat, Yescoin, Crypto Whales и другие.",
+        content: "В каталог добавлены популярные игры: Hamster Gamedev, Hamster King, Hamster Fight Club и Bitquest.",
         date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
@@ -158,6 +155,9 @@ function displayGames(games) {
     container.innerHTML = games.map((game, index) => `
         <div class="game-card" data-game-id="${game.id}">
             <div class="game-header">
+                <div class="game-image">
+                    <img src="${game.image}" alt="${game.name}" onerror="this.style.display='none'">
+                </div>
                 <div class="game-info">
                     <h3 class="game-title">${game.name}</h3>
                     <p class="game-description">${game.description}</p>
@@ -189,8 +189,8 @@ function displayExchanges(exchanges) {
     container.innerHTML = exchanges.map(exchange => `
         <a href="${exchange.url}" class="exchange-card" target="_blank" rel="noopener">
             <div class="exchange-content">
-                <div class="exchange-logo ${exchange.logo}">
-                    ${exchange.name.charAt(0)}
+                <div class="exchange-logo">
+                    <img src="${exchange.logo}" alt="${exchange.name}" onerror="this.style.display='none'">
                 </div>
                 <div class="exchange-info">
                     <h3 class="exchange-name">${exchange.name}</h3>
