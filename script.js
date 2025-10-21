@@ -9,54 +9,81 @@ const GAMES_DATA = [
     {
         id: "1",
         name: "Hamster Kombat",
-        description: "Тапы и комбо для максимум прибыли. Участвуй в ежедневных миссиях!",
-        image: "https://img.icons8.com/color/70/000000/hamster.png",
-        url: "https://t.me/hamster_kombat_bot/start",
+        description: "Создай игровую студию и стань лидером",
         players: "15.2K",
-        rating: 4.5,
-        beta: false,
-        trending: true,
-        new: false,
-        popular: true
+        url: "https://t.me/hamster_kombat_bot/start"
     },
     {
         id: "2", 
         name: "Yescoin",
-        description: "Свайпай и зарабатывай монеты. Новая механика игры!",
-        image: "https://img.icons8.com/color/70/000000/coin.png",
-        url: "https://t.me/yescoin_coin_bot/start",
+        description: "Стань королём в битвах за монеты",
         players: "8.7K",
-        rating: 4.2,
-        beta: true,
-        trending: false,
-        new: true,
-        popular: false
+        url: "https://t.me/yescoin_coin_bot/start"
     },
     {
         id: "3",
-        name: "Crypto Whales",
-        description: "Собирай криптовалюту и становись китом!",
-        image: "https://img.icons8.com/color/70/000000/whale.png", 
-        url: "https://t.me/cryptowhales_bot/start",
+        name: "Crypto Whales", 
+        description: "Бойцовский клуб для китов",
         players: "5.3K",
-        rating: 3.8,
-        beta: false,
-        trending: false,
-        new: false,
-        popular: true
+        url: "https://t.me/cryptowhales_bot/start"
     },
     {
         id: "4",
         name: "Tap Fantasy",
-        description: "Фэнтези тап-игра с RPG элементами",
-        image: "https://img.icons8.com/color/70/000000/fantasy.png",
-        url: "https://t.me/tapfantasy_bot/start",
+        description: "Крипто-приключение в фэнтези мире",
         players: "12.1K",
-        rating: 4.3,
-        beta: false,
-        trending: true,
-        new: false,
-        popular: true
+        url: "https://t.me/tapfantasy_bot/start"
+    },
+    {
+        id: "5",
+        name: "Nut Collector",
+        description: "Зарабатывай орехи и развивайся",
+        players: "3.8K",
+        url: "https://t.me/nutcollector_bot/start"
+    }
+];
+
+// Статические данные бирж
+const EXCHANGES_DATA = [
+    {
+        id: "1",
+        name: "Binance",
+        description: "Крупнейшая криптобиржа",
+        url: "https://www.binance.com",
+        logo: "binance",
+        features: ["Spot", "Futures", "Earn"]
+    },
+    {
+        id: "2",
+        name: "Bybit",
+        description: "Лучшие условия для трейдинга",
+        url: "https://www.bybit.com",
+        logo: "bybit",
+        features: ["Futures", "Copy Trading", "Options"]
+    },
+    {
+        id: "3",
+        name: "OKX",
+        description: "Много торговых пар",
+        url: "https://www.okx.com",
+        logo: "okx",
+        features: ["Spot", "DeFi", "NFT"]
+    },
+    {
+        id: "4",
+        name: "Gate.io",
+        description: "Международная платформа",
+        url: "https://www.gate.io",
+        logo: "gate",
+        features: ["HODL", "Startup", "Labs"]
+    },
+    {
+        id: "5",
+        name: "MEXC",
+        description: "Популярные листинги",
+        url: "https://www.mexc.com",
+        logo: "mexc",
+        features: ["Spot", "ETF", "Earn"]
     }
 ];
 
@@ -64,24 +91,21 @@ const GAMES_DATA = [
 const NEWS_DATA = [
     {
         id: "1", 
-        title: "Добро пожаловать в Games Verse!",
+        title: "Добро пожаловать в Hamster Verse!",
         content: "Запущена новая игровая платформа с лучшими играми Telegram. Теперь все игры в одном месте!",
-        date: new Date().toISOString(),
-        image: ""
+        date: new Date().toISOString()
     },
     {
         id: "2",
-        title: "Новая игра: Hamster Kombat",
-        content: "Добавлена популярная игра Hamster Kombat с ежедневными наградами и комбо-системой.",
-        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        image: ""
+        title: "Новые игры добавлены",
+        content: "В каталог добавлены популярные игры: Hamster Kombat, Yescoin, Crypto Whales и другие.",
+        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
     },
     {
         id: "3",
         title: "Обновление дизайна",
         content: "Полностью обновлен интерфейс приложения. Улучшена навигация и добавлены новые функции.",
-        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        image: ""
+        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
     }
 ];
 
@@ -91,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function initializeApp() {
-    console.log('🚀 Games Verse v' + APP_CONFIG.version + ' initializing...');
+    console.log('🚀 Hamster Verse v' + APP_CONFIG.version + ' initializing...');
     
     try {
         setupNavigation();
@@ -101,12 +125,13 @@ function initializeApp() {
         
         // Загрузка статических данных
         displayGames(GAMES_DATA);
+        displayExchanges(EXCHANGES_DATA);
         displayNews(NEWS_DATA);
         
         document.getElementById('app-version').textContent = APP_CONFIG.version;
         document.getElementById('app-build').textContent = APP_CONFIG.build;
         
-        console.log('✅ Games Verse initialized successfully');
+        console.log('✅ Hamster Verse initialized successfully');
         
     } catch (error) {
         console.error('❌ App initialization failed:', error);
@@ -132,55 +157,54 @@ function displayGames(games) {
     
     container.innerHTML = games.map((game, index) => `
         <div class="game-card" data-game-id="${game.id}">
-            <div class="game-card-content">
-                <div class="game-image">
-                    <img src="${game.image}" alt="${game.name}" class="game-avatar" 
-                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAiIGhlaWdodD0iNzAiIHZpZXdCb3g9IjAgMCA3MCA3MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjcwIiBoZWlnaHQ9IjcwIiByeD0iMTgiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSIyNSIgeT0iMjUiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0id2hpdGUiPjxyZWN0IHg9IjgiIHk9IjQiIHdpZHRoPSI4IiBoZWlnaHQ9IjIiLz48cmVjdCB4PSI0IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMiIvPjxyZWN0IHg9IjIiIHk9IjEyIiB3aWR0aD0iMjAiIGhlaWdodD0iMiIvPjxyZWN0IHg9IjQiIHk9IjE2IiB3aWR0aD0iMTYiIGhlaWdodD0iMiIvPjxyZWN0IHg9IjgiIHk9IjIwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyIi8+PC9zdmc+Cjwvc3ZnPg=='">
-                    ${game.beta ? '<span class="game-badge">BETA</span>' : ''}
-                </div>
-                
+            <div class="game-header">
                 <div class="game-info">
-                    <div class="game-header">
-                        <div class="game-title-wrapper">
-                            <h3>${game.name}</h3>
-                            <div class="game-status">
-                                ${game.beta ? '<span class="status-tag beta">Beta</span>' : ''}
-                                ${game.trending ? '<span class="status-tag trending">🔥 Trending</span>' : ''}
-                                ${game.new ? '<span class="status-tag new">New</span>' : ''}
-                                ${game.popular ? '<span class="status-tag popular">Popular</span>' : ''}
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="game-description">${game.description}</div>
-                    
-                    <div class="game-meta">
+                    <h3 class="game-title">${game.name}</h3>
+                    <p class="game-description">${game.description}</p>
+                    <div class="game-footer">
                         <div class="game-players">
                             <span>👥</span>
-                            <span>${game.players}</span>
+                            <span>${game.players} игроков</span>
                         </div>
-                        ${game.rating ? `
-                        <div class="game-rating">
-                            <span class="stars">${'⭐'.repeat(Math.floor(game.rating))}${game.rating % 1 ? '½' : ''}</span>
-                            <span>${game.rating}</span>
-                        </div>
-                        ` : ''}
+                        <button class="play-button" data-url="${game.url}">
+                            Играть
+                        </button>
                     </div>
                 </div>
-            </div>
-            
-            <div class="game-actions">
-                <button class="play-button" data-url="${game.url}">
-                    Играть
-                </button>
-                <button class="secondary-button" onclick="event.stopPropagation(); showGameDetails('${game.id}')">
-                    ℹ️
-                </button>
             </div>
         </div>
     `).join('');
     
     setupGameButtons();
+}
+
+function displayExchanges(exchanges) {
+    const container = document.getElementById('exchanges-container');
+    
+    if (!exchanges || exchanges.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>Биржи временно недоступны</p></div>';
+        return;
+    }
+    
+    container.innerHTML = exchanges.map(exchange => `
+        <a href="${exchange.url}" class="exchange-card" target="_blank" rel="noopener">
+            <div class="exchange-content">
+                <div class="exchange-logo ${exchange.logo}">
+                    ${exchange.name.charAt(0)}
+                </div>
+                <div class="exchange-info">
+                    <h3 class="exchange-name">${exchange.name}</h3>
+                    <p class="exchange-description">${exchange.description}</p>
+                    <div class="exchange-features">
+                        ${exchange.features.map(feature => `
+                            <span class="exchange-feature">${feature}</span>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="exchange-arrow">→</div>
+            </div>
+        </a>
+    `).join('');
 }
 
 function displayNews(news) {
@@ -196,7 +220,6 @@ function displayNews(news) {
             <span class="news-date">${formatDate(item.date)}</span>
             <div class="news-title">${item.title}</div>
             <div class="news-content">${item.content}</div>
-            ${item.image ? `<img src="${item.image}" alt="News image" class="news-image">` : ''}
         </div>
     `).join('');
 }
@@ -226,13 +249,6 @@ function openGame(url) {
         window.Telegram.WebApp.openLink(url);
     } else {
         window.open(url, '_blank', 'noopener,noreferrer');
-    }
-}
-
-function showGameDetails(gameId) {
-    const game = GAMES_DATA.find(g => g.id === gameId);
-    if (game) {
-        showNotification(`Информация о "${game.name}" скоро будет доступна!`, 'info');
     }
 }
 
@@ -327,14 +343,14 @@ function setupShareButton() {
 }
 
 function shareApp() {
-    const shareText = "🎮 Открой для себя Games Verse - все лучшие игры Telegram в одном приложении! Присоединяйся сейчас!";
+    const shareText = "🎮 Открой для себя Hamster Verse - все лучшие игры Telegram в одном приложении! Присоединяйся сейчас!";
     const shareUrl = window.location.href;
     
     if (window.Telegram && window.Telegram.WebApp) {
         window.Telegram.WebApp.shareUrl(shareUrl, shareText);
     } else if (navigator.share) {
         navigator.share({
-            title: 'Games Verse',
+            title: 'Hamster Verse',
             text: shareText,
             url: shareUrl
         });
