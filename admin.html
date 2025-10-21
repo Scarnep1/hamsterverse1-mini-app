@@ -3,10 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ-панель - Hamster Verse</title>
+    <title>Админ-панель - Games Verse</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
     <style>
         .admin-container { max-width: 800px; margin: 0 auto; padding: 20px; }
         .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
@@ -25,26 +27,6 @@
         .item-actions { display: flex; gap: 10px; }
         .game-preview { display: flex; align-items: center; gap: 15px; }
         .game-preview img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
-        
-        .sync-notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 16px 20px;
-            box-shadow: var(--shadow-hover);
-            z-index: 10000;
-            max-width: 320px;
-            animation: notificationSlideIn 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            border-left: 4px solid;
-        }
-        .sync-notification.success { border-left-color: var(--positive-color); }
-        .sync-notification.info { border-left-color: #667eea; }
     </style>
 </head>
 <body>
@@ -53,7 +35,7 @@
             <div class="header-content">
                 <div class="header-titles">
                     <h1 class="app-title">Админ-панель</h1>
-                    <span class="app-subtitle">Hamster Verse - Supabase</span>
+                    <span class="app-subtitle">Games Verse - Firebase</span>
                 </div>
                 <button class="guide-button" onclick="window.location.href='index.html'">
                     ← Назад к приложению
@@ -65,7 +47,6 @@
             <div class="admin-container">
                 <div class="admin-tabs">
                     <button class="admin-tab active" data-tab="games">🎮 Игры</button>
-                    <button class="admin-tab" data-tab="price">💰 Курс HMSTR</button>
                     <button class="admin-tab" data-tab="news">📰 Новости</button>
                 </div>
 
@@ -97,34 +78,10 @@
                         <div class="form-group">
                             <label><input type="checkbox" id="game-beta"> Бета-версия</label>
                         </div>
-                        <button type="submit" class="btn btn-primary">💾 Сохранить в Supabase</button>
+                        <button type="submit" class="btn btn-primary">💾 Сохранить в Firebase</button>
                     </form>
 
                     <div class="items-list" id="games-list"></div>
-                </div>
-
-                <!-- Price Section -->
-                <div id="price-section" class="admin-section">
-                    <h2>Управление курсом HMSTR</h2>
-                    <form id="price-form">
-                        <div class="form-group">
-                            <label for="hmstr-price">Цена HMSTR (USD)</label>
-                            <input type="number" id="hmstr-price" class="form-control" step="0.000001" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="hmstr-change">Изменение за 24ч (%)</label>
-                            <input type="number" id="hmstr-change" class="form-control" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="hmstr-marketcap">Капитализация (в миллионах)</label>
-                            <input type="number" id="hmstr-marketcap" class="form-control" step="0.1" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="hmstr-volume">Объем торгов 24ч (в миллионах)</label>
-                            <input type="number" id="hmstr-volume" class="form-control" step="0.1" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">💾 Сохранить в Supabase</button>
-                    </form>
                 </div>
 
                 <!-- News Section -->
@@ -148,7 +105,7 @@
                             <label for="news-date">Дата публикации</label>
                             <input type="datetime-local" id="news-date" class="form-control" required>
                         </div>
-                        <button type="submit" class="btn btn-primary">💾 Сохранить в Supabase</button>
+                        <button type="submit" class="btn btn-primary">💾 Сохранить в Firebase</button>
                     </form>
 
                     <div class="items-list" id="news-list"></div>
@@ -158,19 +115,27 @@
     </div>
 
     <script>
-        // Конфигурация Supabase
-        const SUPABASE_CONFIG = {
-            url: 'https://hubgtmchajwzerldgtjh.supabase.co',
-            anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imh1Ymd0bWNoYWp3emVybGRndGpoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA2NDMyNjAsImV4cCI6MjA3NjIxOTI2MH0.bHMgD-GMSwAwd7tO_I1v_aHC82yYrWQgEySRAoHbJ5o'
+        // Firebase конфиг
+        const firebaseConfig = {
+            apiKey: "AIzaSyC7ET2n5MJ6V_jFMjNWaDycd4LRyfkZnMw",
+            authDomain: "hamsterversehost.firebaseapp.com",
+            projectId: "hamsterversehost",
+            storageBucket: "hamsterversehost.firebasestorage.app",
+            messagingSenderId: "895206280147",
+            appId: "1:895206280147:web:64e4929ee7e1599ca47d26"
         };
 
-        const supabase = supabase.createClient(SUPABASE_CONFIG.url, SUPABASE_CONFIG.anonKey);
+        // Инициализация
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
+        // Проверка прав
         if (localStorage.getItem('is_admin') !== 'true') {
             alert('Доступ запрещен');
             window.location.href = 'index.html';
         }
 
+        // Табы
         document.querySelectorAll('.admin-tab').forEach(tab => {
             tab.addEventListener('click', function() {
                 const targetTab = this.getAttribute('data-tab');
@@ -181,30 +146,11 @@
             });
         });
 
+        // Загрузка данных
         loadGames();
-        loadPriceData();
         loadNews();
 
-        function showSyncNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            notification.className = `sync-notification ${type}`;
-            
-            notification.innerHTML = `
-                <div class="notification-icon">${type === 'success' ? '✅' : '🔄'}</div>
-                <div class="notification-content">
-                    <div class="notification-title">${type === 'success' ? 'Успешно' : 'Синхронизация'}</div>
-                    <div class="notification-message">${message}</div>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.classList.add('slide-out');
-                setTimeout(() => notification.remove(), 300);
-            }, 3000);
-        }
-
+        // Управление играми
         document.getElementById('game-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             await saveGame();
@@ -212,14 +158,9 @@
 
         async function loadGames() {
             try {
-                const { data: games, error } = await supabase
-                    .from('games')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-                displayGamesList(games || []);
-                
+                const snapshot = await db.collection('games').get();
+                const games = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                displayGamesList(games);
             } catch (error) {
                 console.error('Ошибка загрузки игр:', error);
                 document.getElementById('games-list').innerHTML = '<p>Ошибка загрузки</p>';
@@ -230,36 +171,23 @@
             const gameData = {
                 name: document.getElementById('game-name').value,
                 description: document.getElementById('game-description').value,
-                image_url: document.getElementById('game-image').value,
-                game_url: document.getElementById('game-url').value,
-                players_count: document.getElementById('game-players').value,
-                is_beta: document.getElementById('game-beta').checked,
-                created_at: new Date().toISOString()
+                image: document.getElementById('game-image').value,
+                url: document.getElementById('game-url').value,
+                players: document.getElementById('game-players').value,
+                beta: document.getElementById('game-beta').checked
             };
 
             const gameId = document.getElementById('game-id').value;
 
             try {
-                showSyncNotification('Синхронизация игры с пользователями...', 'info');
-                
-                let result;
                 if (gameId) {
-                    result = await supabase
-                        .from('games')
-                        .update(gameData)
-                        .eq('id', gameId);
+                    await db.collection('games').doc(gameId).set(gameData);
                 } else {
-                    result = await supabase
-                        .from('games')
-                        .insert([gameData]);
+                    await db.collection('games').add(gameData);
                 }
-
-                if (result.error) throw result.error;
-                
-                showSyncNotification('✅ Игра синхронизирована! Пользователи увидят изменения мгновенно', 'success');
+                alert('✅ Игра сохранена в Firebase!');
                 resetGameForm();
                 loadGames();
-                
             } catch (error) {
                 alert('❌ Ошибка сохранения: ' + error.message);
             }
@@ -270,10 +198,10 @@
             container.innerHTML = games.map(game => `
                 <div class="item-card">
                     <div class="game-preview">
-                        <img src="${game.image_url}" alt="${game.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzY2N2VlYSIvPgo8L3N2Zz4K'">
+                        <img src="${game.image}" alt="${game.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzY2N2VlYSIvPgo8L3N2Zz4K'">
                         <div>
                             <strong>${game.name}</strong>
-                            <div style="font-size: 12px; color: var(--text-secondary);">${game.players_count} игроков</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">${game.players} игроков</div>
                         </div>
                     </div>
                     <div class="item-actions">
@@ -286,22 +214,16 @@
 
         async function editGame(id) {
             try {
-                const { data: game, error } = await supabase
-                    .from('games')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
-
-                if (error) throw error;
-
-                if (game) {
+                const doc = await db.collection('games').doc(id).get();
+                if (doc.exists) {
+                    const game = doc.data();
                     document.getElementById('game-id').value = id;
                     document.getElementById('game-name').value = game.name;
                     document.getElementById('game-description').value = game.description;
-                    document.getElementById('game-image').value = game.image_url;
-                    document.getElementById('game-url').value = game.game_url;
-                    document.getElementById('game-players').value = game.players_count;
-                    document.getElementById('game-beta').checked = game.is_beta || false;
+                    document.getElementById('game-image').value = game.image;
+                    document.getElementById('game-url').value = game.url;
+                    document.getElementById('game-players').value = game.players;
+                    document.getElementById('game-beta').checked = game.beta || false;
                 }
             } catch (error) {
                 alert('Ошибка загрузки игры: ' + error.message);
@@ -311,14 +233,8 @@
         async function deleteGame(id) {
             if (confirm('Удалить эту игру?')) {
                 try {
-                    const { error } = await supabase
-                        .from('games')
-                        .delete()
-                        .eq('id', id);
-
-                    if (error) throw error;
-                    
-                    showSyncNotification('✅ Игра удалена!', 'success');
+                    await db.collection('games').doc(id).delete();
+                    alert('✅ Игра удалена!');
                     loadGames();
                 } catch (error) {
                     alert('❌ Ошибка удаления: ' + error.message);
@@ -331,59 +247,7 @@
             document.getElementById('game-id').value = '';
         }
 
-        document.getElementById('price-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await savePriceData();
-        });
-
-        async function loadPriceData() {
-            try {
-                const { data: price, error } = await supabase
-                    .from('settings')
-                    .select('*')
-                    .eq('id', 'price')
-                    .single();
-
-                if (error) throw error;
-                
-                if (price) {
-                    document.getElementById('hmstr-price').value = price.hmstr_price;
-                    document.getElementById('hmstr-change').value = price.price_change;
-                    document.getElementById('hmstr-marketcap').value = price.market_cap;
-                    document.getElementById('hmstr-volume').value = price.volume_24h;
-                }
-                
-            } catch (error) {
-                console.error('Ошибка загрузки курса:', error);
-            }
-        }
-
-        async function savePriceData() {
-            const priceData = {
-                hmstr_price: parseFloat(document.getElementById('hmstr-price').value),
-                price_change: parseFloat(document.getElementById('hmstr-change').value),
-                market_cap: document.getElementById('hmstr-marketcap').value,
-                volume_24h: document.getElementById('hmstr-volume').value,
-                updated_at: new Date().toISOString()
-            };
-
-            try {
-                showSyncNotification('Синхронизация курса с пользователями...', 'info');
-                
-                const { error } = await supabase
-                    .from('settings')
-                    .update(priceData)
-                    .eq('id', 'price');
-
-                if (error) throw error;
-                
-                showSyncNotification('✅ Курс синхронизирован! Пользователи увидят изменения мгновенно', 'success');
-                
-            } catch (error) {
-                alert('❌ Ошибка сохранения: ' + error.message);
-            }
-        }
-
+        // Управление новостями
         document.getElementById('news-form').addEventListener('submit', async function(e) {
             e.preventDefault();
             await saveNews();
@@ -391,14 +255,9 @@
 
         async function loadNews() {
             try {
-                const { data: news, error } = await supabase
-                    .from('news')
-                    .select('*')
-                    .order('publish_date', { ascending: false });
-
-                if (error) throw error;
-                displayNewsList(news || []);
-                
+                const snapshot = await db.collection('news').orderBy('date', 'desc').get();
+                const news = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                displayNewsList(news);
             } catch (error) {
                 console.error('Ошибка загрузки новостей:', error);
             }
@@ -408,34 +267,21 @@
             const newsData = {
                 title: document.getElementById('news-title').value,
                 content: document.getElementById('news-content').value,
-                image_url: document.getElementById('news-image').value,
-                publish_date: document.getElementById('news-date').value,
-                is_published: true
+                image: document.getElementById('news-image').value,
+                date: document.getElementById('news-date').value
             };
 
             const newsId = document.getElementById('news-id').value;
 
             try {
-                showSyncNotification('Синхронизация новости с пользователями...', 'info');
-                
-                let result;
                 if (newsId) {
-                    result = await supabase
-                        .from('news')
-                        .update(newsData)
-                        .eq('id', newsId);
+                    await db.collection('news').doc(newsId).set(newsData);
                 } else {
-                    result = await supabase
-                        .from('news')
-                        .insert([newsData]);
+                    await db.collection('news').add(newsData);
                 }
-
-                if (result.error) throw result.error;
-                
-                showSyncNotification('✅ Новость синхронизирована! Пользователи увидят изменения мгновенно', 'success');
+                alert('✅ Новость сохранена в Firebase!');
                 resetNewsForm();
                 loadNews();
-                
             } catch (error) {
                 alert('❌ Ошибка сохранения: ' + error.message);
             }
@@ -448,7 +294,7 @@
                     <div>
                         <strong>${item.title}</strong>
                         <div style="font-size: 12px; color: var(--text-secondary);">
-                            ${new Date(item.publish_date).toLocaleDateString('ru-RU')}
+                            ${new Date(item.date).toLocaleDateString('ru-RU')}
                         </div>
                     </div>
                     <div class="item-actions">
@@ -461,20 +307,14 @@
 
         async function editNews(id) {
             try {
-                const { data: news, error } = await supabase
-                    .from('news')
-                    .select('*')
-                    .eq('id', id)
-                    .single();
-
-                if (error) throw error;
-
-                if (news) {
+                const doc = await db.collection('news').doc(id).get();
+                if (doc.exists) {
+                    const news = doc.data();
                     document.getElementById('news-id').value = id;
                     document.getElementById('news-title').value = news.title;
                     document.getElementById('news-content').value = news.content;
-                    document.getElementById('news-image').value = news.image_url || '';
-                    document.getElementById('news-date').value = news.publish_date.slice(0, 16);
+                    document.getElementById('news-image').value = news.image || '';
+                    document.getElementById('news-date').value = news.date;
                 }
             } catch (error) {
                 alert('Ошибка загрузки новости: ' + error.message);
@@ -484,14 +324,8 @@
         async function deleteNews(id) {
             if (confirm('Удалить эту новость?')) {
                 try {
-                    const { error } = await supabase
-                        .from('news')
-                        .delete()
-                        .eq('id', id);
-
-                    if (error) throw error;
-                    
-                    showSyncNotification('✅ Новость удалена!', 'success');
+                    await db.collection('news').doc(id).delete();
+                    alert('✅ Новость удалена!');
                     loadNews();
                 } catch (error) {
                     alert('❌ Ошибка удаления: ' + error.message);
@@ -505,14 +339,15 @@
             document.getElementById('news-date').value = new Date().toISOString().slice(0, 16);
         }
 
+        // Установите текущую дату по умолчанию
         document.getElementById('news-date').value = new Date().toISOString().slice(0, 16);
 
-        supabase.from('games').select('*').limit(1).then((result) => {
-            if (!result.error) {
-                console.log('✅ Supabase подключен');
-            } else {
-                console.error('❌ Ошибка Supabase:', result.error);
-            }
+        // Проверка подключения
+        db.collection('games').limit(1).get().then(() => {
+            console.log('✅ Firebase подключен');
+        }).catch((error) => {
+            console.error('❌ Ошибка Firebase:', error);
+            alert('Ошибка подключения к Firebase: ' + error.message);
         });
     </script>
 </body>
