@@ -101,34 +101,41 @@ function getDefaultGames() {
         {
             id: "1",
             name: "Hamster Kombat",
-            description: "Тапай и зарабатывай монеты в этой увлекательной игре с хомяками!",
-            image: "https://via.placeholder.com/400x200/667eea/764ba2?text=Hamster+Kombat",
+            description: "Тапы и комбо для максимум прибыли. Участвуй в ежедневных миссиях!",
+            image: "https://via.placeholder.com/70",
             url: "https://t.me/hamster_kombat_bot/start?startapp=kentId6823288584",
             players: "15.2K",
+            rating: 4.5,
             beta: false,
-            popular: true,
-            rating: 4.8
+            trending: true,
+            new: false,
+            popular: true
         },
         {
             id: "2", 
             name: "Yescoin",
-            description: "Собирай монеты и развивай свою ферму в стильной аркадной игре",
-            image: "https://via.placeholder.com/400x200/00cec9/0984e3?text=Yescoin",
+            description: "Свайпай и зарабатывай монеты. Новая механика игры!",
+            image: "https://via.placeholder.com/70",
             url: "https://t.me/yescoin_coin_bot/start?startapp=ref_6823288584",
             players: "8.7K",
+            rating: 4.2,
             beta: true,
-            rating: 4.5
+            trending: false,
+            new: true,
+            popular: false
         },
         {
             id: "3",
-            name: "Crypto World",
-            description: "Строй свою крипто-империю и торгуй с игроками со всего мира",
-            image: "https://via.placeholder.com/400x200/fdcb6e/e17055?text=Crypto+World",
-            url: "https://t.me/cryptoworld_bot/start",
-            players: "12.4K",
+            name: "Crypto Whales",
+            description: "Собирай криптовалюту и становись китом!",
+            image: "https://via.placeholder.com/70", 
+            url: "https://t.me/cryptowhales_bot/start?startapp=ref_6823288584",
+            players: "5.3K",
+            rating: 3.8,
             beta: false,
-            popular: true,
-            rating: 4.7
+            trending: false,
+            new: false,
+            popular: true
         }
     ];
 }
@@ -138,15 +145,8 @@ function getDefaultNews() {
         {
             id: "1", 
             title: "Добро пожаловать в Games Verse!",
-            content: "Запущена новая игровая платформа с лучшими играми Telegram. Теперь все ваши любимые игры в одном месте!",
+            content: "Запущена новая игровая платформа с лучшими играми Telegram",
             date: new Date().toISOString(),
-            image: ""
-        },
-        {
-            id: "2",
-            title: "Новые игры уже доступны",
-            content: "Мы добавили самые популярные игры этого сезона. Проверьте раздел игр для ознакомления!",
-            date: new Date(Date.now() - 86400000).toISOString(),
             image: ""
         }
     ];
@@ -159,8 +159,8 @@ function displayGames(games) {
     
     if (!games || games.length === 0) {
         container.innerHTML = `
-            <div class="no-games">
-                <div class="no-games-icon">🎮</div>
+            <div class="empty-state">
+                <div class="empty-icon">🎮</div>
                 <h3>Игры временно недоступны</h3>
                 <p>Попробуйте обновить страницу позже</p>
             </div>
@@ -169,39 +169,51 @@ function displayGames(games) {
     }
     
     container.innerHTML = games.map((game, index) => `
-        <div class="game-card ${index === 0 ? 'featured' : ''}" data-game-id="${game.id}">
-            <div class="game-image">
-                <img src="${game.image}" alt="${game.name}" class="game-avatar" 
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDIwMCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyMDAiIGhlaWdodD0iMjAwIiBmaWxsPSJ1cmwoI2dyYWRpZW50KSIvPgo8ZGVmcz4KPGxpbmVhckdyYWRpZW50IGlkPSJncmFkaWVudCIgeDE9IjAiIHkxPSIwIiB4Mj0iMjAwIiB5Mj0iMjAwIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSI+CjxzdG9wIG9mZnNldD0iMCIgc3RvcC1jb2xvcj0iIzY2N2VlYSIvPgo8c3RvcCBvZmZzZXQ9IjEiIHN0b3AtY29sb3I9IiM3NjRiYTIiLz4KPC9saW5lYXJHcmFkaWVudD4KPC9kZWZzPgo8L3N2Zz4K'">
-                <div class="game-badges">
-                    ${game.beta ? '<span class="game-beta">Beta</span>' : ''}
-                    ${game.popular ? '<span class="game-popular">Популярная</span>' : ''}
+        <div class="game-card" data-game-id="${game.id}">
+            <div class="game-card-content">
+                <div class="game-image">
+                    <img src="${game.image}" alt="${game.name}" class="game-avatar" 
+                         onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNzAiIGhlaWdodD0iNzAiIHZpZXdCb3g9IjAgMCA3MCA3MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjcwIiBoZWlnaHQ9IjcwIiByeD0iMTgiIGZpbGw9IiM2NjdlZWEiLz4KPHN2ZyB4PSIyNSIgeT0iMjUiIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgZmlsbD0id2hpdGUiPjxyZWN0IHg9IjgiIHk9IjQiIHdpZHRoPSI4IiBoZWlnaHQ9IjIiLz48cmVjdCB4PSI0IiB5PSI4IiB3aWR0aD0iMTYiIGhlaWdodD0iMiIvPjxyZWN0IHg9IjIiIHk9IjEyIiB3aWR0aD0iMjAiIGhlaWdodD0iMiIvPjxyZWN0IHg9IjQiIHk9IjE2IiB3aWR0aD0iMTYiIGhlaWdodD0iMiIvPjxyZWN0IHg9IjgiIHk9IjIwIiB3aWR0aD0iOCIgaGVpZ2h0PSIyIi8+PC9zdmc+Cjwvc3ZnPg=='">
+                    ${game.beta ? '<span class="game-badge">BETA</span>' : ''}
                 </div>
-            </div>
-            <div class="game-content">
-                <div class="game-header">
-                    <div class="game-info">
-                        <h3>${game.name}</h3>
-                        ${game.rating ? `
-                            <div class="game-rating">
-                                <div class="stars">
-                                    ${'★'.repeat(Math.floor(game.rating))}${'☆'.repeat(5-Math.floor(game.rating))}
-                                </div>
-                                <span class="rating-value">${game.rating.toFixed(1)}</span>
+                
+                <div class="game-info">
+                    <div class="game-header">
+                        <div class="game-title-wrapper">
+                            <h3>${game.name}</h3>
+                            <div class="game-status">
+                                ${game.beta ? '<span class="status-tag beta">Beta</span>' : ''}
+                                ${game.trending ? '<span class="status-tag trending">🔥 Trending</span>' : ''}
+                                ${game.new ? '<span class="status-tag new">New</span>' : ''}
+                                ${game.popular ? '<span class="status-tag popular">Popular</span>' : ''}
                             </div>
+                        </div>
+                    </div>
+                    
+                    <div class="game-description">${game.description}</div>
+                    
+                    <div class="game-meta">
+                        <div class="game-players">
+                            <span>👥</span>
+                            <span>${game.players}</span>
+                        </div>
+                        ${game.rating ? `
+                        <div class="game-rating">
+                            <span class="stars">${'⭐'.repeat(Math.floor(game.rating))}${game.rating % 1 ? '½' : ''}</span>
+                            <span>${game.rating}</span>
+                        </div>
                         ` : ''}
                     </div>
                 </div>
-                <p class="game-description">${game.description}</p>
-                <div class="game-stats">
-                    <div class="game-players">
-                        <span class="player-icon">👥</span>
-                        ${game.players} игроков
-                    </div>
-                    <button class="play-button" data-url="${game.url}">
-                        Играть →
-                    </button>
-                </div>
+            </div>
+            
+            <div class="game-actions">
+                <button class="play-button" data-url="${game.url}">
+                    Играть
+                </button>
+                <button class="secondary-button" onclick="event.stopPropagation(); showGameDetails('${game.id}')">
+                    ℹ️
+                </button>
             </div>
         </div>
     `).join('');
@@ -255,6 +267,10 @@ function openGame(url) {
     }
 }
 
+function showGameDetails(gameId) {
+    showNotification('Детали игры скоро будут доступны!', 'info');
+}
+
 // ==================== OTHER FUNCTIONS ====================
 
 function setupNavigation() {
@@ -280,61 +296,35 @@ function setupNavigation() {
 
 function setupTelegramIntegration() {
     if (window.Telegram && window.Telegram.WebApp) {
-        window.Telegram.WebApp.expand();
+        const tg = window.Telegram.WebApp;
         
-        const user = window.Telegram.WebApp.initDataUnsafe?.user;
+        tg.expand();
+        tg.enableClosingConfirmation();
         
-        if (user) {
-            updateUserProfile(user);
-        }
+        updateUserProfile(tg.initDataUnsafe.user);
         
-        if (window.Telegram.WebApp.colorScheme === 'dark') {
-            setTheme('dark');
-        }
-        
+        tg.ready();
     } else {
-        simulateUserProfile();
+        console.log('Telegram WebApp not detected, running in browser mode');
+        updateUserProfile({
+            first_name: 'Пользователь',
+            username: 'user'
+        });
     }
 }
 
 function updateUserProfile(user) {
-    const avatar = document.getElementById('tg-avatar');
-    const headerAvatar = document.getElementById('user-avatar');
-    const name = document.getElementById('tg-name');
-    const username = document.getElementById('tg-username');
-    
-    if (user.photo_url) {
-        avatar.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%;">`;
-        headerAvatar.innerHTML = `<img src="${user.photo_url}" alt="Avatar" style="width: 100%; height: 100%; border-radius: 50%;">`;
-    } else {
-        const initial = user.first_name?.[0] || 'U';
-        avatar.textContent = initial;
-        headerAvatar.textContent = initial;
+    if (user) {
+        const name = user.first_name || 'Пользователь';
+        const username = user.username ? `@${user.username}` : 'Пользователь';
+        
+        document.getElementById('tg-name').textContent = name;
+        document.getElementById('tg-username').textContent = username;
+        
+        if (user.photo_url) {
+            document.getElementById('tg-avatar').innerHTML = `<img src="${user.photo_url}" alt="${name}" style="width: 100%; height: 100%; border-radius: 50%;">`;
+        }
     }
-    
-    if (user.first_name) {
-        name.textContent = `${user.first_name} ${user.last_name || ''}`.trim();
-    }
-    
-    if (user.username) {
-        username.textContent = `@${user.username}`;
-    } else {
-        username.textContent = 'Telegram пользователь';
-    }
-}
-
-function simulateUserProfile() {
-    const names = ['Алексей', 'Мария', 'Дмитрий', 'Анна', 'Сергей'];
-    const surnames = ['Иванов', 'Петрова', 'Сидоров', 'Кузнецова', 'Попов'];
-    const usernames = ['alexey', 'maria', 'dmitry', 'anna', 'sergey'];
-    
-    const randomIndex = Math.floor(Math.random() * names.length);
-    const name = names[randomIndex];
-    const surname = surnames[randomIndex];
-    const username = usernames[randomIndex];
-    
-    document.getElementById('tg-name').textContent = `${name} ${surname}`;
-    document.getElementById('tg-username').textContent = `@${username}`;
 }
 
 function setupThemeToggle() {
@@ -343,18 +333,19 @@ function setupThemeToggle() {
     const themeText = themeToggle.querySelector('.theme-text');
     
     const savedTheme = localStorage.getItem('theme') || 'light';
-    setTheme(savedTheme);
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeButton(savedTheme);
     
     themeToggle.addEventListener('click', function() {
-        const currentTheme = document.documentElement.getAttribute('data-theme') || 'light';
+        const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        setTheme(newTheme);
+        
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeButton(newTheme);
     });
     
-    function setTheme(theme) {
-        document.documentElement.setAttribute('data-theme', theme);
-        localStorage.setItem('theme', theme);
-        
+    function updateThemeButton(theme) {
         if (theme === 'dark') {
             themeIcon.textContent = '☀️';
             themeText.textContent = 'Светлая тема';
@@ -367,10 +358,7 @@ function setupThemeToggle() {
 
 function setupShareButton() {
     const shareButton = document.getElementById('share-button');
-    
-    if (shareButton) {
-        shareButton.addEventListener('click', shareApp);
-    }
+    shareButton.addEventListener('click', shareApp);
 }
 
 function shareApp() {
@@ -394,69 +382,64 @@ function shareApp() {
 
 function setupFeedbackSystem() {
     const feedbackButton = document.getElementById('feedback-button');
+    const feedbackModal = document.getElementById('feedback-modal');
     
-    if (feedbackButton) {
-        feedbackButton.addEventListener('click', openFeedbackModal);
-    }
-}
-
-function openFeedbackModal() {
-    const modal = document.getElementById('feedback-modal');
-    modal.classList.remove('hidden');
-    
-    setTimeout(() => {
-        const textarea = document.getElementById('feedback-text');
-        textarea.focus();
-    }, 100);
-}
-
-function closeFeedbackModal() {
-    const modal = document.getElementById('feedback-modal');
-    modal.classList.add('closing');
-    
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        modal.classList.remove('closing');
-    }, 300);
-}
-
-function sendFeedback() {
-    const textarea = document.getElementById('feedback-text');
-    const feedback = textarea.value.trim();
-    
-    if (!feedback) {
-        showNotification('Пожалуйста, введите ваше сообщение', 'error');
-        return;
-    }
-    
-    showNotification('Спасибо за ваш отзыв!', 'success');
-    closeFeedbackModal();
-    textarea.value = '';
+    feedbackButton.addEventListener('click', function() {
+        feedbackModal.classList.remove('hidden');
+    });
 }
 
 function setupAdminButton() {
     const adminContainer = document.getElementById('admin-button-container');
+    const isAdmin = localStorage.getItem('isAdmin') === 'true';
     
-    const isAdmin = localStorage.getItem('is_admin') === 'true';
+    if (isAdmin) {
+        adminContainer.style.display = 'block';
+    }
+}
+
+function closeFeedbackModal() {
+    const modal = document.getElementById('feedback-modal');
+    modal.classList.add('hidden');
+}
+
+function sendFeedback() {
+    const feedbackText = document.getElementById('feedback-text').value.trim();
     
-    if (adminContainer) {
-        adminContainer.style.display = isAdmin ? 'block' : 'none';
+    if (!feedbackText) {
+        showNotification('Пожалуйста, введите ваше сообщение', 'error');
+        return;
     }
     
-    let keySequence = '';
-    document.addEventListener('keydown', function(e) {
-        keySequence += e.key;
-        if (keySequence.length > 10) {
-            keySequence = keySequence.slice(-10);
-        }
+    const feedbackData = {
+        text: feedbackText,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href
+    };
+    
+    try {
+        db.collection('feedback').add(feedbackData)
+            .then(() => {
+                showNotification('Спасибо за ваш отзыв!', 'success');
+                document.getElementById('feedback-text').value = '';
+                closeFeedbackModal();
+            })
+            .catch(error => {
+                console.error('Error saving feedback:', error);
+                showNotification('Ошибка отправки отзыва', 'error');
+            });
+    } catch (error) {
+        console.error('Feedback error:', error);
+        showNotification('Отзыв сохранен локально', 'info');
         
-        if (keySequence.includes(APP_CONFIG.adminPassword)) {
-            localStorage.setItem('is_admin', 'true');
-            setupAdminButton();
-            showNotification('Режим администратора активирован!', 'success');
-            keySequence = '';
-        }
-    });
+        const localFeedback = JSON.parse(localStorage.getItem('feedback') || '[]');
+        localFeedback.push(feedbackData);
+        localStorage.setItem('feedback', JSON.stringify(localFeedback));
+        
+        document.getElementById('feedback-text').value = '';
+        closeFeedbackModal();
+    }
 }
 
 function formatDate(dateString) {
@@ -477,7 +460,6 @@ function showNotification(message, type = 'info') {
     notification.innerHTML = `
         <div class="notification-icon">${icons[type] || icons.info}</div>
         <div class="notification-content">
-            <div class="notification-title">${type === 'success' ? 'Успешно' : type === 'error' ? 'Ошибка' : 'Информация'}</div>
             <div class="notification-message">${message}</div>
         </div>
     `;
@@ -486,8 +468,12 @@ function showNotification(message, type = 'info') {
     
     setTimeout(() => {
         notification.classList.add('slide-out');
-        setTimeout(() => notification.remove(), 300);
-    }, 4000);
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
 }
 
 function closeAnnouncement() {
