@@ -1,108 +1,141 @@
 // Конфигурация приложения
 const APP_CONFIG = {
-    version: '2.3.0',
-    build: '2024.01.20'
+    version: '2.4.0',
+    build: '2024.01.21'
 };
 
-// Статические данные игр
+// Обновленные данные игр с правильными изображениями
 const GAMES_DATA = [
     {
         id: "1",
         name: "Hamster Gamedev",
-        description: "Создай игровую студию и стань лидером",
+        description: "Создай игровую студию и стань лидером индустрии",
         players: "15.2K",
         url: "https://t.me/hamster_gamedev_bot/start",
-        image: "images/hamster_gamedev.jpg"
+        image: "images/hunterer-gamesdev.jpg",
+        category: "Стратегия",
+        rating: "4.8"
     },
     {
         id: "2", 
         name: "Hamster King",
-        description: "Стань королём в битвах за монеты",
+        description: "Стань королём в эпических битвах за монеты",
         players: "8.7K",
         url: "https://t.me/hamster_king_bot/start",
-        image: "images/hamster_king.jpg"
+        image: "images/hamster_king.jpg",
+        category: "Аркада",
+        rating: "4.6"
     },
     {
         id: "3",
         name: "Hamster Fight Club", 
-        description: "Бойцовский клуб для хомяков",
+        description: "Бойцовский клуб для самых сильных хомяков",
         players: "5.3K",
         url: "https://t.me/hamster_fight_club_bot/start",
-        image: "images/hamster_fight_club.jpg"
+        image: "images/hunterer-fight-club.jpg",
+        category: "Экшен",
+        rating: "4.7"
     },
     {
         id: "4",
         name: "Bitquest",
-        description: "Крипто-приключение в фэнтези мире",
+        description: "Крипто-приключение в фэнтези мире блокчейна",
         players: "12.1K",
         url: "https://t.me/bitquest_bot/start",
-        image: "images/bitquest.jpg"
+        image: "images/bitquest.jpg",
+        category: "RPG",
+        rating: "4.9"
+    },
+    {
+        id: "5",
+        name: "Crypto Hamster",
+        description: "Зарабатывай крипту вместе с хомяками",
+        players: "9.4K",
+        url: "https://t.me/crypto_hamster_bot/start",
+        image: "images/hunter-binar.png",
+        category: "Экономика",
+        rating: "4.5"
     }
 ];
 
-// Статические данные бирж
+// Обновленные данные бирж с правильными изображениями
 const EXCHANGES_DATA = [
     {
         id: "1",
         name: "Binance",
-        description: "Крупнейшая криптобиржа",
+        description: "Крупнейшая мировая криптобиржа",
         url: "https://www.binance.com",
-        logo: "images/binance.png",
-        features: ["Spot", "Futures", "Earn"]
+        logo: "images/binarace.png",
+        features: ["Spot", "Futures", "Earn", "NFT"],
+        rating: "4.9"
     },
     {
         id: "2",
         name: "Bybit",
         description: "Лучшие условия для трейдинга",
         url: "https://www.bybit.com",
-        logo: "images/bybit.png",
-        features: ["Futures", "Copy Trading", "Options"]
+        logo: "images/bybel.jpg",
+        features: ["Futures", "Copy Trading", "Options"],
+        rating: "4.7"
     },
     {
         id: "3",
         name: "OKX",
-        description: "Много торговых пар",
+        description: "Тысячи торговых пар",
         url: "https://www.okx.com",
         logo: "images/okx.png",
-        features: ["Spot", "DeFi", "NFT"]
+        features: ["Spot", "DeFi", "NFT", "Web3"],
+        rating: "4.6"
     },
     {
         id: "4",
         name: "Gate.io",
-        description: "Международная платформа",
+        description: "Международная торговая платформа",
         url: "https://www.gate.io",
         logo: "images/gate.png",
-        features: ["HODL", "Startup", "Labs"]
+        features: ["HODL", "Startup", "Labs"],
+        rating: "4.5"
     },
     {
         id: "5",
         name: "MEXC",
-        description: "Популярные листинги",
+        description: "Популярные листинги и низкие комиссии",
         url: "https://www.mexc.com",
         logo: "images/mexc.png",
-        features: ["Spot", "ETF", "Earn"]
+        features: ["Spot", "ETF", "Earn", "Futures"],
+        rating: "4.4"
     }
 ];
 
-// Статические данные новостей
+// Обновленные новости
 const NEWS_DATA = [
     {
         id: "1", 
-        title: "Добро пожаловать в Hamster Verse!",
-        content: "Запущена новая игровая платформа с лучшими играми Telegram. Теперь все игры в одном месте!",
-        date: new Date().toISOString()
+        title: "🎊 Hamster Verse 2.4 запущен!",
+        content: "Полностью обновленный дизайн, новые игры и улучшенная производительность. Теперь еще лучше!",
+        date: new Date().toISOString(),
+        type: "update"
     },
     {
         id: "2",
-        title: "Новые игры добавлены",
-        content: "В каталог добавлены популярные игры: Hamster Gamedev, Hamster King, Hamster Fight Club и Bitquest.",
-        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString()
+        title: "🆕 Добавлены 5 новых игр",
+        content: "В каталог добавлены популярные игры: Hamster Gamedev, Hamster King, Hamster Fight Club, Bitquest и Crypto Hamster.",
+        date: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        type: "games"
     },
     {
         id: "3",
-        title: "Обновление дизайна",
-        content: "Полностью обновлен интерфейс приложения. Улучшена навигация и добавлены новые функции.",
-        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString()
+        title: "📈 Обновлены данные бирж",
+        content: "Актуальная информация о топовых криптобиржах с правильными логотипами и описаниями.",
+        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        type: "exchanges"
+    },
+    {
+        id: "4",
+        title: "🎨 Улучшен интерфейс",
+        content: "Полностью переработан дизайн приложения. Новые анимации, темы и улучшенная навигация.",
+        date: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        type: "design"
     }
 ];
 
@@ -120,7 +153,7 @@ function initializeApp() {
         setupThemeToggle();
         setupShareButton();
         
-        // Загрузка статических данных
+        // Загрузка обновленных данных
         displayGames(GAMES_DATA);
         displayExchanges(EXCHANGES_DATA);
         displayNews(NEWS_DATA);
@@ -154,19 +187,24 @@ function displayGames(games) {
     
     container.innerHTML = games.map((game, index) => `
         <div class="game-card" data-game-id="${game.id}">
+            <div class="game-badge">⭐ ${game.rating}</div>
             <div class="game-header">
                 <div class="game-image">
                     <img src="${game.image}" alt="${game.name}" onerror="handleImageError(this)">
+                    <div class="game-category">${game.category}</div>
                 </div>
                 <div class="game-info">
                     <h3 class="game-title">${game.name}</h3>
                     <p class="game-description">${game.description}</p>
                     <div class="game-footer">
-                        <div class="game-players">
-                            <span>👥</span>
-                            <span>${game.players} игроков</span>
+                        <div class="game-stats">
+                            <div class="game-players">
+                                <span class="stat-icon">👥</span>
+                                <span>${game.players}</span>
+                            </div>
                         </div>
                         <button class="play-button" data-url="${game.url}">
+                            <span class="play-icon">🎯</span>
                             Играть
                         </button>
                     </div>
@@ -176,14 +214,23 @@ function displayGames(games) {
     `).join('');
     
     setupGameButtons();
+    
+    // Добавляем анимацию появления
+    setTimeout(() => {
+        const cards = container.querySelectorAll('.game-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('fade-in-up');
+        });
+    }, 100);
 }
 
 function handleImageError(img) {
     console.warn('Image failed to load:', img.src);
-    // Можно добавить заглушку или скрыть элемент
     img.style.display = 'none';
-    img.parentElement.style.background = 'var(--accent-gradient)';
-    img.parentElement.innerHTML = '<span style="color: white; font-size: 24px;">🎮</span>';
+    const parent = img.parentElement;
+    parent.style.background = 'var(--accent-gradient)';
+    parent.innerHTML = '<div class="image-fallback"><span>🎮</span></div>';
 }
 
 function displayExchanges(exchanges) {
@@ -196,6 +243,7 @@ function displayExchanges(exchanges) {
     
     container.innerHTML = exchanges.map(exchange => `
         <a href="${exchange.url}" class="exchange-card" target="_blank" rel="noopener">
+            <div class="exchange-badge">⭐ ${exchange.rating}</div>
             <div class="exchange-content">
                 <div class="exchange-logo">
                     <img src="${exchange.logo}" alt="${exchange.name}" onerror="handleImageError(this)">
@@ -213,6 +261,15 @@ function displayExchanges(exchanges) {
             </div>
         </a>
     `).join('');
+    
+    // Анимация появления
+    setTimeout(() => {
+        const cards = container.querySelectorAll('.exchange-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+            card.classList.add('fade-in-up');
+        });
+    }, 100);
 }
 
 function displayNews(news) {
@@ -224,12 +281,34 @@ function displayNews(news) {
     }
     
     container.innerHTML = news.map(item => `
-        <div class="news-item">
-            <span class="news-date">${formatDate(item.date)}</span>
+        <div class="news-item news-${item.type}">
+            <div class="news-header">
+                <span class="news-date">${formatDate(item.date)}</span>
+                <span class="news-type">${getNewsTypeIcon(item.type)}</span>
+            </div>
             <div class="news-title">${item.title}</div>
             <div class="news-content">${item.content}</div>
         </div>
     `).join('');
+    
+    // Анимация появления
+    setTimeout(() => {
+        const items = container.querySelectorAll('.news-item');
+        items.forEach((item, index) => {
+            item.style.animationDelay = `${index * 0.1}s`;
+            item.classList.add('fade-in-up');
+        });
+    }, 100);
+}
+
+function getNewsTypeIcon(type) {
+    const icons = {
+        'update': '🔄',
+        'games': '🎮',
+        'exchanges': '💱',
+        'design': '🎨'
+    };
+    return icons[type] || '📢';
 }
 
 function setupGameButtons() {
@@ -279,6 +358,9 @@ function setupNavigation() {
                     section.classList.add('active');
                 }
             });
+            
+            // Плавная прокрутка к верху
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     });
 }
@@ -296,22 +378,23 @@ function setupTelegramIntegration() {
     } else {
         console.log('Telegram WebApp not detected, running in browser mode');
         updateUserProfile({
-            first_name: 'Пользователь',
-            username: 'user'
+            first_name: 'Игрок',
+            username: 'player'
         });
     }
 }
 
 function updateUserProfile(user) {
     if (user) {
-        const name = user.first_name || 'Пользователь';
-        const username = user.username ? `@${user.username}` : 'Пользователь';
+        const name = user.first_name || 'Игрок';
+        const username = user.username ? `@${user.username}` : 'Игрок';
         
         document.getElementById('tg-name').textContent = name;
         document.getElementById('tg-username').textContent = username;
         
         if (user.photo_url) {
             document.getElementById('tg-avatar').innerHTML = `<img src="${user.photo_url}" alt="${name}" style="width: 100%; height: 100%; border-radius: 50%;">`;
+            document.getElementById('tg-avatar-large').innerHTML = `<img src="${user.photo_url}" alt="${name}" style="width: 100%; height: 100%; border-radius: 50%;">`;
         }
     }
 }
@@ -369,8 +452,26 @@ function shareApp() {
     }
 }
 
+function showBuyGuide() {
+    const guide = document.getElementById('buy-guide');
+    if (guide.style.display === 'none') {
+        guide.style.display = 'block';
+        guide.classList.add('fade-in-up');
+    } else {
+        guide.style.display = 'none';
+    }
+}
+
 function formatDate(dateString) {
     const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now - date);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    if (diffDays === 1) return 'Сегодня';
+    if (diffDays === 2) return 'Вчера';
+    if (diffDays <= 7) return `${diffDays - 1} дня назад`;
+    
     return date.toLocaleDateString('ru-RU');
 }
 
@@ -421,6 +522,7 @@ function checkAnnouncementState() {
     }
 }
 
+// Инициализация при загрузке
 document.addEventListener('DOMContentLoaded', function() {
     const images = document.querySelectorAll('img');
     images.forEach(img => {
@@ -429,3 +531,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     checkAnnouncementState();
 });
+
+// Добавляем глобальные функции для использования в HTML
+window.showBuyGuide = showBuyGuide;
+window.closeAnnouncement = closeAnnouncement;
+window.showNotification = showNotification;
+window.shareApp = shareApp;
