@@ -12,7 +12,7 @@ const GAMES_DATA = [
         description: "Создай игровую студию и стань лидером",
         players: "15.2K",
         url: "https://t.me/hamster_gamedev_bot/start",
-        image: "images/hamster_gamedev.png"
+        image: "images/hamster_gamedev.jpg"
     },
     {
         id: "2", 
@@ -20,7 +20,7 @@ const GAMES_DATA = [
         description: "Стань королём в битвах за монеты",
         players: "8.7K",
         url: "https://t.me/hamster_king_bot/start",
-        image: "images/hamster_king.png"
+        image: "images/hamster_king.jpg"
     },
     {
         id: "3",
@@ -28,7 +28,7 @@ const GAMES_DATA = [
         description: "Бойцовский клуб для хомяков",
         players: "5.3K",
         url: "https://t.me/hamster_fight_club_bot/start",
-        image: "images/hamster_fight_club.png"
+        image: "images/hamster_fight_club.jpg"
     },
     {
         id: "4",
@@ -36,7 +36,7 @@ const GAMES_DATA = [
         description: "Крипто-приключение в фэнтези мире",
         players: "12.1K",
         url: "https://t.me/bitquest_bot/start",
-        image: "images/bitquest.png"
+        image: "images/bitquest.jpg"
     }
 ];
 
@@ -156,7 +156,7 @@ function displayGames(games) {
         <div class="game-card" data-game-id="${game.id}">
             <div class="game-header">
                 <div class="game-image">
-                    <img src="${game.image}" alt="${game.name}" onerror="this.style.display='none'">
+                    <img src="${game.image}" alt="${game.name}" onerror="handleImageError(this)">
                 </div>
                 <div class="game-info">
                     <h3 class="game-title">${game.name}</h3>
@@ -178,6 +178,14 @@ function displayGames(games) {
     setupGameButtons();
 }
 
+function handleImageError(img) {
+    console.warn('Image failed to load:', img.src);
+    // Можно добавить заглушку или скрыть элемент
+    img.style.display = 'none';
+    img.parentElement.style.background = 'var(--accent-gradient)';
+    img.parentElement.innerHTML = '<span style="color: white; font-size: 24px;">🎮</span>';
+}
+
 function displayExchanges(exchanges) {
     const container = document.getElementById('exchanges-container');
     
@@ -190,7 +198,7 @@ function displayExchanges(exchanges) {
         <a href="${exchange.url}" class="exchange-card" target="_blank" rel="noopener">
             <div class="exchange-content">
                 <div class="exchange-logo">
-                    <img src="${exchange.logo}" alt="${exchange.name}" onerror="this.style.display='none'">
+                    <img src="${exchange.logo}" alt="${exchange.name}" onerror="handleImageError(this)">
                 </div>
                 <div class="exchange-info">
                     <h3 class="exchange-name">${exchange.name}</h3>
