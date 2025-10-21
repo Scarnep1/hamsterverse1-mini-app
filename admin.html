@@ -3,352 +3,230 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ-панель - Games Verse</title>
+    <meta name="referrer" content="no-referrer">
+    <title>Games Verse - Игровая платформа</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
-    <style>
-        .admin-container { max-width: 800px; margin: 0 auto; padding: 20px; }
-        .admin-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; }
-        .admin-tab { padding: 10px 20px; background: var(--bg-secondary); border: none; border-radius: 8px; cursor: pointer; font-weight: 500; transition: all 0.3s ease; }
-        .admin-tab.active { background: var(--accent-gradient); color: white; }
-        .admin-section { display: none; }
-        .admin-section.active { display: block; }
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-weight: 500; color: var(--text-primary); }
-        .form-control { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-family: inherit; }
-        .btn { padding: 12px 24px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.3s ease; }
-        .btn-primary { background: var(--accent-gradient); color: white; }
-        .btn-danger { background: #ff4444; color: white; }
-        .items-list { display: grid; gap: 15px; margin-top: 20px; }
-        .item-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; }
-        .item-actions { display: flex; gap: 10px; }
-        .game-preview { display: flex; align-items: center; gap: 15px; }
-        .game-preview img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
-    </style>
 </head>
 <body>
     <div class="app-container">
+        <!-- Announcement Banner -->
+        <div class="announcement-banner" id="announcement">
+            <span>🎉 Добро пожаловать в Games Verse! Новые игры уже доступны</span>
+            <button class="close-announcement" onclick="closeAnnouncement()">×</button>
+        </div>
+
+        <!-- Header -->
         <header class="header">
             <div class="header-content">
                 <div class="header-titles">
-                    <h1 class="app-title">Админ-панель</h1>
-                    <span class="app-subtitle">Games Verse - Firebase</span>
+                    <h1 class="app-title">Games Verse</h1>
+                    <span class="app-subtitle">Ваша игровая вселенная</span>
                 </div>
-                <button class="guide-button" onclick="window.location.href='index.html'">
-                    ← Назад к приложению
-                </button>
+                <div class="user-avatar" id="user-avatar">👤</div>
             </div>
         </header>
 
+        <!-- Main Content -->
         <main class="main-content">
-            <div class="admin-container">
-                <div class="admin-tabs">
-                    <button class="admin-tab active" data-tab="games">🎮 Игры</button>
-                    <button class="admin-tab" data-tab="news">📰 Новости</button>
+            <!-- Games Section -->
+            <section id="games-section" class="content-section active">
+                <div class="section-header">
+                    <h2>Игры</h2>
+                    <span class="section-subtitle">Выберите игру для начала</span>
+                </div>
+                
+                <div class="games-grid" id="games-container">
+                    <!-- Games will be loaded from Firebase -->
+                </div>
+            </section>
+
+            <!-- Exchanges Section -->
+            <section id="exchanges-section" class="content-section">
+                <div class="section-header">
+                    <h2>Торговые площадки</h2>
+                    <span class="section-subtitle">Криптовалютные биржи</span>
+                </div>
+                
+                <!-- Exchanges List -->
+                <div class="exchanges-section">
+                    <div class="exchanges-list">
+                        <a href="https://www.binance.com/ru/trade/HMSTR_USDT" class="exchange-card" target="_blank" rel="noopener">
+                            <div class="exchange-logo">
+                                <div class="exchange-avatar">B</div>
+                            </div>
+                            <div class="exchange-info">
+                                <h3>Binance</h3>
+                                <p>Крупнейшая биржа</p>
+                            </div>
+                            <div class="exchange-arrow">→</div>
+                        </a>
+
+                        <a href="https://www.bybit.com/trade/spot/HMSTR/USDT" class="exchange-card" target="_blank" rel="noopener">
+                            <div class="exchange-logo">
+                                <div class="exchange-avatar">B</div>
+                            </div>
+                            <div class="exchange-info">
+                                <h3>Bybit</h3>
+                                <p>Фьючерсы и спот</p>
+                            </div>
+                            <div class="exchange-arrow">→</div>
+                        </a>
+
+                        <a href="https://www.okx.com/ru/trade-spot/hmstr-usdt" class="exchange-card" target="_blank" rel="noopener">
+                            <div class="exchange-logo">
+                                <div class="exchange-avatar">O</div>
+                            </div>
+                            <div class="exchange-info">
+                                <h3>OKX</h3>
+                                <p>Много торговых пар</p>
+                            </div>
+                            <div class="exchange-arrow">→</div>
+                        </a>
+
+                        <a href="https://www.gate.io/ru/trade/HMSTR_USDT" class="exchange-card" target="_blank" rel="noopener">
+                            <div class="exchange-logo">
+                                <div class="exchange-avatar">G</div>
+                            </div>
+                            <div class="exchange-info">
+                                <h3>Gate.io</h3>
+                                <p>Международная биржа</p>
+                            </div>
+                            <div class="exchange-arrow">→</div>
+                        </a>
+
+                        <a href="https://www.mexc.com/ru-RU/exchange/HMSTR_USDT" class="exchange-card" target="_blank" rel="noopener">
+                            <div class="exchange-logo">
+                                <div class="exchange-avatar">M</div>
+                            </div>
+                            <div class="exchange-info">
+                                <h3>MEXC</h3>
+                                <p>Популярные листинги</p>
+                            </div>
+                            <div class="exchange-arrow">→</div>
+                        </a>
+                    </div>
                 </div>
 
-                <!-- Games Section -->
-                <div id="games-section" class="admin-section active">
-                    <h2>Управление играми</h2>
-                    <form id="game-form">
-                        <input type="hidden" id="game-id">
-                        <div class="form-group">
-                            <label for="game-name">Название игры</label>
-                            <input type="text" id="game-name" class="form-control" required>
+                <!-- Info Section -->
+                <div class="buy-guide">
+                    <div class="guide-steps">
+                        <div class="guide-step">
+                            <span class="step-number">💡</span>
+                            <div class="step-content">
+                                <strong>Торговые площадки</strong>
+                                <p>Здесь представлены популярные криптовалютные биржи для торговли различными токенами</p>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="game-description">Описание</label>
-                            <textarea id="game-description" class="form-control" rows="3" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="game-image">URL изображения</label>
-                            <input type="url" id="game-image" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="game-url">Ссылка для запуска</label>
-                            <input type="url" id="game-url" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="game-players">Количество игроков</label>
-                            <input type="text" id="game-players" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label><input type="checkbox" id="game-beta"> Бета-версия</label>
-                        </div>
-                        <button type="submit" class="btn btn-primary">💾 Сохранить в Firebase</button>
-                    </form>
+                    </div>
+                </div>
+            </section>
 
-                    <div class="items-list" id="games-list"></div>
+            <!-- News Section -->
+            <section id="news-section" class="content-section">
+                <div class="section-header">
+                    <h2>Новости</h2>
+                    <span class="section-subtitle">Последние обновления платформы</span>
+                </div>
+                
+                <div class="news-list" id="news-container">
+                    <!-- News will be loaded from Firebase -->
+                </div>
+            </section>
+
+            <!-- Profile Section -->
+            <section id="profile-section" class="content-section">
+                <div class="section-header">
+                    <h2>Профиль</h2>
+                    <span class="section-subtitle">Управление настройками</span>
                 </div>
 
-                <!-- News Section -->
-                <div id="news-section" class="admin-section">
-                    <h2>Управление новостями</h2>
-                    <form id="news-form">
-                        <input type="hidden" id="news-id">
-                        <div class="form-group">
-                            <label for="news-title">Заголовок</label>
-                            <input type="text" id="news-title" class="form-control" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="news-content">Содержание</label>
-                            <textarea id="news-content" class="form-control" rows="4" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="news-image">URL изображения (опционально)</label>
-                            <input type="url" id="news-image" class="form-control">
-                        </div>
-                        <div class="form-group">
-                            <label for="news-date">Дата публикации</label>
-                            <input type="datetime-local" id="news-date" class="form-control" required>
-                        </div>
-                        <button type="submit" class="btn btn-primary">💾 Сохранить в Firebase</button>
-                    </form>
-
-                    <div class="items-list" id="news-list"></div>
+                <div class="profile-header">
+                    <div class="profile-avatar" id="tg-avatar">👤</div>
+                    <div class="profile-info">
+                        <h2 id="tg-name">Пользователь</h2>
+                        <p id="tg-username">@username</p>
+                    </div>
                 </div>
-            </div>
+
+                <!-- Share Button -->
+                <div class="guide-button-container">
+                    <button class="guide-button" id="share-button">
+                        📤 Поделиться приложением
+                    </button>
+                </div>
+
+                <!-- Feedback Button -->
+                <div class="guide-button-container">
+                    <button class="guide-button secondary" id="feedback-button">
+                        💬 Обратная связь
+                    </button>
+                </div>
+
+                <!-- Theme Toggle -->
+                <div class="theme-toggle-container">
+                    <button class="theme-toggle" id="theme-toggle">
+                        <span class="theme-icon">🌙</span>
+                        <span class="theme-text">Темная тема</span>
+                    </button>
+                </div>
+
+                <!-- App Info -->
+                <div class="app-info">
+                    <p>Games Verse v<span id="app-version">2.3.0</span></p>
+                    <p class="app-build">Build: <span id="app-build">2024.01.20</span></p>
+                </div>
+
+                <!-- Admin Link -->
+                <div class="guide-button-container" id="admin-button-container" style="display: none;">
+                    <button class="guide-button secondary" onclick="window.open('admin.html', '_blank')">
+                        ⚙️ Админ-панель
+                    </button>
+                </div>
+            </section>
         </main>
+
+        <!-- Bottom Navigation -->
+        <nav class="bottom-nav">
+            <button class="nav-item active" data-section="games-section">
+                <span class="nav-icon">🎮</span>
+                <span class="nav-label">Игры</span>
+            </button>
+            <button class="nav-item" data-section="exchanges-section">
+                <span class="nav-icon">💰</span>
+                <span class="nav-label">Биржи</span>
+            </button>
+            <button class="nav-item" data-section="news-section">
+                <span class="nav-icon">📰</span>
+                <span class="nav-label">Новости</span>
+            </button>
+            <button class="nav-item" data-section="profile-section">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Профиль</span>
+            </button>
+        </nav>
     </div>
 
-    <script>
-        // Firebase конфиг
-        const firebaseConfig = {
-            apiKey: "AIzaSyC7ET2n5MJ6V_jFMjNWaDycd4LRyfkZnMw",
-            authDomain: "hamsterversehost.firebaseapp.com",
-            projectId: "hamsterversehost",
-            storageBucket: "hamsterversehost.firebasestorage.app",
-            messagingSenderId: "895206280147",
-            appId: "1:895206280147:web:64e4929ee7e1599ca47d26"
-        };
-
-        // Инициализация
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-
-        // Проверка прав
-        if (localStorage.getItem('is_admin') !== 'true') {
-            alert('Доступ запрещен');
-            window.location.href = 'index.html';
-        }
-
-        // Табы
-        document.querySelectorAll('.admin-tab').forEach(tab => {
-            tab.addEventListener('click', function() {
-                const targetTab = this.getAttribute('data-tab');
-                document.querySelectorAll('.admin-tab').forEach(t => t.classList.remove('active'));
-                document.querySelectorAll('.admin-section').forEach(s => s.classList.remove('active'));
-                this.classList.add('active');
-                document.getElementById(`${targetTab}-section`).classList.add('active');
-            });
-        });
-
-        // Загрузка данных
-        loadGames();
-        loadNews();
-
-        // Управление играми
-        document.getElementById('game-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await saveGame();
-        });
-
-        async function loadGames() {
-            try {
-                const snapshot = await db.collection('games').get();
-                const games = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                displayGamesList(games);
-            } catch (error) {
-                console.error('Ошибка загрузки игр:', error);
-                document.getElementById('games-list').innerHTML = '<p>Ошибка загрузки</p>';
-            }
-        }
-
-        async function saveGame() {
-            const gameData = {
-                name: document.getElementById('game-name').value,
-                description: document.getElementById('game-description').value,
-                image: document.getElementById('game-image').value,
-                url: document.getElementById('game-url').value,
-                players: document.getElementById('game-players').value,
-                beta: document.getElementById('game-beta').checked
-            };
-
-            const gameId = document.getElementById('game-id').value;
-
-            try {
-                if (gameId) {
-                    await db.collection('games').doc(gameId).set(gameData);
-                } else {
-                    await db.collection('games').add(gameData);
-                }
-                alert('✅ Игра сохранена в Firebase!');
-                resetGameForm();
-                loadGames();
-            } catch (error) {
-                alert('❌ Ошибка сохранения: ' + error.message);
-            }
-        }
-
-        function displayGamesList(games) {
-            const container = document.getElementById('games-list');
-            container.innerHTML = games.map(game => `
-                <div class="item-card">
-                    <div class="game-preview">
-                        <img src="${game.image}" alt="${game.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHZpZXdCb3g9IjAgMCA0MCA0MCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjQwIiBoZWlnaHQ9IjQwIiByeD0iOCIgZmlsbD0iIzY2N2VlYSIvPgo8L3N2Zz4K'">
-                        <div>
-                            <strong>${game.name}</strong>
-                            <div style="font-size: 12px; color: var(--text-secondary);">${game.players} игроков</div>
-                        </div>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn" onclick="editGame('${game.id}')">✏️</button>
-                        <button class="btn btn-danger" onclick="deleteGame('${game.id}')">🗑️</button>
-                    </div>
+    <!-- Feedback Modal -->
+    <div class="modal-overlay hidden" id="feedback-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3>Обратная связь</h3>
+                <button class="close-modal" onclick="closeFeedbackModal()">×</button>
+            </div>
+            <div class="modal-content">
+                <textarea id="feedback-text" placeholder="Расскажите о вашем опыте использования приложения, предложениях или проблемах..." rows="5"></textarea>
+                <div class="modal-actions">
+                    <button class="modal-btn secondary" onclick="closeFeedbackModal()">Отмена</button>
+                    <button class="modal-btn primary" onclick="sendFeedback()">Отправить</button>
                 </div>
-            `).join('');
-        }
+            </div>
+        </div>
+    </div>
 
-        async function editGame(id) {
-            try {
-                const doc = await db.collection('games').doc(id).get();
-                if (doc.exists) {
-                    const game = doc.data();
-                    document.getElementById('game-id').value = id;
-                    document.getElementById('game-name').value = game.name;
-                    document.getElementById('game-description').value = game.description;
-                    document.getElementById('game-image').value = game.image;
-                    document.getElementById('game-url').value = game.url;
-                    document.getElementById('game-players').value = game.players;
-                    document.getElementById('game-beta').checked = game.beta || false;
-                }
-            } catch (error) {
-                alert('Ошибка загрузки игры: ' + error.message);
-            }
-        }
-
-        async function deleteGame(id) {
-            if (confirm('Удалить эту игру?')) {
-                try {
-                    await db.collection('games').doc(id).delete();
-                    alert('✅ Игра удалена!');
-                    loadGames();
-                } catch (error) {
-                    alert('❌ Ошибка удаления: ' + error.message);
-                }
-            }
-        }
-
-        function resetGameForm() {
-            document.getElementById('game-form').reset();
-            document.getElementById('game-id').value = '';
-        }
-
-        // Управление новостями
-        document.getElementById('news-form').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            await saveNews();
-        });
-
-        async function loadNews() {
-            try {
-                const snapshot = await db.collection('news').orderBy('date', 'desc').get();
-                const news = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                displayNewsList(news);
-            } catch (error) {
-                console.error('Ошибка загрузки новостей:', error);
-            }
-        }
-
-        async function saveNews() {
-            const newsData = {
-                title: document.getElementById('news-title').value,
-                content: document.getElementById('news-content').value,
-                image: document.getElementById('news-image').value,
-                date: document.getElementById('news-date').value
-            };
-
-            const newsId = document.getElementById('news-id').value;
-
-            try {
-                if (newsId) {
-                    await db.collection('news').doc(newsId).set(newsData);
-                } else {
-                    await db.collection('news').add(newsData);
-                }
-                alert('✅ Новость сохранена в Firebase!');
-                resetNewsForm();
-                loadNews();
-            } catch (error) {
-                alert('❌ Ошибка сохранения: ' + error.message);
-            }
-        }
-
-        function displayNewsList(news) {
-            const container = document.getElementById('news-list');
-            container.innerHTML = news.map(item => `
-                <div class="item-card">
-                    <div>
-                        <strong>${item.title}</strong>
-                        <div style="font-size: 12px; color: var(--text-secondary);">
-                            ${new Date(item.date).toLocaleDateString('ru-RU')}
-                        </div>
-                    </div>
-                    <div class="item-actions">
-                        <button class="btn" onclick="editNews('${item.id}')">✏️</button>
-                        <button class="btn btn-danger" onclick="deleteNews('${item.id}')">🗑️</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        async function editNews(id) {
-            try {
-                const doc = await db.collection('news').doc(id).get();
-                if (doc.exists) {
-                    const news = doc.data();
-                    document.getElementById('news-id').value = id;
-                    document.getElementById('news-title').value = news.title;
-                    document.getElementById('news-content').value = news.content;
-                    document.getElementById('news-image').value = news.image || '';
-                    document.getElementById('news-date').value = news.date;
-                }
-            } catch (error) {
-                alert('Ошибка загрузки новости: ' + error.message);
-            }
-        }
-
-        async function deleteNews(id) {
-            if (confirm('Удалить эту новость?')) {
-                try {
-                    await db.collection('news').doc(id).delete();
-                    alert('✅ Новость удалена!');
-                    loadNews();
-                } catch (error) {
-                    alert('❌ Ошибка удаления: ' + error.message);
-                }
-            }
-        }
-
-        function resetNewsForm() {
-            document.getElementById('news-form').reset();
-            document.getElementById('news-id').value = '';
-            document.getElementById('news-date').value = new Date().toISOString().slice(0, 16);
-        }
-
-        // Установите текущую дату по умолчанию
-        document.getElementById('news-date').value = new Date().toISOString().slice(0, 16);
-
-        // Проверка подключения
-        db.collection('games').limit(1).get().then(() => {
-            console.log('✅ Firebase подключен');
-        }).catch((error) => {
-            console.error('❌ Ошибка Firebase:', error);
-            alert('Ошибка подключения к Firebase: ' + error.message);
-        });
-    </script>
+    <script src="script.js"></script>
 </body>
 </html>
