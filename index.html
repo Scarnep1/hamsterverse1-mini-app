@@ -7,9 +7,6 @@
     <title>Games Verse - Игровая платформа</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -40,7 +37,7 @@
                 </div>
                 
                 <div class="games-grid" id="games-container">
-                    <!-- Games will be loaded from Firebase -->
+                    <!-- Games will be loaded from static data -->
                 </div>
             </section>
 
@@ -54,7 +51,7 @@
                 <!-- Exchanges List -->
                 <div class="exchanges-section">
                     <div class="exchanges-list">
-                        <a href="https://www.binance.com/ru/trade/HMSTR_USDT" class="exchange-card" target="_blank" rel="noopener">
+                        <a href="https://www.binance.com" class="exchange-card" target="_blank" rel="noopener">
                             <div class="exchange-logo">
                                 <div class="exchange-avatar">B</div>
                             </div>
@@ -65,7 +62,7 @@
                             <div class="exchange-arrow">→</div>
                         </a>
 
-                        <a href="https://www.bybit.com/trade/spot/HMSTR/USDT" class="exchange-card" target="_blank" rel="noopener">
+                        <a href="https://www.bybit.com" class="exchange-card" target="_blank" rel="noopener">
                             <div class="exchange-logo">
                                 <div class="exchange-avatar">B</div>
                             </div>
@@ -76,35 +73,13 @@
                             <div class="exchange-arrow">→</div>
                         </a>
 
-                        <a href="https://www.okx.com/ru/trade-spot/hmstr-usdt" class="exchange-card" target="_blank" rel="noopener">
+                        <a href="https://www.okx.com" class="exchange-card" target="_blank" rel="noopener">
                             <div class="exchange-logo">
                                 <div class="exchange-avatar">O</div>
                             </div>
                             <div class="exchange-info">
                                 <h3>OKX</h3>
                                 <p>Много торговых пар</p>
-                            </div>
-                            <div class="exchange-arrow">→</div>
-                        </a>
-
-                        <a href="https://www.gate.io/ru/trade/HMSTR_USDT" class="exchange-card" target="_blank" rel="noopener">
-                            <div class="exchange-logo">
-                                <div class="exchange-avatar">G</div>
-                            </div>
-                            <div class="exchange-info">
-                                <h3>Gate.io</h3>
-                                <p>Международная биржа</p>
-                            </div>
-                            <div class="exchange-arrow">→</div>
-                        </a>
-
-                        <a href="https://www.mexc.com/ru-RU/exchange/HMSTR_USDT" class="exchange-card" target="_blank" rel="noopener">
-                            <div class="exchange-logo">
-                                <div class="exchange-avatar">M</div>
-                            </div>
-                            <div class="exchange-info">
-                                <h3>MEXC</h3>
-                                <p>Популярные листинги</p>
                             </div>
                             <div class="exchange-arrow">→</div>
                         </a>
@@ -133,7 +108,7 @@
                 </div>
                 
                 <div class="news-list" id="news-container">
-                    <!-- News will be loaded from Firebase -->
+                    <!-- News will be loaded from static data -->
                 </div>
             </section>
 
@@ -159,13 +134,6 @@
                     </button>
                 </div>
 
-                <!-- Feedback Button -->
-                <div class="guide-button-container">
-                    <button class="guide-button secondary" id="feedback-button">
-                        💬 Обратная связь
-                    </button>
-                </div>
-
                 <!-- Theme Toggle -->
                 <div class="theme-toggle-container">
                     <button class="theme-toggle" id="theme-toggle">
@@ -178,13 +146,6 @@
                 <div class="app-info">
                     <p>Games Verse v<span id="app-version">2.3.0</span></p>
                     <p class="app-build">Build: <span id="app-build">2024.01.20</span></p>
-                </div>
-
-                <!-- Admin Link -->
-                <div class="guide-button-container" id="admin-button-container" style="display: none;">
-                    <button class="guide-button secondary" onclick="window.open('admin.html', '_blank')">
-                        ⚙️ Админ-панель
-                    </button>
                 </div>
             </section>
         </main>
@@ -208,23 +169,6 @@
                 <span class="nav-label">Профиль</span>
             </button>
         </nav>
-    </div>
-
-    <!-- Feedback Modal -->
-    <div class="modal-overlay hidden" id="feedback-modal">
-        <div class="modal">
-            <div class="modal-header">
-                <h3>Обратная связь</h3>
-                <button class="close-modal" onclick="closeFeedbackModal()">×</button>
-            </div>
-            <div class="modal-content">
-                <textarea id="feedback-text" placeholder="Расскажите о вашем опыте использования приложения, предложениях или проблемах..." rows="5"></textarea>
-                <div class="modal-actions">
-                    <button class="modal-btn secondary" onclick="closeFeedbackModal()">Отмена</button>
-                    <button class="modal-btn primary" onclick="sendFeedback()">Отправить</button>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script src="script.js"></script>
