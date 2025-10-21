@@ -154,8 +154,7 @@ body {
     font-weight: 500;
 }
 
-/* ==================== IMPROVED GAME CARDS ==================== */
-
+/* Games Grid */
 .games-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -193,8 +192,25 @@ body {
 .game-header {
     display: flex;
     align-items: flex-start;
-    justify-content: space-between;
-    margin-bottom: 12px;
+    gap: 16px;
+}
+
+.game-image {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.game-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .game-info {
@@ -250,8 +266,7 @@ body {
     box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
 }
 
-/* ==================== IMPROVED EXCHANGE CARDS ==================== */
-
+/* Exchanges Grid */
 .exchanges-grid {
     display: grid;
     grid-template-columns: 1fr;
@@ -295,26 +310,14 @@ body {
     font-weight: 700;
     color: white;
     flex-shrink: 0;
+    overflow: hidden;
+    background: var(--bg-secondary);
 }
 
-.exchange-logo.binance {
-    background: linear-gradient(135deg, #F0B90B 0%, #F8D33A 100%);
-}
-
-.exchange-logo.bybit {
-    background: linear-gradient(135deg, #00D2FF 0%, #3A7BD5 100%);
-}
-
-.exchange-logo.okx {
-    background: linear-gradient(135deg, #000000 0%, #333333 100%);
-}
-
-.exchange-logo.gate {
-    background: linear-gradient(135deg, #8B5CF6 0%, #C4B5FD 100%);
-}
-
-.exchange-logo.mexc {
-    background: linear-gradient(135deg, #00B894 0%, #55EFC4 100%);
+.exchange-logo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
 .exchange-info {
@@ -336,15 +339,17 @@ body {
 
 .exchange-features {
     display: flex;
-    gap: 12px;
+    gap: 8px;
+    flex-wrap: wrap;
 }
 
 .exchange-feature {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 12px;
-    color: var(--text-muted);
+    background: var(--bg-secondary);
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    font-weight: 500;
 }
 
 .exchange-arrow {
@@ -353,7 +358,7 @@ body {
     flex-shrink: 0;
 }
 
-/* Стили для пустого состояния */
+/* Empty State */
 .empty-state {
     text-align: center;
     padding: 60px 20px;
@@ -401,19 +406,6 @@ body {
     box-shadow: 0 8px 30px rgba(102, 126, 234, 0.4);
 }
 
-.guide-button.secondary {
-    background: var(--bg-secondary);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-    box-shadow: var(--shadow);
-}
-
-.guide-button.secondary:hover {
-    background: var(--border-color);
-    transform: translateY(-1px);
-    box-shadow: var(--shadow-hover);
-}
-
 /* Buy Guide */
 .buy-guide {
     background: var(--bg-card);
@@ -422,10 +414,6 @@ body {
     border: 1px solid var(--border-color);
     margin-bottom: 16px;
     box-shadow: var(--shadow);
-}
-
-.buy-guide.hidden {
-    display: none;
 }
 
 .guide-steps {
@@ -508,13 +496,6 @@ body {
     color: var(--text-secondary);
     line-height: 1.4;
     margin-bottom: 8px;
-}
-
-.news-image {
-    width: 100%;
-    border-radius: 8px;
-    margin-top: 8px;
-    display: block;
 }
 
 /* Profile Section */
@@ -724,7 +705,7 @@ body {
     opacity: 0.7;
 }
 
-/* Уведомления */
+/* Notifications */
 .notification {
     position: fixed;
     top: 20px;
@@ -764,13 +745,6 @@ body {
     flex: 1;
 }
 
-.notification-title {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 4px;
-    color: var(--text-primary);
-}
-
 .notification-message {
     font-size: 13px;
     color: var(--text-secondary);
@@ -803,7 +777,7 @@ body {
     animation: notificationSlideOut 0.3s ease forwards;
 }
 
-/* Адаптивность */
+/* Responsive */
 @media (max-width: 480px) {
     .app-container {
         padding-bottom: 75px;
