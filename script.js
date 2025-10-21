@@ -1,30 +1,96 @@
-// Конфигурация Firebase
-const firebaseConfig = {
-    apiKey: "AIzaSyC7ET2n5MJ6V_jFMjNWaDycd4LRyfkZnMw",
-    authDomain: "hamsterversehost.firebaseapp.com",
-    projectId: "hamsterversehost",
-    storageBucket: "hamsterversehost.firebasestorage.app",
-    messagingSenderId: "895206280147",
-    appId: "1:895206280147:web:64e4929ee7e1599ca47d26"
-};
-
-// Инициализация Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
 // Конфигурация приложения
 const APP_CONFIG = {
     version: '2.3.0',
-    build: '2024.01.20',
-    adminPassword: 'games2024'
+    build: '2024.01.20'
 };
+
+// Статические данные игр
+const GAMES_DATA = [
+    {
+        id: "1",
+        name: "Hamster Kombat",
+        description: "Тапы и комбо для максимум прибыли. Участвуй в ежедневных миссиях!",
+        image: "https://img.icons8.com/color/70/000000/hamster.png",
+        url: "https://t.me/hamster_kombat_bot/start",
+        players: "15.2K",
+        rating: 4.5,
+        beta: false,
+        trending: true,
+        new: false,
+        popular: true
+    },
+    {
+        id: "2", 
+        name: "Yescoin",
+        description: "Свайпай и зарабатывай монеты. Новая механика игры!",
+        image: "https://img.icons8.com/color/70/000000/coin.png",
+        url: "https://t.me/yescoin_coin_bot/start",
+        players: "8.7K",
+        rating: 4.2,
+        beta: true,
+        trending: false,
+        new: true,
+        popular: false
+    },
+    {
+        id: "3",
+        name: "Crypto Whales",
+        description: "Собирай криптовалюту и становись китом!",
+        image: "https://img.icons8.com/color/70/000000/whale.png", 
+        url: "https://t.me/cryptowhales_bot/start",
+        players: "5.3K",
+        rating: 3.8,
+        beta: false,
+        trending: false,
+        new: false,
+        popular: true
+    },
+    {
+        id: "4",
+        name: "Tap Fantasy",
+        description: "Фэнтези тап-игра с RPG элементами",
+        image: "https://img.icons8.com/color/70/000000/fantasy.png",
+        url: "https://t.me/tapfantasy_bot/start",
+        players: "12.1K",
+        rating: 4.3,
+        beta: false,
+        trending: true,
+        new: false,
+        popular: true
+    }
+];
+
+// Статические данные новостей
+const NEWS_DATA = [
+    {
+        id: "1", 
+        title: "Добро пожаловать в Games Verse!",
+        content: "Запущена новая игровая платформа с лучшими играми Telegram. Теперь все игры в одном месте!",
+        date: new Date().toISOString(),
+        image: ""
+    },
+    {
+        id: "2",
+        title: "Новая игра: Hamster Kombat",
+        content: "Добавлена популярная игра Hamster Kombat с ежедневными наградами и комбо-системой.",
+        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        image: ""
+    },
+    {
+        id: "3",
+        title: "Обновление дизайна",
+        content: "Полностью обновлен интерфейс приложения. Улучшена навигация и добавлены новые функции.",
+        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+        image: ""
+    }
+];
 
 // Инициализация приложения
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
 });
 
-async function initializeApp() {
+function initializeApp() {
     console.log('🚀 Games Verse v' + APP_CONFIG.version + ' initializing...');
     
     try {
@@ -32,11 +98,10 @@ async function initializeApp() {
         setupTelegramIntegration();
         setupThemeToggle();
         setupShareButton();
-        setupFeedbackSystem();
-        setupAdminButton();
         
-        // Загрузка данных из Firebase
-        await loadAllData();
+        // Загрузка статических данных
+        displayGames(GAMES_DATA);
+        displayNews(NEWS_DATA);
         
         document.getElementById('app-version').textContent = APP_CONFIG.version;
         document.getElementById('app-build').textContent = APP_CONFIG.build;
@@ -46,110 +111,7 @@ async function initializeApp() {
     } catch (error) {
         console.error('❌ App initialization failed:', error);
         showNotification('Ошибка загрузки приложения', 'error');
-        loadCachedData();
     }
-}
-
-// ==================== FIREBASE FUNCTIONS ====================
-
-async function loadAllData() {
-    try {
-        console.log('🔄 Загрузка данных из Firebase...');
-        
-        const [gamesSnapshot, newsSnapshot] = await Promise.all([
-            db.collection('games').get(),
-            db.collection('news').orderBy('date', 'desc').get()
-        ]);
-
-        const games = gamesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-        const news = newsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-
-        const allData = { games, news };
-        
-        // Сохраняем в кеш
-        localStorage.setItem('cached_data', JSON.stringify(allData));
-        localStorage.setItem('cache_time', Date.now().toString());
-        
-        // Обновляем интерфейс
-        displayGames(games);
-        displayNews(news);
-        
-        console.log('✅ Данные загружены из Firebase');
-        
-    } catch (error) {
-        console.log('⚠️ Ошибка Firebase:', error);
-        showNotification('Используем кешированные данные', 'info');
-        loadCachedData();
-    }
-}
-
-function loadCachedData() {
-    const cached = localStorage.getItem('cached_data');
-    if (cached) {
-        const data = JSON.parse(cached);
-        displayGames(data.games || []);
-        displayNews(data.news || []);
-    } else {
-        // Данные по умолчанию
-        displayGames(getDefaultGames());
-        displayNews(getDefaultNews());
-    }
-}
-
-function getDefaultGames() {
-    return [
-        {
-            id: "1",
-            name: "Hamster Kombat",
-            description: "Тапы и комбо для максимум прибыли. Участвуй в ежедневных миссиях!",
-            image: "https://via.placeholder.com/70",
-            url: "https://t.me/hamster_kombat_bot/start?startapp=kentId6823288584",
-            players: "15.2K",
-            rating: 4.5,
-            beta: false,
-            trending: true,
-            new: false,
-            popular: true
-        },
-        {
-            id: "2", 
-            name: "Yescoin",
-            description: "Свайпай и зарабатывай монеты. Новая механика игры!",
-            image: "https://via.placeholder.com/70",
-            url: "https://t.me/yescoin_coin_bot/start?startapp=ref_6823288584",
-            players: "8.7K",
-            rating: 4.2,
-            beta: true,
-            trending: false,
-            new: true,
-            popular: false
-        },
-        {
-            id: "3",
-            name: "Crypto Whales",
-            description: "Собирай криптовалюту и становись китом!",
-            image: "https://via.placeholder.com/70", 
-            url: "https://t.me/cryptowhales_bot/start?startapp=ref_6823288584",
-            players: "5.3K",
-            rating: 3.8,
-            beta: false,
-            trending: false,
-            new: false,
-            popular: true
-        }
-    ];
-}
-
-function getDefaultNews() {
-    return [
-        {
-            id: "1", 
-            title: "Добро пожаловать в Games Verse!",
-            content: "Запущена новая игровая платформа с лучшими играми Telegram",
-            date: new Date().toISOString(),
-            image: ""
-        }
-    ];
 }
 
 // ==================== UI FUNCTIONS ====================
@@ -268,7 +230,10 @@ function openGame(url) {
 }
 
 function showGameDetails(gameId) {
-    showNotification('Детали игры скоро будут доступны!', 'info');
+    const game = GAMES_DATA.find(g => g.id === gameId);
+    if (game) {
+        showNotification(`Информация о "${game.name}" скоро будет доступна!`, 'info');
+    }
 }
 
 // ==================== OTHER FUNCTIONS ====================
@@ -377,68 +342,6 @@ function shareApp() {
         navigator.clipboard.writeText(shareUrl).then(() => {
             showNotification('Ссылка скопирована в буфер!', 'success');
         });
-    }
-}
-
-function setupFeedbackSystem() {
-    const feedbackButton = document.getElementById('feedback-button');
-    const feedbackModal = document.getElementById('feedback-modal');
-    
-    feedbackButton.addEventListener('click', function() {
-        feedbackModal.classList.remove('hidden');
-    });
-}
-
-function setupAdminButton() {
-    const adminContainer = document.getElementById('admin-button-container');
-    const isAdmin = localStorage.getItem('isAdmin') === 'true';
-    
-    if (isAdmin) {
-        adminContainer.style.display = 'block';
-    }
-}
-
-function closeFeedbackModal() {
-    const modal = document.getElementById('feedback-modal');
-    modal.classList.add('hidden');
-}
-
-function sendFeedback() {
-    const feedbackText = document.getElementById('feedback-text').value.trim();
-    
-    if (!feedbackText) {
-        showNotification('Пожалуйста, введите ваше сообщение', 'error');
-        return;
-    }
-    
-    const feedbackData = {
-        text: feedbackText,
-        timestamp: new Date().toISOString(),
-        userAgent: navigator.userAgent,
-        url: window.location.href
-    };
-    
-    try {
-        db.collection('feedback').add(feedbackData)
-            .then(() => {
-                showNotification('Спасибо за ваш отзыв!', 'success');
-                document.getElementById('feedback-text').value = '';
-                closeFeedbackModal();
-            })
-            .catch(error => {
-                console.error('Error saving feedback:', error);
-                showNotification('Ошибка отправки отзыва', 'error');
-            });
-    } catch (error) {
-        console.error('Feedback error:', error);
-        showNotification('Отзыв сохранен локально', 'info');
-        
-        const localFeedback = JSON.parse(localStorage.getItem('feedback') || '[]');
-        localFeedback.push(feedbackData);
-        localStorage.setItem('feedback', JSON.stringify(localFeedback));
-        
-        document.getElementById('feedback-text').value = '';
-        closeFeedbackModal();
     }
 }
 
